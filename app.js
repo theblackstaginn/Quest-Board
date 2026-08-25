@@ -2,14 +2,18 @@
 // QUEST BOARD
 // app.js
 //
-// Phase 1:
-// - Independent device profiles: Farmer or Jess
-// - Weekly 3-quest objective
+// Phase 2:
+// - Independent device profiles
+// - Four real app views
+// - Weekly configurable objective
 // - Quest checklist modal
 // - Quest timer
 // - XP + levels
 // - History
 // - Boss Battle unlock
+// - Character summary
+// - Local Party prototype
+// - Settings persistence
 // - localStorage persistence
 // =========================================================
 
@@ -184,17 +188,19 @@ const SPECIAL_QUESTS = {
 
 
 // =========================================================
-// 3. APP SETTINGS
+// 3. APP CONSTANTS
 // =========================================================
 
-const PROFILES = [
+const DEFAULT_PROFILES = [
   "Farmer",
   "Jess"
 ];
 
-const WEEKLY_GOAL = 3;
+const DEFAULT_WEEKLY_GOAL = 3;
 
 const XP_PER_LEVEL = 100;
+
+const PARTY_GOAL_MULTIPLIER = 2;
 
 
 // =========================================================
@@ -204,6 +210,10 @@ const XP_PER_LEVEL = 100;
 let activeProfile =
   localStorage.getItem("questBoardActiveProfile") ||
   null;
+
+let activeView =
+  localStorage.getItem("questBoardActiveView") ||
+  "board";
 
 let activeQuest = null;
 
@@ -261,7 +271,7 @@ function chooseProfile() {
 
 
 // =========================================================
-// 7. LOCAL STORAGE
+// 7. STORAGE KEYS
 // =========================================================
 
 function getStorageKey() {
@@ -269,11 +279,91 @@ function getStorageKey() {
 }
 
 
-function createFreshState() {
-  return {
-    weekKey: getWeekKey(),
+function getSettingsKey() {
+  return `questBoardSettings-${activeProfile}`;
+}
 
-    weeklyCompleted: [],
+
+function getPartyKey() {
+  return `questBoardParty-${activeProfile}`;
+}
+
+
+// =========================================================
+// 8. SETTINGS STORAGE
+// =========================================================
+
+function createFreshSettings() {
+
+  return {
+    playerName:
+      activeProfile,
+
+    weeklyGoal:
+      DEFAULT_WEEKLY_GOAL,
+
+    reducedMotion:
+      false,
+
+    soundEnabled:
+      false
+  };
+}
+
+
+function getSettings() {
+
+  const saved =
+    localStorage.getItem(
+      getSettingsKey()
+    );
+
+  if (!saved) {
+    return createFreshSettings();
+  }
+
+  try {
+
+    return {
+      ...createFreshSettings(),
+      ...JSON.parse(saved)
+    };
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Could not read Quest Board settings.",
+      error
+    );
+
+    return createFreshSettings();
+  }
+}
+
+
+function saveSettings(settings) {
+
+  localStorage.setItem(
+    getSettingsKey(),
+    JSON.stringify(settings)
+  );
+}
+
+
+// =========================================================
+// 9. QUEST STATE STORAGE
+// =========================================================
+
+function createFreshState() {
+
+  return {
+    weekKey:
+      getWeekKey(),
+
+    weeklyCompleted:
+      [],
 
     xp: {
       strength: 0,
@@ -281,7 +371,8 @@ function createFreshState() {
       restoration: 0
     },
 
-    history: []
+    history:
+      []
   };
 }
 
@@ -344,7 +435,55 @@ function saveState(state) {
 
 
 // =========================================================
-// 8. WEEK HANDLING
+// 10. LOCAL PARTY STORAGE
+// =========================================================
+
+function getParty() {
+
+  const saved =
+    localStorage.getItem(
+      getPartyKey()
+    );
+
+  if (!saved) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(saved);
+  }
+
+  catch (error) {
+
+    console.error(
+      "Could not read party data.",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+function saveParty(party) {
+
+  localStorage.setItem(
+    getPartyKey(),
+    JSON.stringify(party)
+  );
+}
+
+
+function clearParty() {
+
+  localStorage.removeItem(
+    getPartyKey()
+  );
+}
+
+
+// =========================================================
+// 11. WEEK HANDLING
 // =========================================================
 
 function getWeekKey(date = new Date()) {
@@ -423,7 +562,7 @@ function normalizeWeek() {
 
 
 // =========================================================
-// 9. LEVEL SYSTEM
+// 12. LEVEL SYSTEM
 // =========================================================
 
 function getLevelData(xp) {
@@ -444,7 +583,7 @@ function getLevelData(xp) {
 
 
 // =========================================================
-// 10. QUEST LOOKUP
+// 13. QUEST LOOKUP
 // =========================================================
 
 function findQuest(id) {
@@ -461,7 +600,7 @@ function findQuest(id) {
 
 
 // =========================================================
-// 11. MAIN RENDER
+// 14. MAIN RENDER
 // =========================================================
 
 function render() {
@@ -469,41 +608,79 @@ function render() {
   const state =
     normalizeWeek();
 
-  renderProfile();
+  const settings =
+    getSettings();
 
-  renderWeeklyProgress(state);
+  renderProfile(settings);
 
-  renderBossBattle(state);
+  renderWeeklyProgress(
+    state,
+    settings
+  );
+
+  renderBossBattle(
+    state,
+    settings
+  );
 
   renderQuestCards();
 
   renderCharacterStats(state);
+
+  renderCharacterSummary(
+    state,
+    settings
+  );
+
+  renderSettings(settings);
+
+  renderParty(
+    state,
+    settings
+  );
+
+  applyMotionSetting(settings);
 
   bindQuestCards();
 }
 
 
 // =========================================================
-// 12. PROFILE DISPLAY
+// 15. PROFILE DISPLAY
 // =========================================================
 
-function renderProfile() {
+function renderProfile(settings) {
 
-  $("#profileName").textContent =
+  const name =
+    settings.playerName ||
     activeProfile;
 
-  $("#profileAvatar").textContent =
-    activeProfile
-      .charAt(0)
-      .toUpperCase();
+  $("#profileName")
+    .textContent =
+      name;
+
+  $("#profileAvatar")
+    .textContent =
+      name
+        .charAt(0)
+        .toUpperCase();
 }
 
 
 // =========================================================
-// 13. WEEKLY PROGRESS
+// 16. WEEKLY PROGRESS
 // =========================================================
 
-function renderWeeklyProgress(state) {
+function renderWeeklyProgress(
+  state,
+  settings
+) {
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    ) ||
+    DEFAULT_WEEKLY_GOAL;
 
   const completed =
     state.weeklyCompleted.length;
@@ -513,14 +690,21 @@ function renderWeeklyProgress(state) {
       100,
       (
         completed
-        / WEEKLY_GOAL
+        / goal
       )
       * 100
     );
 
+
+  $("#weeklyObjectiveTitle")
+    .textContent =
+      `Complete ${goal} Quests`;
+
+
   $("#weeklyProgressLabel")
     .textContent =
-      `${completed} / ${WEEKLY_GOAL}`;
+      `${completed} / ${goal}`;
+
 
   $("#weeklyProgressBar")
     .style.width =
@@ -528,7 +712,7 @@ function renderWeeklyProgress(state) {
 
 
   if (
-    completed >= WEEKLY_GOAL
+    completed >= goal
   ) {
 
     $("#weekStatus")
@@ -538,7 +722,9 @@ function renderWeeklyProgress(state) {
   }
 
   else if (
-    completed === 2
+    completed === goal - 1
+    &&
+    goal > 1
   ) {
 
     $("#weekStatus")
@@ -548,7 +734,7 @@ function renderWeeklyProgress(state) {
   }
 
   else if (
-    completed === 1
+    completed > 0
   ) {
 
     $("#weekStatus")
@@ -567,17 +753,27 @@ function renderWeeklyProgress(state) {
 
 
 // =========================================================
-// 14. BOSS BATTLE
+// 17. BOSS BATTLE
 // =========================================================
 
-function renderBossBattle(state) {
+function renderBossBattle(
+  state,
+  settings
+) {
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    ) ||
+    DEFAULT_WEEKLY_GOAL;
 
   const bossUnlocked =
     state.weeklyCompleted.length
-    >= WEEKLY_GOAL;
+    >= goal;
 
   const bossButton =
     $("#bossButton");
+
 
   bossButton.disabled =
     !bossUnlocked;
@@ -595,13 +791,13 @@ function renderBossBattle(state) {
 
     $("#bossLockText")
       .textContent =
-        "Unlock by completing 3 quests.";
+        `Unlock by completing ${goal} quests.`;
   }
 }
 
 
 // =========================================================
-// 15. QUEST CARDS
+// 18. QUEST CARDS
 // =========================================================
 
 function renderQuestCards() {
@@ -712,7 +908,7 @@ function bindQuestCards() {
 
 
 // =========================================================
-// 16. CHARACTER STATS
+// 19. CHARACTER STATS
 // =========================================================
 
 function renderCharacterStats(state) {
@@ -734,7 +930,10 @@ function renderCharacterStats(state) {
 }
 
 
-function renderStat(type, xp) {
+function renderStat(
+  type,
+  xp
+) {
 
   const {
     level,
@@ -760,7 +959,46 @@ function renderStat(type, xp) {
 
 
 // =========================================================
-// 17. OPEN QUEST
+// 20. CHARACTER SUMMARY
+// =========================================================
+
+function renderCharacterSummary(
+  state,
+  settings
+) {
+
+  const totalXp =
+    state.xp.strength
+    +
+    state.xp.endurance
+    +
+    state.xp.restoration;
+
+
+  $("#characterProfileName")
+    .textContent =
+      settings.playerName ||
+      activeProfile;
+
+
+  $("#characterWeeklyQuests")
+    .textContent =
+      state.weeklyCompleted.length;
+
+
+  $("#characterTotalQuests")
+    .textContent =
+      state.history.length;
+
+
+  $("#characterTotalXp")
+    .textContent =
+      totalXp;
+}
+
+
+// =========================================================
+// 21. OPEN QUEST
 // =========================================================
 
 function openQuest(id) {
@@ -816,7 +1054,7 @@ function openQuest(id) {
 
 
 // =========================================================
-// 18. EXERCISE CHECKLIST
+// 22. EXERCISE CHECKLIST
 // =========================================================
 
 function renderExerciseList(quest) {
@@ -848,7 +1086,7 @@ function renderExerciseList(quest) {
 
 
 // =========================================================
-// 19. COMPLETE QUEST
+// 23. COMPLETE QUEST
 // =========================================================
 
 function completeQuest() {
@@ -861,12 +1099,15 @@ function completeQuest() {
     normalizeWeek();
 
 
+  const completedAt =
+    new Date().toISOString();
+
+
   state.weeklyCompleted.push({
     questId:
       activeQuest.id,
 
-    completedAt:
-      new Date().toISOString()
+    completedAt
   });
 
 
@@ -892,8 +1133,7 @@ function completeQuest() {
     xpType:
       activeQuest.xpType,
 
-    completedAt:
-      new Date().toISOString()
+    completedAt
   });
 
 
@@ -917,7 +1157,7 @@ function completeQuest() {
 
 
 // =========================================================
-// 20. CLOSE QUEST
+// 24. CLOSE QUEST
 // =========================================================
 
 function closeQuest() {
@@ -927,14 +1167,17 @@ function closeQuest() {
   const dialog =
     $("#questDialog");
 
-  if (dialog.open) {
+  if (
+    dialog &&
+    dialog.open
+  ) {
     dialog.close();
   }
 }
 
 
 // =========================================================
-// 21. TIMER
+// 25. TIMER
 // =========================================================
 
 function startTimer() {
@@ -1059,7 +1302,7 @@ function updateTimerDisplay() {
 
 
 // =========================================================
-// 22. HISTORY
+// 26. HISTORY
 // =========================================================
 
 function openHistory() {
@@ -1098,6 +1341,7 @@ function openHistory() {
                 new Date(
                   item.completedAt
                 );
+
 
               const dateText =
                 date.toLocaleDateString(
@@ -1145,14 +1389,1083 @@ function closeHistory() {
   const dialog =
     $("#historyDialog");
 
-  if (dialog.open) {
+  if (
+    dialog &&
+    dialog.open
+  ) {
     dialog.close();
   }
 }
 
 
 // =========================================================
-// 23. TOAST MESSAGE
+// 27. VIEW NAVIGATION
+// =========================================================
+
+const VIEW_HEADERS = {
+
+  board: {
+    eyebrow:
+      "Training Guild",
+
+    title:
+      "Quest Board"
+  },
+
+  character: {
+    eyebrow:
+      "Adventurer",
+
+    title:
+      "Character"
+  },
+
+  party: {
+    eyebrow:
+      "Fellowship",
+
+    title:
+      "Party"
+  },
+
+  settings: {
+    eyebrow:
+      "Guild Configuration",
+
+    title:
+      "Settings"
+  }
+};
+
+
+function setView(view) {
+
+  const validView =
+    VIEW_HEADERS[view]
+      ? view
+      : "board";
+
+
+  activeView =
+    validView;
+
+
+  localStorage.setItem(
+    "questBoardActiveView",
+    activeView
+  );
+
+
+  $$(".app-view")
+    .forEach(
+      section => {
+
+        const isActive =
+          section.dataset.appView
+          === activeView;
+
+
+        section.hidden =
+          !isActive;
+
+
+        section.classList.toggle(
+          "active-view",
+          isActive
+        );
+      }
+    );
+
+
+  $$(".nav-item")
+    .forEach(
+      button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.view === activeView
+        );
+      }
+    );
+
+
+  const header =
+    VIEW_HEADERS[activeView];
+
+
+  $("#screenEyebrow")
+    .textContent =
+      header.eyebrow;
+
+
+  $("#screenTitle")
+    .textContent =
+      header.title;
+
+
+  window.scrollTo({
+    top: 0,
+    behavior:
+      getSettings().reducedMotion
+        ? "auto"
+        : "smooth"
+  });
+
+
+  if (
+    activeView ===
+    "character"
+  ) {
+
+    renderCharacterSummary(
+      normalizeWeek(),
+      getSettings()
+    );
+  }
+
+
+  if (
+    activeView ===
+    "party"
+  ) {
+
+    renderParty(
+      normalizeWeek(),
+      getSettings()
+    );
+  }
+
+
+  if (
+    activeView ===
+    "settings"
+  ) {
+
+    renderSettings(
+      getSettings()
+    );
+  }
+}
+
+
+function handleNavigation(button) {
+
+  setView(
+    button.dataset.view
+  );
+}
+
+
+// =========================================================
+// 28. SETTINGS RENDER
+// =========================================================
+
+function renderSettings(settings) {
+
+  $("#playerNameInput")
+    .value =
+      settings.playerName ||
+      activeProfile;
+
+
+  $("#weeklyGoalSelect")
+    .value =
+      String(
+        settings.weeklyGoal
+        ||
+        DEFAULT_WEEKLY_GOAL
+      );
+
+
+  $("#reducedMotionToggle")
+    .checked =
+      Boolean(
+        settings.reducedMotion
+      );
+
+
+  $("#soundToggle")
+    .checked =
+      Boolean(
+        settings.soundEnabled
+      );
+
+
+  const party =
+    getParty();
+
+
+  $("#leavePartyButton")
+    .disabled =
+      !party;
+}
+
+
+// =========================================================
+// 29. SAVE PLAYER NAME
+// =========================================================
+
+function savePlayerName() {
+
+  const input =
+    $("#playerNameInput");
+
+  const name =
+    input.value.trim();
+
+
+  if (!name) {
+
+    showToast(
+      "Enter a player name."
+    );
+
+    return;
+  }
+
+
+  const settings =
+    getSettings();
+
+
+  settings.playerName =
+    name;
+
+
+  saveSettings(
+    settings
+  );
+
+
+  render();
+
+
+  showToast(
+    "Adventurer name saved."
+  );
+}
+
+
+// =========================================================
+// 30. WEEKLY GOAL
+// =========================================================
+
+function saveWeeklyGoal() {
+
+  const goal =
+    Number(
+      $("#weeklyGoalSelect")
+        .value
+    );
+
+
+  if (
+    !Number.isFinite(goal)
+    ||
+    goal < 1
+  ) {
+    return;
+  }
+
+
+  const settings =
+    getSettings();
+
+
+  settings.weeklyGoal =
+    goal;
+
+
+  saveSettings(
+    settings
+  );
+
+
+  render();
+
+
+  showToast(
+    `Weekly goal set to ${goal}.`
+  );
+}
+
+
+// =========================================================
+// 31. REDUCED MOTION
+// =========================================================
+
+function applyMotionSetting(settings) {
+
+  document.body.classList.toggle(
+    "reduce-motion",
+    Boolean(
+      settings.reducedMotion
+    )
+  );
+}
+
+
+function saveReducedMotion() {
+
+  const settings =
+    getSettings();
+
+
+  settings.reducedMotion =
+    $("#reducedMotionToggle")
+      .checked;
+
+
+  saveSettings(
+    settings
+  );
+
+
+  applyMotionSetting(
+    settings
+  );
+
+
+  showToast(
+    settings.reducedMotion
+      ? "Reduced motion enabled."
+      : "Reduced motion disabled."
+  );
+}
+
+
+// =========================================================
+// 32. SOUND SETTING
+// =========================================================
+
+function saveSoundSetting() {
+
+  const settings =
+    getSettings();
+
+
+  settings.soundEnabled =
+    $("#soundToggle")
+      .checked;
+
+
+  saveSettings(
+    settings
+  );
+
+
+  showToast(
+    settings.soundEnabled
+      ? "Sound effects enabled."
+      : "Sound effects disabled."
+  );
+}
+
+
+// =========================================================
+// 33. RESET THIS WEEK
+// =========================================================
+
+function resetThisWeek() {
+
+  const confirmed =
+    confirm(
+      "Reset this week's completed quests?\n\nXP and quest history will remain."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const state =
+    getState();
+
+
+  state.weekKey =
+    getWeekKey();
+
+
+  state.weeklyCompleted =
+    [];
+
+
+  saveState(
+    state
+  );
+
+
+  render();
+
+
+  showToast(
+    "Weekly progress reset."
+  );
+}
+
+
+// =========================================================
+// 34. CLEAR HISTORY
+// =========================================================
+
+function clearQuestHistory() {
+
+  const confirmed =
+    confirm(
+      "Clear the quest chronicle?\n\nYour XP and levels will remain."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const state =
+    getState();
+
+
+  state.history =
+    [];
+
+
+  saveState(
+    state
+  );
+
+
+  render();
+
+
+  showToast(
+    "Quest history cleared."
+  );
+}
+
+
+// =========================================================
+// 35. RESET CHARACTER
+// =========================================================
+
+function resetCharacter() {
+
+  const confirmed =
+    confirm(
+      "Reset this character completely?\n\nThis will erase XP, levels, weekly progress, and quest history on this device."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  saveState(
+    createFreshState()
+  );
+
+
+  render();
+
+
+  showToast(
+    "Character reset."
+  );
+}
+
+
+// =========================================================
+// 36. LOCAL PARTY GENERATOR
+// =========================================================
+
+function generatePartyCode() {
+
+  const characters =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  let code =
+    "";
+
+
+  for (
+    let i = 0;
+    i < 6;
+    i++
+  ) {
+
+    code +=
+      characters.charAt(
+        Math.floor(
+          Math.random()
+          *
+          characters.length
+        )
+      );
+  }
+
+
+  return code;
+}
+
+
+// =========================================================
+// 37. CREATE PARTY
+// =========================================================
+
+function createParty() {
+
+  const settings =
+    getSettings();
+
+
+  const party = {
+    id:
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : `party-${Date.now()}`,
+
+    name:
+      "The Fellowship",
+
+    inviteCode:
+      generatePartyCode(),
+
+    createdAt:
+      new Date().toISOString(),
+
+    members: [
+      {
+        name:
+          settings.playerName
+          ||
+          activeProfile,
+
+        profile:
+          activeProfile
+      }
+    ]
+  };
+
+
+  saveParty(
+    party
+  );
+
+
+  renderParty(
+    normalizeWeek(),
+    settings
+  );
+
+
+  renderSettings(
+    settings
+  );
+
+
+  showToast(
+    "Fellowship created."
+  );
+}
+
+
+// =========================================================
+// 38. SHOW JOIN PARTY
+// =========================================================
+
+function toggleJoinPartyForm() {
+
+  const form =
+    $("#joinPartyForm");
+
+
+  form.hidden =
+    !form.hidden;
+
+
+  if (!form.hidden) {
+
+    $("#partyCodeInput")
+      .focus();
+  }
+}
+
+
+// =========================================================
+// 39. JOIN PARTY
+// =========================================================
+
+function joinParty() {
+
+  const code =
+    $("#partyCodeInput")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  if (
+    code.length < 4
+  ) {
+
+    showToast(
+      "Enter a valid party code."
+    );
+
+    return;
+  }
+
+
+  const settings =
+    getSettings();
+
+
+  /*
+    LOCAL PROTOTYPE ONLY.
+
+    Once Supabase is connected,
+    this function will search the
+    parties table by invite code.
+  */
+
+  const party = {
+    id:
+      `local-${code}`,
+
+    name:
+      "The Fellowship",
+
+    inviteCode:
+      code,
+
+    joinedAt:
+      new Date().toISOString(),
+
+    members: [
+      {
+        name:
+          settings.playerName
+          ||
+          activeProfile,
+
+        profile:
+          activeProfile
+      }
+    ]
+  };
+
+
+  saveParty(
+    party
+  );
+
+
+  $("#partyCodeInput")
+    .value =
+      "";
+
+
+  $("#joinPartyForm")
+    .hidden =
+      true;
+
+
+  renderParty(
+    normalizeWeek(),
+    settings
+  );
+
+
+  renderSettings(
+    settings
+  );
+
+
+  showToast(
+    "Fellowship joined."
+  );
+}
+
+
+// =========================================================
+// 40. LEAVE PARTY
+// =========================================================
+
+function leaveParty() {
+
+  const confirmed =
+    confirm(
+      "Leave this fellowship?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  clearParty();
+
+
+  renderParty(
+    normalizeWeek(),
+    getSettings()
+  );
+
+
+  renderSettings(
+    getSettings()
+  );
+
+
+  showToast(
+    "You left the fellowship."
+  );
+}
+
+
+// =========================================================
+// 41. PARTY RENDER
+// =========================================================
+
+function renderParty(
+  state,
+  settings
+) {
+
+  const party =
+    getParty();
+
+
+  const emptyState =
+    $("#partyEmptyState");
+
+
+  const dashboard =
+    $("#partyDashboard");
+
+
+  if (!party) {
+
+    emptyState.hidden =
+      false;
+
+    dashboard.hidden =
+      true;
+
+    return;
+  }
+
+
+  emptyState.hidden =
+    true;
+
+  dashboard.hidden =
+    false;
+
+
+  $("#partyName")
+    .textContent =
+      party.name
+      ||
+      "The Fellowship";
+
+
+  $("#partyInviteCode")
+    .textContent =
+      party.inviteCode
+      ||
+      "------";
+
+
+  renderPartyMembers(
+    party,
+    state,
+    settings
+  );
+
+
+  renderPartyChallenge(
+    state,
+    settings
+  );
+
+
+  renderPartyActivity(
+    state,
+    settings
+  );
+}
+
+
+// =========================================================
+// 42. PARTY MEMBERS
+// =========================================================
+
+function renderPartyMembers(
+  party,
+  state,
+  settings
+) {
+
+  const members =
+    Array.isArray(
+      party.members
+    )
+      ? party.members
+      : [];
+
+
+  const totalXp =
+    state.xp.strength
+    +
+    state.xp.endurance
+    +
+    state.xp.restoration;
+
+
+  /*
+    Local version can only see this device's
+    live stats.
+
+    Supabase will replace this with
+    true cross-device party member data.
+  */
+
+  $("#partyMembers")
+    .innerHTML =
+      members
+        .map(
+          member => {
+
+            const isCurrent =
+              member.profile
+              === activeProfile;
+
+
+            return `
+              <article class="party-member-card">
+
+                <div class="party-member-avatar">
+                  ${
+                    member.name
+                      .charAt(0)
+                      .toUpperCase()
+                  }
+                </div>
+
+                <div class="party-member-info">
+
+                  <strong>
+                    ${escapeHtml(member.name)}
+                  </strong>
+
+                  <span>
+                    ${
+                      isCurrent
+                        ? `${state.weeklyCompleted.length} quests this week`
+                        : "Awaiting sync"
+                    }
+                  </span>
+
+                </div>
+
+                <div class="party-member-score">
+                  ${
+                    isCurrent
+                      ? `${totalXp} XP`
+                      : "—"
+                  }
+                </div>
+
+              </article>
+            `;
+          }
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 43. PARTY CHALLENGE
+// =========================================================
+
+function renderPartyChallenge(
+  state,
+  settings
+) {
+
+  const personalGoal =
+    Number(
+      settings.weeklyGoal
+    ) ||
+    DEFAULT_WEEKLY_GOAL;
+
+
+  const partyGoal =
+    personalGoal
+    *
+    PARTY_GOAL_MULTIPLIER;
+
+
+  /*
+    Until Supabase exists, only the
+    current device contributes here.
+  */
+
+  const completed =
+    state.weeklyCompleted.length;
+
+
+  const percent =
+    Math.min(
+      100,
+      (
+        completed
+        / partyGoal
+      )
+      * 100
+    );
+
+
+  $("#partyChallengeProgress")
+    .textContent =
+      `${completed} / ${partyGoal}`;
+
+
+  $("#partyChallengeBar")
+    .style.width =
+      `${percent}%`;
+
+
+  if (
+    completed >= partyGoal
+  ) {
+
+    $("#partyChallengeStatus")
+      .textContent =
+        "Challenge conquered.";
+
+  }
+
+  else if (
+    completed > 0
+  ) {
+
+    $("#partyChallengeStatus")
+      .textContent =
+        "The fellowship advances.";
+
+  }
+
+  else {
+
+    $("#partyChallengeStatus")
+      .textContent =
+        "The campaign awaits.";
+  }
+
+
+  const heading =
+    $("#partyDashboard .party-challenge h2");
+
+
+  if (heading) {
+
+    heading.textContent =
+      `Complete ${partyGoal} Quests`;
+  }
+}
+
+
+// =========================================================
+// 44. PARTY ACTIVITY
+// =========================================================
+
+function renderPartyActivity(
+  state,
+  settings
+) {
+
+  const recent =
+    state.history.slice(
+      0,
+      5
+    );
+
+
+  if (
+    recent.length === 0
+  ) {
+
+    $("#partyActivityList")
+      .innerHTML =
+        `
+          <p class="muted">
+            No party activity yet.
+          </p>
+        `;
+
+    return;
+  }
+
+
+  $("#partyActivityList")
+    .innerHTML =
+      recent
+        .map(
+          item => {
+
+            const date =
+              new Date(
+                item.completedAt
+              );
+
+
+            const time =
+              date.toLocaleDateString(
+                undefined,
+                {
+                  month: "short",
+                  day: "numeric"
+                }
+              );
+
+
+            return `
+              <article class="party-activity-item">
+
+                <strong>
+                  ${
+                    escapeHtml(
+                      settings.playerName
+                      ||
+                      activeProfile
+                    )
+                  }
+                  completed
+                  ${escapeHtml(item.title)}
+                </strong>
+
+                <span>
+                  ${time}
+                  ·
+                  +${item.xp}
+                  ${capitalize(item.xpType)}
+                  XP
+                </span>
+
+              </article>
+            `;
+          }
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 45. TOAST MESSAGE
 // =========================================================
 
 function showToast(message) {
@@ -1184,83 +2497,13 @@ function showToast(message) {
         );
 
       },
-      2000
+      2200
     );
 }
 
 
 // =========================================================
-// 24. BOTTOM NAVIGATION
-// =========================================================
-
-function handleNavigation(button) {
-
-  $$(".nav-item")
-    .forEach(
-      item =>
-        item.classList.remove(
-          "active"
-        )
-    );
-
-
-  button.classList.add(
-    "active"
-  );
-
-
-  const view =
-    button.dataset.view;
-
-
-  switch (view) {
-
-    case "board":
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
-      break;
-
-
-    case "character":
-
-      document
-        .querySelector(
-          ".character-section"
-        )
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-      break;
-
-
-    case "party":
-
-      showToast(
-        "Party system coming later."
-      );
-
-      break;
-
-
-    case "settings":
-
-      showToast(
-        "Settings coming next."
-      );
-
-      break;
-  }
-}
-
-
-// =========================================================
-// 25. UTILITY
+// 46. UTILITY
 // =========================================================
 
 function capitalize(text) {
@@ -1277,50 +2520,73 @@ function capitalize(text) {
 }
 
 
-// =========================================================
-// 26. EVENT LISTENERS
-// =========================================================
+function escapeHtml(value) {
 
-// Profile button intentionally does NOT switch profiles.
-// Each device keeps its chosen user.
+  return String(value)
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+}
+
+
+// =========================================================
+// 47. EVENT LISTENERS
+// =========================================================
 
 $("#closeQuestButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     closeQuest
   );
 
 
 $("#completeQuestButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     completeQuest
   );
 
 
 $("#timerToggleButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     toggleTimer
   );
 
 
 $("#timerResetButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     resetTimer
   );
 
 
 $("#showHistoryButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     openHistory
   );
 
 
 $("#closeHistoryButton")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     closeHistory
   );
@@ -1342,11 +2608,112 @@ $$(".nav-item")
 
 
 // =========================================================
-// 27. CLICK OUTSIDE DIALOG TO CLOSE
+// 48. SETTINGS EVENTS
+// =========================================================
+
+$("#savePlayerNameButton")
+  ?.addEventListener(
+    "click",
+    savePlayerName
+  );
+
+
+$("#weeklyGoalSelect")
+  ?.addEventListener(
+    "change",
+    saveWeeklyGoal
+  );
+
+
+$("#reducedMotionToggle")
+  ?.addEventListener(
+    "change",
+    saveReducedMotion
+  );
+
+
+$("#soundToggle")
+  ?.addEventListener(
+    "change",
+    saveSoundSetting
+  );
+
+
+$("#resetWeekButton")
+  ?.addEventListener(
+    "click",
+    resetThisWeek
+  );
+
+
+$("#clearHistoryButton")
+  ?.addEventListener(
+    "click",
+    clearQuestHistory
+  );
+
+
+$("#resetCharacterButton")
+  ?.addEventListener(
+    "click",
+    resetCharacter
+  );
+
+
+// =========================================================
+// 49. PARTY EVENTS
+// =========================================================
+
+$("#createPartyButton")
+  ?.addEventListener(
+    "click",
+    createParty
+  );
+
+
+$("#showJoinPartyButton")
+  ?.addEventListener(
+    "click",
+    toggleJoinPartyForm
+  );
+
+
+$("#joinPartyButton")
+  ?.addEventListener(
+    "click",
+    joinParty
+  );
+
+
+$("#partyCodeInput")
+  ?.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        joinParty();
+      }
+    }
+  );
+
+
+$("#leavePartyButton")
+  ?.addEventListener(
+    "click",
+    leaveParty
+  );
+
+
+// =========================================================
+// 50. CLICK OUTSIDE DIALOG TO CLOSE
 // =========================================================
 
 $("#questDialog")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     event => {
 
@@ -1354,6 +2721,7 @@ $("#questDialog")
         event.target ===
         $("#questDialog")
       ) {
+
         closeQuest();
       }
     }
@@ -1361,7 +2729,7 @@ $("#questDialog")
 
 
 $("#historyDialog")
-  .addEventListener(
+  ?.addEventListener(
     "click",
     event => {
 
@@ -1369,6 +2737,7 @@ $("#historyDialog")
         event.target ===
         $("#historyDialog")
       ) {
+
         closeHistory();
       }
     }
@@ -1376,9 +2745,51 @@ $("#historyDialog")
 
 
 // =========================================================
-// 28. INITIALIZE APP
+// 51. ESCAPE KEY
+// =========================================================
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key !==
+      "Escape"
+    ) {
+      return;
+    }
+
+
+    if (
+      $("#questDialog")
+      ?.open
+    ) {
+
+      closeQuest();
+
+      return;
+    }
+
+
+    if (
+      $("#historyDialog")
+      ?.open
+    ) {
+
+      closeHistory();
+    }
+  }
+);
+
+
+// =========================================================
+// 52. INITIALIZE APP
 // =========================================================
 
 chooseProfile();
 
 render();
+
+setView(
+  activeView
+);
