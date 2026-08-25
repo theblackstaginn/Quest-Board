@@ -34,7 +34,9 @@
     content="Quest Board — a gamified fantasy fitness tracker."
   >
 
-  <title>Quest Board</title>
+  <title>
+    Quest Board
+  </title>
 
 
   <!-- =====================================
@@ -64,7 +66,7 @@
 
   <link
     rel="stylesheet"
-    href="styles.css?v=41"
+    href="styles.css?v=42"
   >
 
 </head>
@@ -72,8 +74,17 @@
 
 <body>
 
+  <!-- =====================================
+       WORLD BACKGROUND
+  ====================================== -->
+
   <div class="world-overlay"></div>
 
+
+
+  <!-- =====================================
+       APP SHELL
+  ====================================== -->
 
   <div class="app-shell">
 
@@ -317,6 +328,7 @@
           aria-labelledby="characterTitle"
         >
 
+
           <!-- =====================================
                CHARACTER CARD
           ====================================== -->
@@ -333,8 +345,9 @@
           </section>
 
 
+
           <!-- =====================================
-               IDENTITY / GOLD
+               IDENTITY / CURRENCY
           ====================================== -->
 
           <section class="character-identity-panel">
@@ -359,27 +372,66 @@
             </div>
 
 
-            <div class="gold-purse">
+            <div class="currency-wallet">
 
-              <span class="gold-coin">
-                ●
-              </span>
 
-              <div>
+              <!-- GOLD -->
 
-                <small>
-                  Gold
-                </small>
+              <div class="currency-purse">
 
-                <strong id="characterGold">
-                  0
-                </strong>
+                <img
+                  class="currency-icon"
+                  src="icons/gold-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <div>
+
+                  <small>
+                    Gold
+                  </small>
+
+                  <strong id="characterGold">
+                    0
+                  </strong>
+
+                </div>
 
               </div>
+
+
+
+              <!-- CRYSTALS -->
+
+              <div class="currency-purse">
+
+                <img
+                  class="currency-icon"
+                  src="icons/crystal-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <div>
+
+                  <small>
+                    Crystals
+                  </small>
+
+                  <strong id="characterCrystals">
+                    0
+                  </strong>
+
+                </div>
+
+              </div>
+
 
             </div>
 
           </section>
+
 
 
           <!-- =====================================
@@ -388,6 +440,8 @@
 
           <div class="stats-grid">
 
+
+            <!-- STRENGTH -->
 
             <article class="stat-card">
 
@@ -416,6 +470,8 @@
 
 
 
+            <!-- ENDURANCE -->
+
             <article class="stat-card">
 
               <span class="stat-name">
@@ -442,6 +498,8 @@
             </article>
 
 
+
+            <!-- RESTORATION -->
 
             <article class="stat-card">
 
@@ -548,6 +606,10 @@
       >
 
 
+        <!-- =====================================
+             PARTY HERO
+        ====================================== -->
+
         <section class="party-hero">
 
           <p class="eyebrow">
@@ -566,6 +628,11 @@
         </section>
 
 
+
+        <!-- =====================================
+             CONNECTION STATUS
+        ====================================== -->
+
         <div
           class="party-sync-status"
           id="partySyncStatus"
@@ -573,6 +640,11 @@
           Connecting to the guild...
         </div>
 
+
+
+        <!-- =====================================
+             NO PARTY STATE
+        ====================================== -->
 
         <section
           class="party-empty-state"
@@ -647,12 +719,20 @@
 
 
 
+        <!-- =====================================
+             ACTIVE PARTY
+        ====================================== -->
+
         <section
           class="party-dashboard"
           id="partyDashboard"
           hidden
         >
 
+
+          <!-- =====================================
+               PARTY BANNER
+          ====================================== -->
 
           <section class="party-banner">
 
@@ -681,6 +761,10 @@
 
 
 
+          <!-- =====================================
+               MEMBERS
+          ====================================== -->
+
           <section class="party-section">
 
             <div class="section-heading">
@@ -708,6 +792,10 @@
           </section>
 
 
+
+          <!-- =====================================
+               SHARED CHALLENGE
+          ====================================== -->
 
           <section class="party-challenge">
 
@@ -750,6 +838,10 @@
 
 
 
+          <!-- =====================================
+               PARTY ACTIVITY
+          ====================================== -->
+
           <section class="party-section">
 
             <div class="section-heading">
@@ -791,6 +883,7 @@
 
           </section>
 
+
         </section>
 
       </section>
@@ -809,6 +902,10 @@
       >
 
 
+        <!-- =====================================
+             SETTINGS HERO
+        ====================================== -->
+
         <section class="settings-hero">
 
           <p class="eyebrow">
@@ -826,6 +923,10 @@
         </section>
 
 
+
+        <!-- =====================================
+             PLAYER
+        ====================================== -->
 
         <section class="settings-panel">
 
@@ -876,6 +977,10 @@
 
 
 
+        <!-- =====================================
+             WEEKLY GOAL
+        ====================================== -->
+
         <section class="settings-panel">
 
           <p class="eyebrow">
@@ -911,7 +1016,10 @@
                 2
               </option>
 
-              <option value="3" selected>
+              <option
+                value="3"
+                selected
+              >
                 3
               </option>
 
@@ -938,6 +1046,10 @@
         </section>
 
 
+
+        <!-- =====================================
+             EXPERIENCE
+        ====================================== -->
 
         <section class="settings-panel">
 
@@ -999,6 +1111,10 @@
 
 
 
+        <!-- =====================================
+             DATA
+        ====================================== -->
+
         <section class="settings-panel danger-panel">
 
           <p class="eyebrow">
@@ -1040,6 +1156,10 @@
 
 
 
+        <!-- =====================================
+             PARTY SETTINGS
+        ====================================== -->
+
         <section
           class="settings-panel"
           id="partySettingsPanel"
@@ -1054,7 +1174,10 @@
           </h2>
 
 
-          <p class="muted" id="partySettingsStatus">
+          <p
+            class="muted"
+            id="partySettingsStatus"
+          >
             Connecting to Supabase...
           </p>
 
@@ -1070,7 +1193,9 @@
 
         </section>
 
+
       </section>
+
 
     </main>
 
@@ -1084,6 +1209,7 @@
       class="bottom-nav"
       aria-label="Primary navigation"
     >
+
 
       <button
         class="nav-item active"
@@ -1124,7 +1250,9 @@
         Settings
       </button>
 
+
     </nav>
+
 
   </div>
 
@@ -1184,7 +1312,7 @@
       </span>
 
       <span id="dialogReward">
-        +20 XP · +10 Gold
+        +20 XP
       </span>
 
     </div>
@@ -1327,7 +1455,7 @@
 
 
   <!-- ==================================================
-       BOSS DEFEATED DIALOG
+       BOSS DEFEATED / CRYSTAL REVEAL
   =================================================== -->
 
   <dialog
@@ -1339,8 +1467,8 @@
 
       <img
         class="victory-art"
-        src="boss-defeated.webp"
-        alt="Boss Defeated"
+        src="cluster.webp"
+        alt="Boss Defeated — a crystal cluster has been revealed"
       >
 
 
@@ -1376,15 +1504,19 @@
        SUPABASE
   ====================================== -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
 
 
   <!-- =====================================
        APP
   ====================================== -->
 
-  <script src="app.js?v=41"></script>
+  <script src="app.js?v=42"></script>
 
 
 </body>
+
 </html>
