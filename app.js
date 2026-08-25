@@ -3,7 +3,7 @@
 // app.js
 //
 // Phase 1:
-// - Two profiles: Farmer + Jess
+// - Independent device profiles: Farmer or Jess
 // - Weekly 3-quest objective
 // - Quest checklist modal
 // - Quest timer
@@ -203,13 +203,15 @@ const XP_PER_LEVEL = 100;
 
 let activeProfile =
   localStorage.getItem("questBoardActiveProfile") ||
-  "Farmer";
+  null;
 
 let activeQuest = null;
 
 let timerSeconds = 0;
 
 let timerInterval = null;
+
+let toastTimeout = null;
 
 
 // =========================================================
@@ -224,7 +226,42 @@ const $$ = selector =>
 
 
 // =========================================================
-// 6. LOCAL STORAGE
+// 6. PROFILE SETUP
+// =========================================================
+
+function chooseProfile() {
+
+  if (activeProfile) {
+    return;
+  }
+
+  const choice = prompt(
+    "Who is using this Quest Board?\n\nType Farmer or Jess"
+  );
+
+  if (!choice) {
+    activeProfile = "Farmer";
+  }
+
+  else if (
+    choice.trim().toLowerCase() === "jess"
+  ) {
+    activeProfile = "Jess";
+  }
+
+  else {
+    activeProfile = "Farmer";
+  }
+
+  localStorage.setItem(
+    "questBoardActiveProfile",
+    activeProfile
+  );
+}
+
+
+// =========================================================
+// 7. LOCAL STORAGE
 // =========================================================
 
 function getStorageKey() {
@@ -307,7 +344,7 @@ function saveState(state) {
 
 
 // =========================================================
-// 7. WEEK HANDLING
+// 8. WEEK HANDLING
 // =========================================================
 
 function getWeekKey(date = new Date()) {
@@ -386,7 +423,7 @@ function normalizeWeek() {
 
 
 // =========================================================
-// 8. LEVEL SYSTEM
+// 9. LEVEL SYSTEM
 // =========================================================
 
 function getLevelData(xp) {
@@ -407,7 +444,7 @@ function getLevelData(xp) {
 
 
 // =========================================================
-// 9. QUEST LOOKUP
+// 10. QUEST LOOKUP
 // =========================================================
 
 function findQuest(id) {
@@ -424,7 +461,7 @@ function findQuest(id) {
 
 
 // =========================================================
-// 10. MAIN RENDER
+// 11. MAIN RENDER
 // =========================================================
 
 function render() {
@@ -447,7 +484,7 @@ function render() {
 
 
 // =========================================================
-// 11. PROFILE
+// 12. PROFILE DISPLAY
 // =========================================================
 
 function renderProfile() {
@@ -462,37 +499,8 @@ function renderProfile() {
 }
 
 
-function switchProfile() {
-
-  const currentIndex =
-    PROFILES.indexOf(
-      activeProfile
-    );
-
-  const nextIndex =
-    (
-      currentIndex + 1
-    )
-    % PROFILES.length;
-
-  activeProfile =
-    PROFILES[nextIndex];
-
-  localStorage.setItem(
-    "questBoardActiveProfile",
-    activeProfile
-  );
-
-  render();
-
-  showToast(
-    `Switched to ${activeProfile}`
-  );
-}
-
-
 // =========================================================
-// 12. WEEKLY PROGRESS
+// 13. WEEKLY PROGRESS
 // =========================================================
 
 function renderWeeklyProgress(state) {
@@ -559,7 +567,7 @@ function renderWeeklyProgress(state) {
 
 
 // =========================================================
-// 13. BOSS BATTLE
+// 14. BOSS BATTLE
 // =========================================================
 
 function renderBossBattle(state) {
@@ -593,7 +601,7 @@ function renderBossBattle(state) {
 
 
 // =========================================================
-// 14. QUEST CARDS
+// 15. QUEST CARDS
 // =========================================================
 
 function renderQuestCards() {
@@ -704,7 +712,7 @@ function bindQuestCards() {
 
 
 // =========================================================
-// 15. CHARACTER STATS
+// 16. CHARACTER STATS
 // =========================================================
 
 function renderCharacterStats(state) {
@@ -752,7 +760,7 @@ function renderStat(type, xp) {
 
 
 // =========================================================
-// 16. OPEN QUEST
+// 17. OPEN QUEST
 // =========================================================
 
 function openQuest(id) {
@@ -808,7 +816,7 @@ function openQuest(id) {
 
 
 // =========================================================
-// 17. EXERCISE CHECKLIST
+// 18. EXERCISE CHECKLIST
 // =========================================================
 
 function renderExerciseList(quest) {
@@ -840,7 +848,7 @@ function renderExerciseList(quest) {
 
 
 // =========================================================
-// 18. COMPLETE QUEST
+// 19. COMPLETE QUEST
 // =========================================================
 
 function completeQuest() {
@@ -909,7 +917,7 @@ function completeQuest() {
 
 
 // =========================================================
-// 19. CLOSE QUEST
+// 20. CLOSE QUEST
 // =========================================================
 
 function closeQuest() {
@@ -926,7 +934,7 @@ function closeQuest() {
 
 
 // =========================================================
-// 20. TIMER
+// 21. TIMER
 // =========================================================
 
 function startTimer() {
@@ -1051,7 +1059,7 @@ function updateTimerDisplay() {
 
 
 // =========================================================
-// 21. HISTORY
+// 22. HISTORY
 // =========================================================
 
 function openHistory() {
@@ -1144,11 +1152,8 @@ function closeHistory() {
 
 
 // =========================================================
-// 22. TOAST MESSAGE
+// 23. TOAST MESSAGE
 // =========================================================
-
-let toastTimeout = null;
-
 
 function showToast(message) {
 
@@ -1185,7 +1190,7 @@ function showToast(message) {
 
 
 // =========================================================
-// 23. BOTTOM NAVIGATION
+// 24. BOTTOM NAVIGATION
 // =========================================================
 
 function handleNavigation(button) {
@@ -1237,7 +1242,7 @@ function handleNavigation(button) {
     case "party":
 
       showToast(
-        "Party system coming next."
+        "Party system coming later."
       );
 
       break;
@@ -1255,7 +1260,7 @@ function handleNavigation(button) {
 
 
 // =========================================================
-// 24. UTILITY
+// 25. UTILITY
 // =========================================================
 
 function capitalize(text) {
@@ -1273,15 +1278,11 @@ function capitalize(text) {
 
 
 // =========================================================
-// 25. EVENT LISTENERS
+// 26. EVENT LISTENERS
 // =========================================================
 
-$("#profileButton")
-  .addEventListener(
-    "click",
-    switchProfile
-  );
-
+// Profile button intentionally does NOT switch profiles.
+// Each device keeps its chosen user.
 
 $("#closeQuestButton")
   .addEventListener(
@@ -1341,7 +1342,7 @@ $$(".nav-item")
 
 
 // =========================================================
-// 26. CLICK OUTSIDE DIALOG TO CLOSE
+// 27. CLICK OUTSIDE DIALOG TO CLOSE
 // =========================================================
 
 $("#questDialog")
@@ -1375,7 +1376,9 @@ $("#historyDialog")
 
 
 // =========================================================
-// 27. INITIALIZE APP
+// 28. INITIALIZE APP
 // =========================================================
+
+chooseProfile();
 
 render();
