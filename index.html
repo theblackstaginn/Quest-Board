@@ -24,7 +24,6 @@
     href="icons/app-icon.PNG"
   >
 
-
   <meta
     name="theme-color"
     content="#11100c"
@@ -32,13 +31,10 @@
 
   <meta
     name="description"
-    content="Quest Board — a gamified weekly fitness tracker."
+    content="Quest Board — a gamified fantasy fitness tracker."
   >
 
-
-  <title>
-    Quest Board
-  </title>
+  <title>Quest Board</title>
 
 
   <!-- =====================================
@@ -63,12 +59,12 @@
 
 
   <!-- =====================================
-       QUEST BOARD STYLES
+       STYLES
   ====================================== -->
 
   <link
     rel="stylesheet"
-    href="styles.css?v=35"
+    href="styles.css?v=40"
   >
 
 </head>
@@ -76,18 +72,8 @@
 
 <body>
 
-
-  <!-- =====================================
-       FIXED WORLD BACKGROUND
-  ====================================== -->
-
   <div class="world-overlay"></div>
 
-
-
-  <!-- =====================================
-       APP
-  ====================================== -->
 
   <div class="app-shell">
 
@@ -311,7 +297,6 @@
 
         </section>
 
-
       </section>
 
 
@@ -327,35 +312,37 @@
         hidden
       >
 
-
         <section
           class="character-section"
           aria-labelledby="characterTitle"
         >
 
-
           <!-- =====================================
-               CHARACTER HERO
+               CHARACTER CARD
           ====================================== -->
 
-          <section class="character-hero">
+          <section class="character-card-panel">
 
-            <div class="character-card-wrap">
+            <img
+              id="characterCardImage"
+              class="character-card-image"
+              src="farmer-card.webp"
+              alt="Fantasy character card"
+            >
 
-              <img
-                id="characterCardImage"
-                class="character-card-image"
-                src="farmer-card.webp"
-                alt="Fantasy character card"
-              >
-
-            </div>
+          </section>
 
 
-            <div class="character-identity">
+          <!-- =====================================
+               IDENTITY / GOLD
+          ====================================== -->
+
+          <section class="character-identity-panel">
+
+            <div>
 
               <p class="eyebrow">
-                Character
+                Adventurer
               </p>
 
               <h2 id="characterProfileName">
@@ -363,18 +350,26 @@
               </h2>
 
               <p
-                class="character-class"
+                class="character-class-name"
                 id="characterClassName"
               >
                 Half-Orc Wizard
               </p>
 
+            </div>
 
-              <div class="character-wallet">
 
-                <span class="gold-label">
+            <div class="gold-purse">
+
+              <span class="gold-coin">
+                ●
+              </span>
+
+              <div>
+
+                <small>
                   Gold
-                </span>
+                </small>
 
                 <strong id="characterGold">
                   0
@@ -387,33 +382,12 @@
           </section>
 
 
-
           <!-- =====================================
-               CHARACTER PROGRESSION
+               CHARACTER STATS
           ====================================== -->
-
-          <div class="section-heading">
-
-            <div>
-
-              <p class="eyebrow">
-                Attributes
-              </p>
-
-              <h2 id="characterTitle">
-                Your Progress
-              </h2>
-
-            </div>
-
-          </div>
-
-
 
           <div class="stats-grid">
 
-
-            <!-- STRENGTH -->
 
             <article class="stat-card">
 
@@ -442,8 +416,6 @@
 
 
 
-            <!-- ENDURANCE -->
-
             <article class="stat-card">
 
               <span class="stat-name">
@@ -470,8 +442,6 @@
             </article>
 
 
-
-            <!-- RESTORATION -->
 
             <article class="stat-card">
 
@@ -512,6 +482,7 @@
             <p class="eyebrow">
               Adventurer Record
             </p>
+
 
             <div class="character-summary-grid">
 
@@ -559,9 +530,7 @@
 
           </section>
 
-
         </section>
-
 
       </section>
 
@@ -580,7 +549,7 @@
 
 
         <!-- =====================================
-             PARTY HEADER
+             PARTY HERO
         ====================================== -->
 
         <section class="party-hero">
@@ -599,6 +568,19 @@
           </p>
 
         </section>
+
+
+
+        <!-- =====================================
+             CONNECTION STATUS
+        ====================================== -->
+
+        <div
+          class="party-sync-status"
+          id="partySyncStatus"
+        >
+          Connecting to the guild...
+        </div>
 
 
 
@@ -626,7 +608,6 @@
 
           <div class="party-action-grid">
 
-
             <button
               class="fantasy-action-button"
               id="createPartyButton"
@@ -643,7 +624,6 @@
             >
               Join Party
             </button>
-
 
           </div>
 
@@ -692,6 +672,10 @@
         >
 
 
+          <!-- =====================================
+               PARTY BANNER
+          ====================================== -->
+
           <section class="party-banner">
 
             <p class="eyebrow">
@@ -701,6 +685,7 @@
             <h2 id="partyName">
               The Fellowship
             </h2>
+
 
             <div class="party-code-line">
 
@@ -719,7 +704,7 @@
 
 
           <!-- =====================================
-               PARTY MEMBERS
+               MEMBERS
           ====================================== -->
 
           <section class="party-section">
@@ -760,12 +745,12 @@
               Shared Challenge
             </p>
 
-            <h2>
+            <h2 id="partyChallengeTitle">
               Complete 6 Quests
             </h2>
 
             <p class="muted">
-              Your combined weekly progress.
+              Combined weekly progress from every member of the fellowship.
             </p>
 
 
@@ -815,6 +800,15 @@
 
               </div>
 
+
+              <button
+                class="text-button"
+                id="refreshPartyButton"
+                type="button"
+              >
+                Refresh
+              </button>
+
             </div>
 
 
@@ -831,9 +825,7 @@
 
           </section>
 
-
         </section>
-
 
       </section>
 
@@ -850,10 +842,6 @@
         hidden
       >
 
-
-        <!-- =====================================
-             SETTINGS HEADER
-        ====================================== -->
 
         <section class="settings-hero">
 
@@ -874,7 +862,7 @@
 
 
         <!-- =====================================
-             PLAYER SETTINGS
+             PLAYER
         ====================================== -->
 
         <section class="settings-panel">
@@ -897,7 +885,7 @@
               </strong>
 
               <span>
-                This name appears across your Quest Board.
+                Renaming your adventurer does not change your class or character identity.
               </span>
 
             </div>
@@ -927,7 +915,7 @@
 
 
         <!-- =====================================
-             WEEKLY GOAL SETTINGS
+             WEEKLY GOAL
         ====================================== -->
 
         <section class="settings-panel">
@@ -965,10 +953,7 @@
                 2
               </option>
 
-              <option
-                value="3"
-                selected
-              >
+              <option value="3" selected>
                 3
               </option>
 
@@ -997,7 +982,7 @@
 
 
         <!-- =====================================
-             INTERFACE SETTINGS
+             EXPERIENCE
         ====================================== -->
 
         <section class="settings-panel">
@@ -1061,7 +1046,7 @@
 
 
         <!-- =====================================
-             DATA CONTROLS
+             DATA
         ====================================== -->
 
         <section class="settings-panel danger-panel">
@@ -1106,7 +1091,7 @@
 
 
         <!-- =====================================
-             PARTY SETTINGS
+             PARTY
         ====================================== -->
 
         <section
@@ -1123,8 +1108,8 @@
           </h2>
 
 
-          <p class="muted">
-            Party syncing will connect through Supabase.
+          <p class="muted" id="partySettingsStatus">
+            Connecting to Supabase...
           </p>
 
 
@@ -1139,9 +1124,7 @@
 
         </section>
 
-
       </section>
-
 
     </main>
 
@@ -1155,7 +1138,6 @@
       class="bottom-nav"
       aria-label="Primary navigation"
     >
-
 
       <button
         class="nav-item active"
@@ -1196,9 +1178,7 @@
         Settings
       </button>
 
-
     </nav>
-
 
   </div>
 
@@ -1381,12 +1361,18 @@
 
 
   <!-- =====================================
-       APP SCRIPT
+       SUPABASE
   ====================================== -->
 
-  <script src="app.js?v=35"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+  <!-- =====================================
+       APP
+  ====================================== -->
+
+  <script src="app.js?v=40"></script>
 
 
 </body>
-
 </html>
