@@ -1368,7 +1368,7 @@ h3 {
     no-repeat;
 
   box-shadow:
-    var(--shadow);
+    none;
 
 }
 
@@ -2442,7 +2442,7 @@ h3 {
       158px;
 
     padding:
-      30px 30px;
+      34px 32px;
 
   }
 
@@ -2561,7 +2561,7 @@ h3 {
       145px;
 
     padding:
-      27px 25px;
+      30px 27px;
 
   }
 
