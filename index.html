@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta name="theme-color" content="#11110f">
+  <meta name="theme-color" content="#11100c">
 
   <meta
     name="description"
@@ -17,30 +17,39 @@
 
   <title>Quest Board</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
+  <!-- atmospheric dark overlay -->
+  <div class="world-overlay"></div>
+
   <div class="app-shell">
 
-    <!-- =========================
+    <!-- =====================================
          HEADER
-    ========================== -->
+    ====================================== -->
     <header class="topbar">
 
       <div class="brand-block">
-        <p class="eyebrow">Training Guild</p>
-        <h1>Quest Board</h1>
+
+        <p class="eyebrow">
+          Training Guild
+        </p>
+
+        <h1>
+          Quest Board
+        </h1>
+
       </div>
 
-      <button
+
+      <div
         class="profile-button"
         id="profileButton"
-        type="button"
-        aria-label="Switch profile"
       >
+
         <span
           class="profile-avatar"
           id="profileAvatar"
@@ -51,18 +60,18 @@
         <span id="profileName">
           Farmer
         </span>
-      </button>
+
+      </div>
 
     </header>
 
 
-    <!-- =========================
-         MAIN CONTENT
-    ========================== -->
+
     <main>
 
-
-      <!-- WEEKLY OBJECTIVE -->
+      <!-- =====================================
+           WEEKLY OBJECTIVE
+      ====================================== -->
       <section
         class="weekly-objective"
         aria-labelledby="weeklyObjectiveTitle"
@@ -105,10 +114,12 @@
             class="progress-track"
             aria-label="Weekly quest progress"
           >
+
             <div
               class="progress-fill"
               id="weeklyProgressBar"
             ></div>
+
           </div>
 
         </div>
@@ -117,16 +128,14 @@
 
 
 
-      <!-- =========================
-           QUICK QUESTS
-      ========================== -->
+      <!-- =====================================
+           SPECIAL QUESTS
+      ====================================== -->
       <section
         class="quick-quests"
         aria-label="Special quests"
       >
 
-
-        <!-- EMERGENCY QUEST -->
         <button
           class="quick-quest emergency-quest"
           type="button"
@@ -148,8 +157,6 @@
         </button>
 
 
-
-        <!-- BOSS BATTLE -->
         <button
           class="quick-quest boss-quest"
           id="bossButton"
@@ -179,9 +186,9 @@
 
 
 
-      <!-- =========================
+      <!-- =====================================
            QUEST BOARD
-      ========================== -->
+      ====================================== -->
       <section
         class="quest-section"
         aria-labelledby="questBoardTitle"
@@ -213,267 +220,21 @@
         </div>
 
 
-
+        <!--
+          app.js generates quest cards inside here.
+        -->
         <div
           class="quest-grid"
           id="questGrid"
-        >
-
-
-          <!-- QUEST 1 -->
-          <article
-            class="quest-card"
-            data-quest-id="there-back"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Endurance
-              </p>
-
-              <h3>
-                There and Back
-              </h3>
-
-              <p>
-                Walk the 1-mile road route.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                15–25 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-
-          <!-- QUEST 2 -->
-          <article
-            class="quest-card"
-            data-quest-id="keep"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Strength
-              </p>
-
-              <h3>
-                The Keep
-              </h3>
-
-              <p>
-                Dumbbells and kettlebells.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                10–20 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-
-          <!-- QUEST 3 -->
-          <article
-            class="quest-card"
-            data-quest-id="dragonstrength"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Strength
-              </p>
-
-              <h3>
-                DragonStrength
-              </h3>
-
-              <p>
-                Barbell and rack training.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                10–20 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-
-          <!-- QUEST 4 -->
-          <article
-            class="quest-card"
-            data-quest-id="rogue"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Mixed
-              </p>
-
-              <h3>
-                Rogue Mode
-              </h3>
-
-              <p>
-                Ten minutes of continuous movement.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                10 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-
-          <!-- QUEST 5 -->
-          <article
-            class="quest-card"
-            data-quest-id="restoration"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Recovery
-              </p>
-
-              <h3>
-                Restoration
-              </h3>
-
-              <p>
-                Mobility, yoga, and stretching.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                10–20 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-
-          <!-- QUEST 6 -->
-          <article
-            class="quest-card"
-            data-quest-id="ranger"
-          >
-
-            <div class="quest-card-content">
-
-              <p class="quest-type">
-                Endurance
-              </p>
-
-              <h3>
-                Ranger Training
-              </h3>
-
-              <p>
-                Interval walking on the mile route.
-              </p>
-
-            </div>
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                20–30 min
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-
-
-        </div>
+        ></div>
 
       </section>
 
 
 
-      <!-- =========================
+      <!-- =====================================
            CHARACTER STATS
-      ========================== -->
+      ====================================== -->
       <section
         class="character-section"
         aria-labelledby="characterTitle"
@@ -496,11 +257,9 @@
         </div>
 
 
-
         <div class="stats-grid">
 
 
-          <!-- STRENGTH -->
           <article class="stat-card">
 
             <span class="stat-name">
@@ -512,10 +271,12 @@
             </strong>
 
             <div class="stat-progress">
+
               <div
                 class="stat-progress-fill"
                 id="strengthBar"
               ></div>
+
             </div>
 
             <small id="strengthXp">
@@ -526,7 +287,6 @@
 
 
 
-          <!-- ENDURANCE -->
           <article class="stat-card">
 
             <span class="stat-name">
@@ -538,10 +298,12 @@
             </strong>
 
             <div class="stat-progress">
+
               <div
                 class="stat-progress-fill"
                 id="enduranceBar"
               ></div>
+
             </div>
 
             <small id="enduranceXp">
@@ -552,7 +314,6 @@
 
 
 
-          <!-- RESTORATION -->
           <article class="stat-card">
 
             <span class="stat-name">
@@ -564,10 +325,12 @@
             </strong>
 
             <div class="stat-progress">
+
               <div
                 class="stat-progress-fill"
                 id="restorationBar"
               ></div>
+
             </div>
 
             <small id="restorationXp">
@@ -581,14 +344,13 @@
 
       </section>
 
-
     </main>
 
 
 
-    <!-- =========================
+    <!-- =====================================
          BOTTOM NAVIGATION
-    ========================== -->
+    ====================================== -->
     <nav
       class="bottom-nav"
       aria-label="Primary navigation"
@@ -632,9 +394,9 @@
 
 
 
-  <!-- =========================
-       QUEST MODAL
-  ========================== -->
+  <!-- =====================================
+       QUEST DIALOG
+  ====================================== -->
   <dialog
     class="quest-dialog"
     id="questDialog"
@@ -670,14 +432,12 @@
     </div>
 
 
-
     <p
       class="quest-description"
       id="dialogDescription"
     >
       Quest description.
     </p>
-
 
 
     <div class="quest-detail-meta">
@@ -693,16 +453,12 @@
     </div>
 
 
-
-    <!-- JS will insert exercises here -->
     <div
       class="exercise-list"
       id="exerciseList"
     ></div>
 
 
-
-    <!-- TIMER -->
     <section class="quest-timer">
 
       <div>
@@ -739,7 +495,6 @@
     </section>
 
 
-
     <button
       class="complete-quest-button"
       id="completeQuestButton"
@@ -752,9 +507,9 @@
 
 
 
-  <!-- =========================
-       HISTORY MODAL
-  ========================== -->
+  <!-- =====================================
+       HISTORY DIALOG
+  ====================================== -->
   <dialog
     class="history-dialog"
     id="historyDialog"
@@ -799,9 +554,7 @@
 
 
 
-  <!-- =========================
-       NOTIFICATION
-  ========================== -->
+  <!-- notification -->
   <div
     class="toast"
     id="toast"
@@ -810,8 +563,6 @@
   ></div>
 
 
-
-  <!-- JavaScript -->
   <script src="app.js"></script>
 
 </body>
