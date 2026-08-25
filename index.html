@@ -64,7 +64,7 @@
 
   <link
     rel="stylesheet"
-    href="styles.css?v=40"
+    href="styles.css?v=41"
   >
 
 </head>
@@ -548,10 +548,6 @@
       >
 
 
-        <!-- =====================================
-             PARTY HERO
-        ====================================== -->
-
         <section class="party-hero">
 
           <p class="eyebrow">
@@ -570,11 +566,6 @@
         </section>
 
 
-
-        <!-- =====================================
-             CONNECTION STATUS
-        ====================================== -->
-
         <div
           class="party-sync-status"
           id="partySyncStatus"
@@ -582,11 +573,6 @@
           Connecting to the guild...
         </div>
 
-
-
-        <!-- =====================================
-             NO PARTY STATE
-        ====================================== -->
 
         <section
           class="party-empty-state"
@@ -661,20 +647,12 @@
 
 
 
-        <!-- =====================================
-             ACTIVE PARTY
-        ====================================== -->
-
         <section
           class="party-dashboard"
           id="partyDashboard"
           hidden
         >
 
-
-          <!-- =====================================
-               PARTY BANNER
-          ====================================== -->
 
           <section class="party-banner">
 
@@ -703,10 +681,6 @@
 
 
 
-          <!-- =====================================
-               MEMBERS
-          ====================================== -->
-
           <section class="party-section">
 
             <div class="section-heading">
@@ -734,10 +708,6 @@
           </section>
 
 
-
-          <!-- =====================================
-               SHARED CHALLENGE
-          ====================================== -->
 
           <section class="party-challenge">
 
@@ -779,10 +749,6 @@
           </section>
 
 
-
-          <!-- =====================================
-               PARTY ACTIVITY
-          ====================================== -->
 
           <section class="party-section">
 
@@ -861,10 +827,6 @@
 
 
 
-        <!-- =====================================
-             PLAYER
-        ====================================== -->
-
         <section class="settings-panel">
 
           <p class="eyebrow">
@@ -913,10 +875,6 @@
         </section>
 
 
-
-        <!-- =====================================
-             WEEKLY GOAL
-        ====================================== -->
 
         <section class="settings-panel">
 
@@ -981,10 +939,6 @@
 
 
 
-        <!-- =====================================
-             EXPERIENCE
-        ====================================== -->
-
         <section class="settings-panel">
 
           <p class="eyebrow">
@@ -1045,10 +999,6 @@
 
 
 
-        <!-- =====================================
-             DATA
-        ====================================== -->
-
         <section class="settings-panel danger-panel">
 
           <p class="eyebrow">
@@ -1089,10 +1039,6 @@
         </section>
 
 
-
-        <!-- =====================================
-             PARTY
-        ====================================== -->
 
         <section
           class="settings-panel"
@@ -1347,6 +1293,72 @@
 
 
 
+  <!-- ==================================================
+       WEEK CONQUERED DIALOG
+  =================================================== -->
+
+  <dialog
+    class="victory-dialog week-victory-dialog"
+    id="weekConqueredDialog"
+  >
+
+    <div class="victory-panel">
+
+      <img
+        class="victory-art"
+        src="week-conquered.webp"
+        alt="Week Conquered"
+      >
+
+
+      <button
+        class="victory-image-button continue-victory-button"
+        id="weekContinueButton"
+        type="button"
+        aria-label="Continue"
+      >
+        Continue
+      </button>
+
+    </div>
+
+  </dialog>
+
+
+
+  <!-- ==================================================
+       BOSS DEFEATED DIALOG
+  =================================================== -->
+
+  <dialog
+    class="victory-dialog boss-victory-dialog"
+    id="bossDefeatedDialog"
+  >
+
+    <div class="victory-panel">
+
+      <img
+        class="victory-art"
+        src="boss-defeated.webp"
+        alt="Boss Defeated"
+      >
+
+
+      <button
+        class="victory-image-button claim-reward-button"
+        id="claimBossRewardsButton"
+        type="button"
+        aria-label="Claim rewards"
+      >
+        Claim Rewards
+      </button>
+
+    </div>
+
+  </dialog>
+
+
+
   <!-- =====================================
        NOTIFICATION
   ====================================== -->
@@ -1371,7 +1383,7 @@
        APP
   ====================================== -->
 
-  <script src="app.js?v=40"></script>
+  <script src="app.js?v=41"></script>
 
 
 </body>
