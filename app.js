@@ -7,9 +7,10 @@
 // - Character tarot cards
 // - XP + levels
 // - Gold economy
+// - Crystal economy
 // - Configurable weekly goals
 // - Week Conquered victory reward
-// - Boss Battle victory + claim reward
+// - Boss Battle victory + crystal reveal
 // - Weekly reward protection
 // - Boss reward protection
 // - Anonymous Supabase authentication
@@ -48,14 +49,26 @@ const supabaseClient =
 const QUESTS = [
 
   {
-    id: "there-back",
-    title: "There and Back",
-    category: "Endurance",
-    time: "15–25 min",
+    id:
+      "there-back",
 
-    xpType: "endurance",
-    xp: 20,
-    gold: 12,
+    title:
+      "There and Back",
+
+    category:
+      "Endurance",
+
+    time:
+      "15–25 min",
+
+    xpType:
+      "endurance",
+
+    xp:
+      20,
+
+    gold:
+      12,
 
     description:
       "Walk the full 1-mile road route at a comfortable, steady pace.",
@@ -67,14 +80,26 @@ const QUESTS = [
 
 
   {
-    id: "keep",
-    title: "The Keep",
-    category: "Strength",
-    time: "10–20 min",
+    id:
+      "keep",
 
-    xpType: "strength",
-    xp: 25,
-    gold: 15,
+    title:
+      "The Keep",
+
+    category:
+      "Strength",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      25,
+
+    gold:
+      15,
 
     description:
       "A simple dumbbell and kettlebell strength quest. Complete two rounds for a short session or three to four rounds for the full quest.",
@@ -90,14 +115,26 @@ const QUESTS = [
 
 
   {
-    id: "dragonstrength",
-    title: "DragonStrength",
-    category: "Strength",
-    time: "10–20 min",
+    id:
+      "dragonstrength",
 
-    xpType: "strength",
-    xp: 30,
-    gold: 20,
+    title:
+      "DragonStrength",
+
+    category:
+      "Strength",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      30,
+
+    gold:
+      20,
 
     description:
       "Barbell and rack training. Keep the movement controlled and leave a little strength in reserve.",
@@ -113,14 +150,26 @@ const QUESTS = [
 
 
   {
-    id: "rogue",
-    title: "Rogue Mode",
-    category: "Mixed",
-    time: "10 min",
+    id:
+      "rogue",
 
-    xpType: "strength",
-    xp: 20,
-    gold: 15,
+    title:
+      "Rogue Mode",
+
+    category:
+      "Mixed",
+
+    time:
+      "10 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      20,
+
+    gold:
+      15,
 
     description:
       "Set the timer for ten minutes and move continuously through the circuit at your own pace.",
@@ -136,14 +185,26 @@ const QUESTS = [
 
 
   {
-    id: "restoration",
-    title: "Restoration",
-    category: "Recovery",
-    time: "10–20 min",
+    id:
+      "restoration",
 
-    xpType: "restoration",
-    xp: 20,
-    gold: 10,
+    title:
+      "Restoration",
+
+    category:
+      "Recovery",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "restoration",
+
+    xp:
+      20,
+
+    gold:
+      10,
 
     description:
       "A mobility and recovery quest for keeping the body loose, capable, and ready for the next battle.",
@@ -160,14 +221,26 @@ const QUESTS = [
 
 
   {
-    id: "ranger",
-    title: "Ranger Training",
-    category: "Endurance",
-    time: "20–30 min",
+    id:
+      "ranger",
 
-    xpType: "endurance",
-    xp: 30,
-    gold: 20,
+    title:
+      "Ranger Training",
+
+    category:
+      "Endurance",
+
+    time:
+      "20–30 min",
+
+    xpType:
+      "endurance",
+
+    xp:
+      30,
+
+    gold:
+      20,
 
     description:
       "Walk the mile. After a five-minute warm-up, alternate one minute fast with two minutes at your normal pace.",
@@ -192,14 +265,26 @@ const SPECIAL_QUESTS = {
 
   emergency: {
 
-    id: "emergency",
-    title: "Emergency Quest",
-    category: "Emergency",
-    time: "5 min",
+    id:
+      "emergency",
 
-    xpType: "strength",
-    xp: 10,
-    gold: 5,
+    title:
+      "Emergency Quest",
+
+    category:
+      "Emergency",
+
+    time:
+      "5 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      10,
+
+    gold:
+      5,
 
     description:
       "Five minutes counts. This exists for the days when doing anything feels harder than it should.",
@@ -211,27 +296,39 @@ const SPECIAL_QUESTS = {
       "10 deadlifts",
       "Repeat until five minutes is complete"
     ]
-
   },
 
 
   boss: {
 
-    id: "boss",
-    title: "Boss Battle",
-    category: "Boss",
-    time: "30–45 min",
+    id:
+      "boss",
+
+    title:
+      "Boss Battle",
+
+    category:
+      "Boss",
+
+    time:
+      "30–45 min",
 
     /*
       Boss rewards are handled separately.
 
-      These values are intentionally NOT
-      awarded by completeQuest().
+      These values are deliberately zero so the
+      normal quest completion pathway cannot
+      accidentally award an extra Boss payout.
     */
 
-    xpType: "strength",
-    xp: 0,
-    gold: 0,
+    xpType:
+      "strength",
+
+    xp:
+      0,
+
+    gold:
+      0,
 
     description:
       "The weekly challenge. Walk the mile, then complete twenty minutes of strength training.",
@@ -241,7 +338,6 @@ const SPECIAL_QUESTS = {
       "Choose The Keep, DragonStrength, or Rogue Mode",
       "Complete 20 minutes of strength work"
     ]
-
   }
 
 };
@@ -341,6 +437,10 @@ const BOSS_GOLD =
   100;
 
 
+const BOSS_CRYSTALS =
+  3;
+
+
 // =========================================================
 // 6. APP STATE
 // =========================================================
@@ -424,7 +524,8 @@ function normalizeProfileId(
 
 
   if (
-    normalized === "farmer"
+    normalized ===
+    "farmer"
   ) {
 
     return "farmer";
@@ -433,7 +534,8 @@ function normalizeProfileId(
 
 
   if (
-    normalized === "jess"
+    normalized ===
+    "jess"
   ) {
 
     return "jess";
@@ -619,7 +721,9 @@ function getSettings() {
     !saved
   ) {
 
-    return createFreshSettings();
+    return (
+      createFreshSettings()
+    );
 
   }
 
@@ -648,7 +752,9 @@ function getSettings() {
     );
 
 
-    return createFreshSettings();
+    return (
+      createFreshSettings()
+    );
 
   }
 }
@@ -697,13 +803,16 @@ function createFreshState() {
     gold:
       0,
 
+    crystals:
+      0,
+
     history:
       [],
 
 
     /*
-      These hold the exact week key when
-      each one-time reward/event occurred.
+      These hold the exact week key in which
+      each one-time reward/event happened.
     */
 
     weekConqueredRewardWeek:
@@ -748,6 +857,13 @@ function migrateState(
     gold:
       Number(
         parsed?.gold
+      )
+      ||
+      0,
+
+    crystals:
+      Number(
+        parsed?.crystals
       )
       ||
       0,
@@ -797,7 +913,9 @@ function getState() {
     !saved
   ) {
 
-    return createFreshState();
+    return (
+      createFreshState()
+    );
 
   }
 
@@ -824,7 +942,9 @@ function getState() {
     );
 
 
-    return createFreshState();
+    return (
+      createFreshState()
+    );
 
   }
 }
@@ -943,6 +1063,15 @@ function normalizeWeek() {
       [];
 
 
+    /*
+      The reward flags intentionally remain.
+
+      Because they store explicit week keys,
+      last week's flags naturally stop matching
+      without destroying historical state.
+    */
+
+
     saveState(
       state
     );
@@ -1037,7 +1166,8 @@ async function initializeSupabase() {
         session
       }
     } =
-      await supabaseClient.auth.getSession();
+      await supabaseClient.auth
+        .getSession();
 
 
     if (
@@ -1315,7 +1445,9 @@ async function loadCurrentParty() {
   );
 
 
-  return currentParty;
+  return (
+    currentParty
+  );
 }
 
 
@@ -1629,9 +1761,19 @@ function renderQuestCards() {
                   )}
                 </span>
 
+
                 <span class="quest-gold-reward">
-                  ${quest.gold}g
+
+                  <img
+                    src="icons/gold-icon.webp"
+                    alt=""
+                    aria-hidden="true"
+                  >
+
+                  ${quest.gold}
+
                 </span>
+
 
                 <span
                   class="quest-arrow"
@@ -1830,6 +1972,11 @@ function renderCharacterSummary(
       state.gold;
 
 
+  $("#characterCrystals")
+    .textContent =
+      state.crystals;
+
+
   $("#characterWeeklyQuests")
     .textContent =
       state.weeklyCompleted.length;
@@ -1959,24 +2106,50 @@ function openQuest(
   ) {
 
     $("#dialogReward")
-      .textContent =
-        "Victory Reward · 100 XP · 100 Gold";
+      .innerHTML =
+        `
+          +${BOSS_STRENGTH_XP} Strength XP
+          ·
+          +${BOSS_ENDURANCE_XP} Endurance XP
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_GOLD}
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/crystal-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_CRYSTALS}
+        `;
 
   }
 
   else {
 
     $("#dialogReward")
-      .textContent =
-        (
-          `+${quest.xp} `
-          +
-          `${capitalize(
+      .innerHTML =
+        `
+          +${quest.xp}
+          ${capitalize(
             quest.xpType
-          )} XP`
-          +
-          ` · +${quest.gold} Gold`
-        );
+          )}
+          XP
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${quest.gold}
+        `;
 
   }
 
@@ -2047,7 +2220,7 @@ async function completeQuest() {
 
 
   /*
-    Boss Battles use their own reward path.
+    Boss Battles use the separate victory path.
   */
 
   if (
@@ -2151,25 +2324,27 @@ async function completeQuest() {
       gold:
         earnedGold,
 
+      crystals:
+        0,
+
       completedAt
 
     }
   );
 
 
-  /*
-    WEEK CONQUERED
-
-    Reward only if this exact completion
-    crosses the goal threshold.
-
-    Changing the goal in Settings later
-    cannot accidentally award the bonus.
-  */
-
   const completedAfter =
     state.weeklyCompleted.length;
 
+
+  /*
+    WEEK CONQUERED
+
+    This only fires when an actual quest
+    completion crosses the weekly threshold.
+
+    It cannot award twice during the same week.
+  */
 
   const conqueredWeekNow =
     completedBefore
@@ -2245,8 +2420,8 @@ async function completeQuest() {
 
 
   /*
-    Victory screen takes priority over
-    the normal completion toast.
+    The Week Conquered modal takes priority
+    over the ordinary completion toast.
   */
 
   if (
@@ -2322,11 +2497,6 @@ function closeWeekConquered() {
   }
 
 
-  /*
-    Render again so the freshly unlocked
-    Boss Battle is unmistakably active.
-  */
-
   render();
 
 
@@ -2363,12 +2533,9 @@ async function completeBossBattle() {
 
 
   /*
-    Defensive checks.
-
-    Even if the button state somehow gets
-    out of sync, the Boss cannot be completed
-    before the week is conquered or twice
-    during the same week.
+    Defensive check:
+    the Boss cannot be completed before
+    the weekly campaign is conquered.
   */
 
   if (
@@ -2394,6 +2561,12 @@ async function completeBossBattle() {
   }
 
 
+  /*
+    Defensive check:
+    the same Boss cannot be defeated twice
+    during a single week.
+  */
+
   if (
     state.bossDefeatedWeek
     ===
@@ -2418,10 +2591,10 @@ async function completeBossBattle() {
 
 
   /*
-    Mark the Boss defeated NOW.
+    The Boss is now defeated.
 
-    Rewards are NOT granted until the
-    Claim Rewards sticker is pressed.
+    Rewards are deliberately NOT granted yet.
+    The player must press Claim Rewards.
   */
 
   state.bossDefeatedWeek =
@@ -2448,7 +2621,7 @@ async function completeBossBattle() {
 
 
 // =========================================================
-// 32. BOSS DEFEATED MODAL
+// 32. BOSS DEFEATED / CRYSTAL REVEAL
 // =========================================================
 
 function openBossDefeated() {
@@ -2484,7 +2657,8 @@ async function claimBossRewards() {
 
 
   /*
-    Claim only after an actual Boss victory.
+    Rewards can only be claimed after
+    this week's Boss has actually fallen.
   */
 
   if (
@@ -2506,8 +2680,8 @@ async function claimBossRewards() {
   /*
     Idempotency guard.
 
-    No amount of tapping can duplicate
-    this week's Boss reward.
+    Repeated taps, reloads, or reopened dialogs
+    cannot duplicate the treasure.
   */
 
   if (
@@ -2534,6 +2708,8 @@ async function claimBossRewards() {
       .toISOString();
 
 
+  // XP
+
   state.xp.strength +=
     BOSS_STRENGTH_XP;
 
@@ -2542,21 +2718,29 @@ async function claimBossRewards() {
     BOSS_ENDURANCE_XP;
 
 
+  // CURRENCY
+
   state.gold +=
     BOSS_GOLD;
 
+
+  state.crystals +=
+    BOSS_CRYSTALS;
+
+
+  // LOCK REWARD
 
   state.bossRewardsClaimedWeek =
     weekKey;
 
 
   /*
-    Record the Boss as an individual
-    character victory.
+    Record the Boss as a personal character
+    achievement.
 
-    It does NOT count toward weeklyCompleted,
-    because the personal weekly campaign
-    was already conquered before unlocking it.
+    It does not enter weeklyCompleted because
+    the weekly goal was conquered before
+    the Boss became available.
   */
 
   state.history.unshift(
@@ -2582,6 +2766,9 @@ async function claimBossRewards() {
       gold:
         BOSS_GOLD,
 
+      crystals:
+        BOSS_CRYSTALS,
+
       completedAt
 
     }
@@ -2594,11 +2781,12 @@ async function claimBossRewards() {
 
 
   /*
-    Sync the Boss victory into the Fellowship
-    activity feed.
+    Fellowship activity currently stores XP
+    and Gold.
 
-    This creates one cross-device Boss victory
-    record with the combined 100 XP reward.
+    Crystals remain personal character inventory
+    until we intentionally add crystal support
+    to the Supabase schema later.
   */
 
   let partySynced =
@@ -2645,7 +2833,7 @@ async function claimBossRewards() {
   ) {
 
     showToast(
-      "Boss Rewards Claimed · +100 XP · +100 Gold · Party sync failed"
+      `Boss Rewards Claimed · +100 XP · +${BOSS_GOLD} Gold · +${BOSS_CRYSTALS} Crystals · Party sync failed`
     );
 
   }
@@ -2653,7 +2841,7 @@ async function claimBossRewards() {
   else {
 
     showToast(
-      "Boss Rewards Claimed · +100 XP · +100 Gold"
+      `Boss Rewards Claimed · +100 XP · +${BOSS_GOLD} Gold · +${BOSS_CRYSTALS} Crystals`
     );
 
   }
@@ -2677,7 +2865,7 @@ function closeBossDefeated() {
 
 
 // =========================================================
-// 34. SYNC QUEST ACTIVITY
+// 34. SYNC NORMAL QUEST ACTIVITY
 // =========================================================
 
 async function syncQuestActivityToParty(
@@ -3137,6 +3325,14 @@ function openHistory() {
                 0;
 
 
+              const crystals =
+                Number(
+                  item.crystals
+                )
+                ||
+                0;
+
+
               const xpTypeText =
                 item.xpType ===
                 "mixed"
@@ -3156,14 +3352,44 @@ function openHistory() {
                   </strong>
 
                   <span>
+
                     ${dateText}
+
                     · +${item.xp}
                     ${xpTypeText} XP
+
+
                     ${
                       gold
-                        ? ` · +${gold} Gold`
+                        ? `
+                          ·
+                          <img
+                            class="currency-icon-small"
+                            src="icons/gold-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${gold}
+                        `
                         : ""
                     }
+
+
+                    ${
+                      crystals
+                        ? `
+                          ·
+                          <img
+                            class="currency-icon-small"
+                            src="icons/crystal-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${crystals}
+                        `
+                        : ""
+                    }
+
                   </span>
 
                 </article>
@@ -3530,6 +3756,8 @@ function saveWeeklyGoal() {
     !Number.isFinite(
       goal
     )
+    ||
+    goal < 1
   ) {
 
     return;
@@ -3597,6 +3825,13 @@ function saveReducedMotion() {
   applyMotionSetting(
     settings
   );
+
+
+  showToast(
+    settings.reducedMotion
+      ? "Reduced motion enabled."
+      : "Reduced motion disabled."
+  );
 }
 
 
@@ -3618,6 +3853,13 @@ function saveSoundSetting() {
   saveSettings(
     settings
   );
+
+
+  showToast(
+    settings.soundEnabled
+      ? "Sound effects enabled."
+      : "Sound effects disabled."
+  );
 }
 
 
@@ -3629,7 +3871,7 @@ function resetThisWeek() {
 
   if (
     !confirm(
-      "Reset this week's personal progress?\n\nXP, gold, and history will remain."
+      "Reset this week's personal progress?\n\nXP, gold, crystals, history, and rewards already earned will remain."
     )
   ) {
 
@@ -3642,12 +3884,8 @@ function resetThisWeek() {
     getState();
 
 
-  const weekKey =
-    getWeekKey();
-
-
   state.weekKey =
-    weekKey;
+    getWeekKey();
 
 
   state.weeklyCompleted =
@@ -3655,47 +3893,16 @@ function resetThisWeek() {
 
 
   /*
-    Reset the current week's campaign flags,
-    but do NOT subtract rewards already earned.
+    IMPORTANT:
 
-    This prevents Reset Week from becoming
-    a gold farming exploit.
+    We do NOT clear:
+    - weekConqueredRewardWeek
+    - bossDefeatedWeek
+    - bossRewardsClaimedWeek
+
+    Therefore Reset This Week cannot be used
+    to farm repeated weekly or Boss rewards.
   */
-
-  if (
-    state.weekConqueredRewardWeek
-    ===
-    weekKey
-  ) {
-
-    state.weekConqueredRewardWeek =
-      `claimed-${weekKey}`;
-
-  }
-
-
-  if (
-    state.bossDefeatedWeek
-    ===
-    weekKey
-  ) {
-
-    state.bossDefeatedWeek =
-      `defeated-${weekKey}`;
-
-  }
-
-
-  if (
-    state.bossRewardsClaimedWeek
-    ===
-    weekKey
-  ) {
-
-    state.bossRewardsClaimedWeek =
-      `claimed-${weekKey}`;
-
-  }
 
 
   saveState(
@@ -3707,7 +3914,7 @@ function resetThisWeek() {
 
 
   showToast(
-    "Weekly progress reset."
+    "Weekly quest progress reset."
   );
 }
 
@@ -3720,7 +3927,7 @@ function clearQuestHistory() {
 
   if (
     !confirm(
-      "Clear the personal quest chronicle?\n\nXP, levels, and gold will remain."
+      "Clear the personal quest chronicle?\n\nXP, levels, gold, and crystals will remain."
     )
   ) {
 
@@ -3759,7 +3966,7 @@ function resetCharacter() {
 
   if (
     !confirm(
-      "Reset this character completely?\n\nThis erases local XP, gold, levels, weekly progress, rewards, Boss victories, and personal quest history."
+      "Reset this character completely?\n\nThis erases local XP, gold, crystals, levels, weekly progress, Boss victories, rewards, and personal quest history."
     )
   ) {
 
@@ -4207,6 +4414,17 @@ async function renderParty() {
 
 
   if (
+    !emptyState
+    ||
+    !dashboard
+  ) {
+
+    return;
+
+  }
+
+
+  if (
     !supabaseReady
   ) {
 
@@ -4562,7 +4780,30 @@ function renderPartyMembers(
         .map(
           member => {
 
-            const weeklyActivity =
+            /*
+              Boss Battles appear in the activity
+              feed but are not counted as normal
+              weekly quest completions.
+            */
+
+            const weeklyQuestActivity =
+              activity.filter(
+                item =>
+                  item.user_id
+                    ===
+                    member.user_id
+                  &&
+                  item.week_key
+                    ===
+                    currentWeek
+                  &&
+                  item.quest_id
+                    !==
+                    "boss"
+              );
+
+
+            const weeklyGoldActivity =
               activity.filter(
                 item =>
                   item.user_id
@@ -4576,7 +4817,7 @@ function renderPartyMembers(
 
 
             const weeklyGold =
-              weeklyActivity.reduce(
+              weeklyGoldActivity.reduce(
                 (
                   total,
                   item
@@ -4633,6 +4874,7 @@ function renderPartyMembers(
                     `
                 }
 
+
                 <div class="party-member-info">
 
                   <strong>
@@ -4648,9 +4890,10 @@ function renderPartyMembers(
                   </span>
 
                   <small>
-                    ${weeklyActivity.length}
+                    ${weeklyQuestActivity.length}
                     quest${
-                      weeklyActivity.length === 1
+                      weeklyQuestActivity.length ===
+                      1
                         ? ""
                         : "s"
                     }
@@ -4720,11 +4963,10 @@ function renderPartyChallenge(
 
 
   /*
-    Boss Battles are intentionally excluded
-    from the Fellowship's normal weekly quest
-    target.
+    Boss Battles are bonus victories.
 
-    They are bonus endgame victories.
+    They do not inflate the Fellowship's
+    ordinary weekly quest goal.
   */
 
   const weeklyActivity =
@@ -5064,7 +5306,7 @@ function escapeHtml(
 
 
 // =========================================================
-// 65. EVENTS
+// 65. MAIN EVENTS
 // =========================================================
 
 $("#closeQuestButton")
@@ -5294,15 +5536,13 @@ $("#historyDialog")
 // =========================================================
 
 /*
-  Victory screens require their real action.
+  These screens require the intended action.
 
-  Week Conquered:
-  Continue.
+  WEEK CONQUERED:
+  Continue
 
-  Boss Defeated:
-  Claim Rewards.
-
-  Escape cannot silently dismiss either one.
+  BOSS DEFEATED:
+  Claim Rewards
 */
 
 $("#weekConqueredDialog")
@@ -5328,7 +5568,7 @@ $("#bossDefeatedDialog")
 
 
 // =========================================================
-// 70. ESCAPE
+// 70. ESCAPE KEY
 // =========================================================
 
 document.addEventListener(
@@ -5406,12 +5646,11 @@ function restorePendingVictory() {
 
 
   /*
-    If Safari reloads/crashes AFTER the Boss
-    was defeated but BEFORE Claim Rewards,
-    reopen the reward screen.
+    If the browser reloads after the Boss falls
+    but before Claim Rewards is pressed, the
+    crystal cluster returns.
 
-    This prevents a reload from losing the
-    player's treasure.
+    The treasure cannot be lost by refreshing.
   */
 
   if (
