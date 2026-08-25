@@ -1,7 +1,7 @@
 /* =========================================================
    QUEST BOARD
    FULL FANTASY UI PASS
-   Fixed background stacking version
+   Artwork-Driven Panels
 ========================================================= */
 
 
@@ -49,9 +49,6 @@
 
   --mixed:
     #675578;
-
-  --stone-border:
-    rgba(202, 157, 82, 0.34);
 
   --shadow:
     0 18px 45px rgba(0, 0, 0, 0.58);
@@ -406,25 +403,22 @@ h3 {
     6px 14px 6px 6px;
 
   border:
-    1px solid rgba(207, 161, 87, 0.42);
+    0;
 
   border-radius:
-    999px;
+    0;
 
   background-image:
-
-    linear-gradient(
-      rgba(9, 10, 7, 0.30),
-      rgba(9, 10, 7, 0.30)
-    ),
-
     url("mossy-stone.webp");
 
   background-size:
-    cover;
+    100% 100%;
 
   background-position:
     center;
+
+  background-repeat:
+    no-repeat;
 
   box-shadow:
     var(--shadow);
@@ -499,11 +493,10 @@ h3 {
 
 
 /* =========================================================
-   7. MOSSY STONE SHARED SURFACE
+   7. WEEKLY OBJECTIVE
 ========================================================= */
 
-.weekly-objective,
-.stat-card {
+.weekly-objective {
 
   position:
     relative;
@@ -511,23 +504,26 @@ h3 {
   overflow:
     hidden;
 
+  padding:
+    24px;
+
   border:
-    1px solid var(--stone-border);
+    0;
+
+  border-radius:
+    0;
 
   background-image:
-
-    linear-gradient(
-      rgba(9, 10, 7, 0.22),
-      rgba(9, 10, 7, 0.28)
-    ),
-
     url("mossy-stone.webp");
 
   background-size:
-    cover;
+    100% 100%;
 
   background-position:
     center;
+
+  background-repeat:
+    no-repeat;
 
   box-shadow:
     var(--shadow);
@@ -535,47 +531,8 @@ h3 {
 }
 
 
-/* =========================================================
-   8. WEEKLY OBJECTIVE
-========================================================= */
-
-.weekly-objective {
-
-  padding:
-    24px;
-
-  border-radius:
-    26px;
-
-}
-
-
 .weekly-objective::before {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    6px;
-
-  pointer-events:
-    none;
-
-  border:
-    1px solid
-    rgba(227, 183, 101, 0.14);
-
-  border-radius:
-    19px;
-
-  box-shadow:
-    inset
-    0 0 22px
-    rgba(0, 0, 0, 0.18);
-
+  display: none;
 }
 
 
@@ -732,7 +689,7 @@ h3 {
 
 
 /* =========================================================
-   9. SPECIAL QUEST CARDS
+   8. SPECIAL QUEST CARDS
 ========================================================= */
 
 .quick-quests {
@@ -767,20 +724,22 @@ h3 {
     18px;
 
   border:
-    1px solid
-    rgba(84, 55, 27, 0.82);
+    0;
 
   border-radius:
-    19px;
+    0;
 
   background-image:
     url("body-bg.webp");
 
   background-size:
-    cover;
+    100% 100%;
 
   background-position:
     center;
+
+  background-repeat:
+    no-repeat;
 
   color:
     var(--ink);
@@ -802,26 +761,7 @@ h3 {
 
 
 .quick-quest::after {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    5px;
-
-  pointer-events:
-    none;
-
-  border:
-    1px solid
-    rgba(58, 37, 19, 0.28);
-
-  border-radius:
-    14px;
-
+  display: none;
 }
 
 
@@ -966,7 +906,7 @@ h3 {
 
 
 /* =========================================================
-   10. SECTION HEADINGS
+   9. SECTION HEADINGS
 ========================================================= */
 
 .quest-section,
@@ -1035,17 +975,22 @@ h3 {
 
 
 /* =========================================================
-   11. QUEST GRID
+   10. QUEST GRID
 ========================================================= */
 
 .quest-grid {
-  display: grid;
-  gap: 13px;
+
+  display:
+    grid;
+
+  gap:
+    13px;
+
 }
 
 
 /* =========================================================
-   12. QUEST CARDS
+   11. QUEST CARDS
 ========================================================= */
 
 .quest-card {
@@ -1077,20 +1022,22 @@ h3 {
     hidden;
 
   border:
-    1px solid
-    rgba(70, 45, 22, 0.82);
+    0;
 
   border-radius:
-    19px;
+    0;
 
   background-image:
     url("body-bg.webp");
 
   background-size:
-    cover;
+    100% 100%;
 
   background-position:
     center;
+
+  background-repeat:
+    no-repeat;
 
   color:
     var(--ink);
@@ -1119,31 +1066,12 @@ h3 {
 
 
 .quest-card::after {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    5px;
-
-  pointer-events:
-    none;
-
-  border:
-    1px solid
-    rgba(68, 42, 18, 0.26);
-
-  border-radius:
-    14px;
-
+  display: none;
 }
 
 
 /* =========================================================
-   13. QUEST ICONS
+   12. QUEST ICONS
 ========================================================= */
 
 .quest-card::before {
@@ -1221,7 +1149,7 @@ h3 {
 
 
 /* =========================================================
-   14. QUEST CARD CONTENT
+   13. QUEST CARD CONTENT
 ========================================================= */
 
 .quest-card-content {
@@ -1393,7 +1321,7 @@ h3 {
 
 
 /* =========================================================
-   15. CHARACTER STATS
+   14. CHARACTER STATS
 ========================================================= */
 
 .stats-grid {
@@ -1412,36 +1340,71 @@ h3 {
 
 .stat-card {
 
+  position:
+    relative;
+
+  overflow:
+    hidden;
+
   padding:
-    15px;
+    18px 20px;
+
+  border:
+    0;
 
   border-radius:
-    16px;
+    0;
+
+  background-color:
+    transparent;
+
+  background-size:
+    100% 100%;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+/* STRENGTH */
+
+.stat-card:nth-child(1) {
+
+  background-image:
+    url("strength-pnl.webp");
+
+}
+
+
+/* ENDURANCE */
+
+.stat-card:nth-child(2) {
+
+  background-image:
+    url("endurance-pnl.webp");
+
+}
+
+
+/* RESTORATION */
+
+.stat-card:nth-child(3) {
+
+  background-image:
+    url("restoration-pnl.webp");
 
 }
 
 
 .stat-card::after {
-
-  content:
-    "";
-
-  position:
-    absolute;
-
-  inset:
-    5px;
-
-  pointer-events:
-    none;
-
-  border:
-    1px solid
-    rgba(230, 185, 103, 0.12);
-
-  border-radius:
-    11px;
-
+  display: none;
 }
 
 
@@ -1454,7 +1417,7 @@ h3 {
     1;
 
   color:
-    #d6cebd;
+    #eee3c5;
 
   font-family:
     Arial,
@@ -1462,6 +1425,10 @@ h3 {
 
   font-size:
     0.72rem;
+
+  text-shadow:
+    0 2px 3px
+    rgba(0, 0, 0, 0.85);
 
 }
 
@@ -1481,10 +1448,14 @@ h3 {
     6px 0 12px;
 
   color:
-    var(--cream);
+    #f3e6c7;
 
   font-size:
     1.13rem;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.85);
 
 }
 
@@ -1498,7 +1469,7 @@ h3 {
     1;
 
   color:
-    #cbc2b1;
+    #e0d5bd;
 
   font-family:
     Arial,
@@ -1506,6 +1477,10 @@ h3 {
 
   font-size:
     0.7rem;
+
+  text-shadow:
+    0 2px 3px
+    rgba(0, 0, 0, 0.85);
 
 }
 
@@ -1527,11 +1502,14 @@ h3 {
   margin-bottom:
     7px;
 
+  border:
+    0;
+
   border-radius:
     999px;
 
   background:
-    rgba(0, 0, 0, 0.68);
+    rgba(0, 0, 0, 0.74);
 
   box-shadow:
     inset
@@ -1574,7 +1552,7 @@ h3 {
 
 
 /* =========================================================
-   16. CUSTOM BOTTOM NAV
+   15. CUSTOM BOTTOM NAV
 ========================================================= */
 
 .bottom-nav {
@@ -1645,6 +1623,9 @@ h3 {
     0;
 
   border:
+    0;
+
+  border-radius:
     0;
 
   background-color:
@@ -1731,7 +1712,7 @@ h3 {
 
 
 /* =========================================================
-   17. DIALOGS
+   16. DIALOGS
 ========================================================= */
 
 .quest-dialog,
@@ -1756,20 +1737,22 @@ h3 {
     22px;
 
   border:
-    2px solid
-    rgba(98, 68, 34, 0.92);
+    0;
 
   border-radius:
-    19px;
+    0;
 
   background-image:
     url("body-bg.webp");
 
   background-size:
-    cover;
+    100% 100%;
 
   background-position:
     center;
+
+  background-repeat:
+    no-repeat;
 
   color:
     var(--ink);
@@ -1827,7 +1810,7 @@ h3 {
 
 
 /* =========================================================
-   18. X BUTTON ASSET
+   17. X BUTTON ASSET
 ========================================================= */
 
 .close-button {
@@ -1845,6 +1828,9 @@ h3 {
     0;
 
   border:
+    0;
+
+  border-radius:
     0;
 
   background-color:
@@ -1902,7 +1888,7 @@ h3 {
 
 
 /* =========================================================
-   19. QUEST DIALOG CONTENT
+   18. QUEST DIALOG CONTENT
 ========================================================= */
 
 .quest-description {
@@ -1968,7 +1954,7 @@ h3 {
 
 
 /* =========================================================
-   20. CHECKLIST
+   19. CHECKLIST
 ========================================================= */
 
 .exercise-list {
@@ -2061,7 +2047,7 @@ h3 {
 
 
 /* =========================================================
-   21. TIMER
+   20. TIMER
 ========================================================= */
 
 .quest-timer {
@@ -2160,7 +2146,7 @@ h3 {
 
 
 /* =========================================================
-   22. COMPLETE QUEST BUTTON
+   21. COMPLETE QUEST BUTTON
 ========================================================= */
 
 .complete-quest-button {
@@ -2209,7 +2195,7 @@ h3 {
 
 
 /* =========================================================
-   23. HISTORY
+   22. HISTORY
 ========================================================= */
 
 #historyList {
@@ -2274,7 +2260,7 @@ h3 {
 
 
 /* =========================================================
-   24. TOAST
+   23. TOAST
 ========================================================= */
 
 .toast {
@@ -2305,23 +2291,22 @@ h3 {
     11px 16px;
 
   border:
-    1px solid
-    var(--gold-dark);
+    0;
 
   border-radius:
-    999px;
+    0;
 
   background-image:
-
-    linear-gradient(
-      rgba(7, 8, 5, 0.24),
-      rgba(7, 8, 5, 0.24)
-    ),
-
     url("mossy-stone.webp");
 
   background-size:
-    cover;
+    100% 100%;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
 
   color:
     var(--cream);
@@ -2367,7 +2352,7 @@ h3 {
 
 
 /* =========================================================
-   25. MOBILE
+   24. MOBILE
 ========================================================= */
 
 @media (max-width: 560px) {
@@ -2453,6 +2438,12 @@ h3 {
     gap:
       8px 16px;
 
+    min-height:
+      158px;
+
+    padding:
+      30px 30px;
+
   }
 
 
@@ -2514,7 +2505,7 @@ h3 {
 
 
 /* =========================================================
-   26. SMALL PHONES
+   25. SMALL PHONES
 ========================================================= */
 
 @media (max-width: 390px) {
@@ -2564,6 +2555,17 @@ h3 {
   }
 
 
+  .stat-card {
+
+    min-height:
+      145px;
+
+    padding:
+      27px 25px;
+
+  }
+
+
   .quest-timer {
 
     align-items:
@@ -2594,7 +2596,7 @@ h3 {
 
 
 /* =========================================================
-   27. TABLET / DESKTOP
+   26. TABLET / DESKTOP
 ========================================================= */
 
 @media (min-width: 700px) {
@@ -2646,11 +2648,22 @@ h3 {
 
   }
 
+
+  .stat-card {
+
+    min-height:
+      150px;
+
+    padding:
+      28px 24px;
+
+  }
+
 }
 
 
 /* =========================================================
-   28. REDUCED MOTION
+   27. REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
