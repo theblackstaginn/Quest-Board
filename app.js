@@ -2,29 +2,43 @@
 // QUEST BOARD
 // app.js
 //
-// Phase 3.1:
-// - Stable profile IDs separate from display names
-// - Automatic migration from legacy Farmer / Jess identity
-// - Independent device profiles
-// - Four real app views
-// - Weekly configurable objective
-// - Quest checklist modal
-// - Quest timer
+// Phase 4:
+// - Stable Farmer / Jess profile identities
+// - Character tarot cards
 // - XP + levels
 // - Gold economy
-// - Character tarot cards
-// - Fixed character classes
-// - History
-// - Boss Battle unlock
-// - Character summary
-// - Local Party prototype
-// - Settings persistence
-// - Backward-compatible localStorage migration
+// - Configurable weekly goals
+// - Anonymous Supabase authentication
+// - Real cross-device parties
+// - Invite-code joining
+// - Shared party quest activity
+// - Combined weekly party challenge
+// - Local personal progression
+// - Supabase-backed fellowship data
 // =========================================================
 
 
 // =========================================================
-// 1. QUEST DATA
+// 1. SUPABASE CONFIGURATION
+// =========================================================
+
+const SUPABASE_URL =
+  "https://pqifpislzljilqatmtly.supabase.co";
+
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_16wAhIyuMsClbOYoAZt6aQ_unXWTJ_n";
+
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+
+// =========================================================
+// 2. QUEST DATA
 // =========================================================
 
 const QUESTS = [
@@ -167,7 +181,7 @@ const QUESTS = [
 
 
 // =========================================================
-// 2. SPECIAL QUESTS
+// 3. SPECIAL QUESTS
 // =========================================================
 
 const SPECIAL_QUESTS = {
@@ -223,7 +237,7 @@ const SPECIAL_QUESTS = {
 
 
 // =========================================================
-// 3. CHARACTER / PROFILE DATA
+// 4. CHARACTER DATA
 // =========================================================
 
 const CHARACTER_PROFILES = {
@@ -277,21 +291,93 @@ const CHARACTER_PROFILES = {
 
 
 // =========================================================
-// 4. APP CONSTANTS
+// 5. CONSTANTS
 // =========================================================
 
 const DEFAULT_WEEKLY_GOAL =
   3;
 
+
 const XP_PER_LEVEL =
   100;
+
 
 const PARTY_GOAL_MULTIPLIER =
   2;
 
 
+const PARTY_REFRESH_INTERVAL =
+  15000;
+
+
 // =========================================================
-// 5. PROFILE ID HELPERS
+// 6. APP STATE
+// =========================================================
+
+let activeProfileId =
+  getInitialProfileId();
+
+
+let activeView =
+  localStorage.getItem(
+    "questBoardActiveView"
+  )
+  ||
+  "board";
+
+
+let activeQuest =
+  null;
+
+
+let timerSeconds =
+  0;
+
+
+let timerInterval =
+  null;
+
+
+let toastTimeout =
+  null;
+
+
+let supabaseUser =
+  null;
+
+
+let supabaseReady =
+  false;
+
+
+let currentParty =
+  null;
+
+
+let partyRefreshTimer =
+  null;
+
+
+// =========================================================
+// 7. DOM HELPERS
+// =========================================================
+
+const $ =
+  selector =>
+    document.querySelector(
+      selector
+    );
+
+
+const $$ =
+  selector =>
+    document.querySelectorAll(
+      selector
+    );
+
+
+// =========================================================
+// 8. PROFILE HELPERS
 // =========================================================
 
 function normalizeProfileId(
@@ -307,15 +393,6 @@ function normalizeProfileId(
 
 
   if (
-    normalized === "jess"
-  ) {
-
-    return "jess";
-
-  }
-
-
-  if (
     normalized === "farmer"
   ) {
 
@@ -324,58 +401,22 @@ function normalizeProfileId(
   }
 
 
+  if (
+    normalized === "jess"
+  ) {
+
+    return "jess";
+
+  }
+
+
   return null;
 }
 
 
-function getLegacyProfileName(
-  profileId
-) {
-
-  return (
-    CHARACTER_PROFILES[
-      profileId
-    ]?.legacyName
-    ||
-    "Farmer"
-  );
-}
-
-
-function getCharacterConfig(
-  profileId = activeProfileId
-) {
-
-  return (
-    CHARACTER_PROFILES[
-      profileId
-    ]
-    ||
-    CHARACTER_PROFILES.farmer
-  );
-}
-
-
-// =========================================================
-// 6. PROFILE ID MIGRATION
-// =========================================================
-
 function getInitialProfileId() {
 
-  /*
-    New architecture uses:
-
-    questBoardActiveProfileId = "farmer"
-    questBoardActiveProfileId = "jess"
-
-    Older builds used:
-
-    questBoardActiveProfile = "Farmer"
-    questBoardActiveProfile = "Jess"
-  */
-
-
-  const newSavedId =
+  const newValue =
     normalizeProfileId(
       localStorage.getItem(
         "questBoardActiveProfileId"
@@ -384,10 +425,10 @@ function getInitialProfileId() {
 
 
   if (
-    newSavedId
+    newValue
   ) {
 
-    return newSavedId;
+    return newValue;
 
   }
 
@@ -419,58 +460,34 @@ function getInitialProfileId() {
 }
 
 
-// =========================================================
-// 7. APP STATE
-// =========================================================
+function getCharacterConfig(
+  profileId = activeProfileId
+) {
 
-let activeProfileId =
-  getInitialProfileId();
-
-
-let activeView =
-  localStorage.getItem(
-    "questBoardActiveView"
-  )
-  ||
-  "board";
+  return (
+    CHARACTER_PROFILES[
+      profileId
+    ]
+    ||
+    CHARACTER_PROFILES.farmer
+  );
+}
 
 
-let activeQuest =
-  null;
+function getLegacyProfileName(
+  profileId = activeProfileId
+) {
 
-
-let timerSeconds =
-  0;
-
-
-let timerInterval =
-  null;
-
-
-let toastTimeout =
-  null;
+  return (
+    getCharacterConfig(
+      profileId
+    ).legacyName
+  );
+}
 
 
 // =========================================================
-// 8. DOM HELPERS
-// =========================================================
-
-const $ =
-  selector =>
-    document.querySelector(
-      selector
-    );
-
-
-const $$ =
-  selector =>
-    document.querySelectorAll(
-      selector
-    );
-
-
-// =========================================================
-// 9. PROFILE SETUP
+// 9. PROFILE CHOICE
 // =========================================================
 
 function chooseProfile() {
@@ -490,14 +507,10 @@ function chooseProfile() {
     );
 
 
-  const selectedId =
+  activeProfileId =
     normalizeProfileId(
       choice
-    );
-
-
-  activeProfileId =
-    selectedId
+    )
     ||
     "farmer";
 
@@ -508,19 +521,9 @@ function chooseProfile() {
   );
 
 
-  /*
-    Keep the legacy key updated too.
-
-    This makes older builds less likely
-    to behave strangely if they are still
-    temporarily cached.
-  */
-
   localStorage.setItem(
     "questBoardActiveProfile",
-    getLegacyProfileName(
-      activeProfileId
-    )
+    getLegacyProfileName()
   );
 }
 
@@ -531,56 +534,22 @@ function chooseProfile() {
 
 function getStorageKey() {
 
-  /*
-    Intentionally retain the old
-    Farmer / Jess key format.
-
-    That means existing save data survives
-    without having to copy/delete storage.
-  */
-
-  const legacyName =
-    getLegacyProfileName(
-      activeProfileId
-    );
-
-
   return (
-    `questBoardState-${legacyName}`
+    `questBoardState-${getLegacyProfileName()}`
   );
 }
 
 
 function getSettingsKey() {
 
-  const legacyName =
-    getLegacyProfileName(
-      activeProfileId
-    );
-
-
   return (
-    `questBoardSettings-${legacyName}`
-  );
-}
-
-
-function getPartyKey() {
-
-  const legacyName =
-    getLegacyProfileName(
-      activeProfileId
-    );
-
-
-  return (
-    `questBoardParty-${legacyName}`
+    `questBoardSettings-${getLegacyProfileName()}`
   );
 }
 
 
 // =========================================================
-// 11. SETTINGS STORAGE
+// 11. SETTINGS
 // =========================================================
 
 function createFreshSettings() {
@@ -628,17 +597,13 @@ function getSettings() {
 
   try {
 
-    const parsed =
-      JSON.parse(
-        saved
-      );
-
-
     return {
 
       ...createFreshSettings(),
 
-      ...parsed
+      ...JSON.parse(
+        saved
+      )
 
     };
 
@@ -676,7 +641,7 @@ function saveSettings(
 
 
 // =========================================================
-// 12. QUEST STATE STORAGE
+// 12. PERSONAL QUEST STATE
 // =========================================================
 
 function createFreshState() {
@@ -712,22 +677,12 @@ function createFreshState() {
 }
 
 
-// =========================================================
-// 13. SAVE MIGRATION
-// =========================================================
-
 function migrateState(
   parsed
 ) {
 
   const fresh =
     createFreshState();
-
-
-  const safeGold =
-    Number(
-      parsed?.gold
-    );
 
 
   return {
@@ -749,11 +704,11 @@ function migrateState(
     },
 
     gold:
-      Number.isFinite(
-        safeGold
+      Number(
+        parsed?.gold
       )
-        ? safeGold
-        : 0,
+      ||
+      0,
 
     weeklyCompleted:
       Array.isArray(
@@ -766,39 +721,12 @@ function migrateState(
       Array.isArray(
         parsed?.history
       )
-        ? parsed.history.map(
-            item => {
-
-              const historicalGold =
-                Number(
-                  item?.gold
-                );
-
-
-              return {
-
-                ...item,
-
-                gold:
-                  Number.isFinite(
-                    historicalGold
-                  )
-                    ? historicalGold
-                    : 0
-
-              };
-
-            }
-          )
+        ? parsed.history
         : []
 
   };
 }
 
-
-// =========================================================
-// 14. READ / SAVE STATE
-// =========================================================
 
 function getState() {
 
@@ -821,15 +749,11 @@ function getState() {
 
   try {
 
-    const parsed =
-      JSON.parse(
-        saved
-      );
-
-
     return (
       migrateState(
-        parsed
+        JSON.parse(
+          saved
+        )
       )
     );
 
@@ -840,7 +764,7 @@ function getState() {
   ) {
 
     console.error(
-      "Could not read Quest Board save data.",
+      "Could not read Quest Board state.",
       error
     );
 
@@ -867,144 +791,7 @@ function saveState(
 
 
 // =========================================================
-// 15. LOCAL PARTY STORAGE
-// =========================================================
-
-function migrateParty(
-  party
-) {
-
-  if (
-    !party
-  ) {
-
-    return null;
-
-  }
-
-
-  const members =
-    Array.isArray(
-      party.members
-    )
-      ? party.members.map(
-          member => {
-
-            const migratedProfileId =
-              normalizeProfileId(
-                member.profileId
-                ||
-                member.profile
-              );
-
-
-            return {
-
-              ...member,
-
-              profileId:
-                migratedProfileId,
-
-              name:
-                member.name
-                ||
-                (
-                  migratedProfileId
-                    ? getCharacterConfig(
-                        migratedProfileId
-                      ).defaultName
-                    : "Adventurer"
-                )
-
-            };
-
-          }
-        )
-      : [];
-
-
-  return {
-
-    ...party,
-
-    members
-
-  };
-}
-
-
-function getParty() {
-
-  const saved =
-    localStorage.getItem(
-      getPartyKey()
-    );
-
-
-  if (
-    !saved
-  ) {
-
-    return null;
-
-  }
-
-
-  try {
-
-    const parsed =
-      JSON.parse(
-        saved
-      );
-
-
-    return (
-      migrateParty(
-        parsed
-      )
-    );
-
-  }
-
-  catch (
-    error
-  ) {
-
-    console.error(
-      "Could not read party data.",
-      error
-    );
-
-
-    return null;
-
-  }
-}
-
-
-function saveParty(
-  party
-) {
-
-  localStorage.setItem(
-    getPartyKey(),
-    JSON.stringify(
-      party
-    )
-  );
-}
-
-
-function clearParty() {
-
-  localStorage.removeItem(
-    getPartyKey()
-  );
-}
-
-
-// =========================================================
-// 16. WEEK HANDLING
+// 13. WEEK HANDLING
 // =========================================================
 
 function getWeekKey(
@@ -1086,17 +873,17 @@ function normalizeWeek() {
     getState();
 
 
-  const currentWeek =
+  const weekKey =
     getWeekKey();
 
 
   if (
     state.weekKey !==
-    currentWeek
+    weekKey
   ) {
 
     state.weekKey =
-      currentWeek;
+      weekKey;
 
 
     state.weeklyCompleted =
@@ -1115,7 +902,7 @@ function normalizeWeek() {
 
 
 // =========================================================
-// 17. LEVEL SYSTEM
+// 14. LEVEL SYSTEM
 // =========================================================
 
 function getLevelData(
@@ -1133,33 +920,28 @@ function getLevelData(
     );
 
 
-  const level =
-    Math.floor(
-      safeXp
-      /
-      XP_PER_LEVEL
-    )
-    +
-    1;
-
-
-  const progress =
-    safeXp
-    %
-    XP_PER_LEVEL;
-
-
   return {
 
-    level,
-    progress
+    level:
+      Math.floor(
+        safeXp
+        /
+        XP_PER_LEVEL
+      )
+      +
+      1,
+
+    progress:
+      safeXp
+      %
+      XP_PER_LEVEL
 
   };
 }
 
 
 // =========================================================
-// 18. QUEST LOOKUP
+// 15. QUEST LOOKUP
 // =========================================================
 
 function findQuest(
@@ -1179,6 +961,308 @@ function findQuest(
       id
     ]
 
+  );
+}
+
+
+// =========================================================
+// 16. SUPABASE INITIALIZATION
+// =========================================================
+
+async function initializeSupabase() {
+
+  setPartySyncStatus(
+    "Connecting to the guild..."
+  );
+
+
+  try {
+
+    const {
+      data:
+      {
+        session
+      }
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (
+      session?.user
+    ) {
+
+      supabaseUser =
+        session.user;
+
+    }
+
+    else {
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .signInAnonymously();
+
+
+      if (
+        error
+      ) {
+
+        throw error;
+
+      }
+
+
+      supabaseUser =
+        data.user;
+
+    }
+
+
+    if (
+      !supabaseUser
+    ) {
+
+      throw new Error(
+        "Supabase did not return a user."
+      );
+
+    }
+
+
+    supabaseReady =
+      true;
+
+
+    await syncProfileToSupabase();
+
+
+    await loadCurrentParty();
+
+
+    setPartySyncStatus(
+      "Guild connection established.",
+      "connected"
+    );
+
+
+    startPartyRefreshLoop();
+
+  }
+
+  catch (
+    error
+  ) {
+
+    supabaseReady =
+      false;
+
+
+    console.error(
+      "Supabase initialization failed:",
+      error
+    );
+
+
+    setPartySyncStatus(
+      "Party sync unavailable. Personal progress still works.",
+      "error"
+    );
+
+  }
+}
+
+
+// =========================================================
+// 17. SYNC PROFILE
+// =========================================================
+
+async function syncProfileToSupabase() {
+
+  if (
+    !supabaseReady
+    ||
+    !supabaseUser
+  ) {
+
+    return;
+
+  }
+
+
+  const settings =
+    getSettings();
+
+
+  const character =
+    getCharacterConfig();
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from(
+        "profiles"
+      )
+      .upsert(
+        {
+
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            ||
+            character.defaultName,
+
+          class_name:
+            character.className
+
+        },
+        {
+
+          onConflict:
+            "user_id"
+
+        }
+      );
+
+
+  if (
+    error
+  ) {
+
+    throw error;
+
+  }
+}
+
+
+// =========================================================
+// 18. LOAD CURRENT PARTY
+// =========================================================
+
+async function loadCurrentParty() {
+
+  currentParty =
+    null;
+
+
+  if (
+    !supabaseReady
+    ||
+    !supabaseUser
+  ) {
+
+    return null;
+
+  }
+
+
+  const {
+    data:
+      membership,
+    error:
+      membershipError
+  } =
+    await supabaseClient
+      .from(
+        "party_members"
+      )
+      .select(
+        "party_id, joined_at"
+      )
+      .eq(
+        "user_id",
+        supabaseUser.id
+      )
+      .order(
+        "joined_at",
+        {
+          ascending:
+            false
+        }
+      )
+      .limit(
+        1
+      )
+      .maybeSingle();
+
+
+  if (
+    membershipError
+  ) {
+
+    throw membershipError;
+
+  }
+
+
+  if (
+    !membership
+  ) {
+
+    renderParty();
+
+    renderSettings(
+      getSettings()
+    );
+
+
+    return null;
+
+  }
+
+
+  const {
+    data:
+      party,
+    error:
+      partyError
+  } =
+    await supabaseClient
+      .from(
+        "parties"
+      )
+      .select(
+        "*"
+      )
+      .eq(
+        "id",
+        membership.party_id
+      )
+      .single();
+
+
+  if (
+    partyError
+  ) {
+
+    throw partyError;
+
+  }
+
+
+  currentParty =
+    party;
+
+
+  await renderParty();
+
+
+  renderSettings(
+    getSettings()
+  );
+
+
+  return (
+    currentParty
   );
 }
 
@@ -1233,10 +1317,7 @@ function render() {
   );
 
 
-  renderParty(
-    state,
-    settings
-  );
+  renderParty();
 
 
   applyMotionSetting(
@@ -1260,7 +1341,7 @@ function renderProfile(
     getCharacterConfig();
 
 
-  const displayName =
+  const name =
     settings.playerName
     ||
     character.defaultName;
@@ -1268,13 +1349,15 @@ function renderProfile(
 
   $("#profileName")
     .textContent =
-      displayName;
+      name;
 
 
   $("#profileAvatar")
     .textContent =
-      displayName
-        .charAt(0)
+      name
+        .charAt(
+          0
+        )
         .toUpperCase();
 }
 
@@ -1389,37 +1472,22 @@ function renderBossBattle(
     DEFAULT_WEEKLY_GOAL;
 
 
-  const bossUnlocked =
+  const unlocked =
     state.weeklyCompleted.length
     >=
     goal;
 
 
-  const bossButton =
-    $("#bossButton");
+  $("#bossButton")
+    .disabled =
+      !unlocked;
 
 
-  bossButton.disabled =
-    !bossUnlocked;
-
-
-  if (
-    bossUnlocked
-  ) {
-
-    $("#bossLockText")
-      .textContent =
-        "Unlocked. Face the boss.";
-
-  }
-
-  else {
-
-    $("#bossLockText")
-      .textContent =
-        `Unlock by completing ${goal} quests.`;
-
-  }
+  $("#bossLockText")
+    .textContent =
+      unlocked
+        ? "Unlocked. Face the boss."
+        : `Unlock by completing ${goal} quests.`;
 }
 
 
@@ -1429,77 +1497,71 @@ function renderBossBattle(
 
 function renderQuestCards() {
 
-  const questGrid =
-    $("#questGrid");
+  $("#questGrid")
+    .innerHTML =
+      QUESTS
+        .map(
+          quest => `
+            <article
+              class="quest-card"
+              data-quest-id="${quest.id}"
+              tabindex="0"
+              role="button"
+            >
+
+              <div class="quest-card-content">
+
+                <p class="quest-type">
+                  ${escapeHtml(
+                    quest.category
+                  )}
+                </p>
+
+                <h3>
+                  ${escapeHtml(
+                    quest.title
+                  )}
+                </h3>
+
+                <p>
+                  ${escapeHtml(
+                    quest.description
+                  )}
+                </p>
+
+              </div>
 
 
-  questGrid.innerHTML =
-    QUESTS
-      .map(
-        quest => `
-          <article
-            class="quest-card"
-            data-quest-id="${quest.id}"
-            tabindex="0"
-            role="button"
-          >
+              <div class="quest-card-meta">
 
-            <div class="quest-card-content">
+                <span class="quest-duration">
+                  ${escapeHtml(
+                    quest.time
+                  )}
+                </span>
 
-              <p class="quest-type">
-                ${escapeHtml(
-                  quest.category
-                )}
-              </p>
+                <span class="quest-gold-reward">
+                  ${quest.gold}g
+                </span>
 
-              <h3>
-                ${escapeHtml(
-                  quest.title
-                )}
-              </h3>
+                <span
+                  class="quest-arrow"
+                  aria-hidden="true"
+                >
+                  ›
+                </span>
 
-              <p>
-                ${escapeHtml(
-                  quest.description
-                )}
-              </p>
+              </div>
 
-            </div>
-
-
-            <div class="quest-card-meta">
-
-              <span class="quest-duration">
-                ${escapeHtml(
-                  quest.time
-                )}
-              </span>
-
-              <span
-                class="quest-gold-reward"
-                aria-label="${quest.gold} gold"
-              >
-                ${quest.gold}g
-              </span>
-
-              <span
-                class="quest-arrow"
-                aria-hidden="true"
-              >
-                ›
-              </span>
-
-            </div>
-
-          </article>
-        `
-      )
-      .join("");
+            </article>
+          `
+        )
+        .join("");
 }
 
 
 // =========================================================
-// 24. QUEST CARD EVENTS
+// 24. QUEST CARD BINDINGS
 // =========================================================
 
 function bindQuestCards() {
@@ -1513,13 +1575,7 @@ function bindQuestCards() {
         element.onclick =
           () => {
 
-            const id =
-              element.dataset.questId;
-
-
             if (
-              id === "boss"
-              &&
               element.disabled
             ) {
 
@@ -1529,7 +1585,7 @@ function bindQuestCards() {
 
 
             openQuest(
-              id
+              element.dataset.questId
             );
 
           };
@@ -1545,9 +1601,11 @@ function bindQuestCards() {
             event => {
 
               if (
-                event.key === "Enter"
+                event.key ===
+                  "Enter"
                 ||
-                event.key === " "
+                event.key ===
+                  " "
               ) {
 
                 event.preventDefault();
@@ -1668,34 +1726,14 @@ function renderCharacterSummary(
       character.className;
 
 
-  const characterImage =
-    $("#characterCardImage");
-
-
-  if (
-    characterImage
-  ) {
-
-    /*
-      IMPORTANT:
-
-      This now depends ONLY on stable profileId.
-
-      Renaming Jess to "Nightshade"
-      does not turn her into Farmer.
-
-      Renaming Farmer to "Grimfang"
-      does not change his character.
-    */
-
-    characterImage.src =
+  $("#characterCardImage")
+    .src =
       character.card;
 
 
-    characterImage.alt =
+  $("#characterCardImage")
+    .alt =
       `${displayName} — ${character.className}`;
-
-  }
 
 
   $("#characterGold")
@@ -1808,34 +1846,31 @@ function renderExerciseList(
   quest
 ) {
 
-  const list =
-    $("#exerciseList");
+  $("#exerciseList")
+    .innerHTML =
+      quest.exercises
+        .map(
+          (
+            exercise,
+            index
+          ) => `
+            <label class="exercise-row">
 
+              <input
+                type="checkbox"
+                id="exercise-${index}"
+              >
 
-  list.innerHTML =
-    quest.exercises
-      .map(
-        (
-          exercise,
-          index
-        ) => `
-          <label class="exercise-row">
+              <span>
+                ${escapeHtml(
+                  exercise
+                )}
+              </span>
 
-            <input
-              type="checkbox"
-              id="exercise-${index}"
-            >
-
-            <span>
-              ${escapeHtml(
-                exercise
-              )}
-            </span>
-
-          </label>
-        `
-      )
-      .join("");
+            </label>
+          `
+        )
+        .join("");
 }
 
 
@@ -1843,7 +1878,7 @@ function renderExerciseList(
 // 29. COMPLETE QUEST
 // =========================================================
 
-function completeQuest() {
+async function completeQuest() {
 
   if (
     !activeQuest
@@ -1852,6 +1887,10 @@ function completeQuest() {
     return;
 
   }
+
+
+  const completedQuest =
+    activeQuest;
 
 
   const state =
@@ -1865,7 +1904,7 @@ function completeQuest() {
 
   const earnedXp =
     Number(
-      activeQuest.xp
+      completedQuest.xp
     )
     ||
     0;
@@ -1873,24 +1912,26 @@ function completeQuest() {
 
   const earnedGold =
     Number(
-      activeQuest.gold
+      completedQuest.gold
     )
     ||
     0;
 
 
-  state.weeklyCompleted.push({
+  state.weeklyCompleted.push(
+    {
 
-    questId:
-      activeQuest.id,
+      questId:
+        completedQuest.id,
 
-    completedAt
+      completedAt
 
-  });
+    }
+  );
 
 
   state.xp[
-    activeQuest.xpType
+    completedQuest.xpType
   ] +=
     earnedXp;
 
@@ -1899,29 +1940,31 @@ function completeQuest() {
     earnedGold;
 
 
-  state.history.unshift({
+  state.history.unshift(
+    {
 
-    questId:
-      activeQuest.id,
+      questId:
+        completedQuest.id,
 
-    title:
-      activeQuest.title,
+      title:
+        completedQuest.title,
 
-    category:
-      activeQuest.category,
+      category:
+        completedQuest.category,
 
-    xp:
-      earnedXp,
+      xp:
+        earnedXp,
 
-    xpType:
-      activeQuest.xpType,
+      xpType:
+        completedQuest.xpType,
 
-    gold:
-      earnedGold,
+      gold:
+        earnedGold,
 
-    completedAt
+      completedAt
 
-  });
+    }
+  );
 
 
   saveState(
@@ -1936,23 +1979,159 @@ function completeQuest() {
   closeQuest();
 
 
-  showToast(
-    (
-      `Quest Complete · `
-      +
-      `+${earnedXp} XP · `
-      +
-      `+${earnedGold} Gold`
-    )
-  );
+  let partySynced =
+    false;
+
+
+  if (
+    supabaseReady
+    &&
+    supabaseUser
+    &&
+    currentParty
+  ) {
+
+    partySynced =
+      await syncQuestActivityToParty(
+        completedQuest,
+        completedAt
+      );
+
+  }
+
+
+  if (
+    supabaseReady
+    &&
+    currentParty
+    &&
+    !partySynced
+  ) {
+
+    showToast(
+      `Quest saved · +${earnedXp} XP · +${earnedGold} Gold · Party sync failed`
+    );
+
+  }
+
+  else {
+
+    showToast(
+      `Quest Complete · +${earnedXp} XP · +${earnedGold} Gold`
+    );
+
+  }
 
 
   render();
+
+
+  if (
+    currentParty
+  ) {
+
+    await renderParty();
+
+  }
 }
 
 
 // =========================================================
-// 30. CLOSE QUEST
+// 30. SYNC QUEST ACTIVITY
+// =========================================================
+
+async function syncQuestActivityToParty(
+  quest,
+  completedAt
+) {
+
+  try {
+
+    const settings =
+      getSettings();
+
+
+    const character =
+      getCharacterConfig();
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "quest_activity"
+        )
+        .insert(
+          {
+
+            party_id:
+              currentParty.id,
+
+            user_id:
+              supabaseUser.id,
+
+            profile_id:
+              activeProfileId,
+
+            display_name:
+              settings.playerName
+              ||
+              character.defaultName,
+
+            quest_id:
+              quest.id,
+
+            quest_title:
+              quest.title,
+
+            xp:
+              quest.xp,
+
+            gold:
+              quest.gold,
+
+            week_key:
+              getWeekKey(),
+
+            completed_at:
+              completedAt
+
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    return true;
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Could not sync quest to party:",
+      error
+    );
+
+
+    return false;
+
+  }
+}
+
+
+// =========================================================
+// 31. CLOSE QUEST
 // =========================================================
 
 function closeQuest() {
@@ -1965,9 +2144,7 @@ function closeQuest() {
 
 
   if (
-    dialog
-    &&
-    dialog.open
+    dialog?.open
   ) {
 
     dialog.close();
@@ -1977,7 +2154,7 @@ function closeQuest() {
 
 
 // =========================================================
-// 31. TIMER
+// 32. TIMER
 // =========================================================
 
 function startTimer() {
@@ -2160,7 +2337,7 @@ function updateTimerDisplay() {
 
 
 // =========================================================
-// 32. HISTORY
+// 33. HISTORY
 // =========================================================
 
 function openHistory() {
@@ -2169,14 +2346,8 @@ function openHistory() {
     normalizeWeek();
 
 
-  const history =
-    state.history
-    ||
-    [];
-
-
   if (
-    history.length ===
+    state.history.length ===
     0
   ) {
 
@@ -2195,7 +2366,7 @@ function openHistory() {
 
     $("#historyList")
       .innerHTML =
-        history
+        state.history
           .map(
             item => {
 
@@ -2223,10 +2394,12 @@ function openHistory() {
                 );
 
 
-              const goldText =
-                item.gold > 0
-                  ? ` · +${item.gold} Gold`
-                  : "";
+              const gold =
+                Number(
+                  item.gold
+                )
+                ||
+                0;
 
 
               return `
@@ -2240,13 +2413,15 @@ function openHistory() {
 
                   <span>
                     ${dateText}
-                    ·
-                    +${item.xp}
+                    · +${item.xp}
                     ${capitalize(
                       item.xpType
-                    )}
-                    XP
-                    ${goldText}
+                    )} XP
+                    ${
+                      gold
+                        ? ` · +${gold} Gold`
+                        : ""
+                    }
                   </span>
 
                 </article>
@@ -2266,24 +2441,20 @@ function openHistory() {
 
 function closeHistory() {
 
-  const dialog =
-    $("#historyDialog");
-
-
   if (
-    dialog
-    &&
-    dialog.open
+    $("#historyDialog")
+      ?.open
   ) {
 
-    dialog.close();
+    $("#historyDialog")
+      .close();
 
   }
 }
 
 
 // =========================================================
-// 33. VIEW NAVIGATION
+// 34. VIEW HEADERS
 // =========================================================
 
 const VIEW_HEADERS = {
@@ -2334,20 +2505,20 @@ const VIEW_HEADERS = {
 };
 
 
-function setView(
+// =========================================================
+// 35. VIEW NAVIGATION
+// =========================================================
+
+async function setView(
   view
 ) {
 
-  const validView =
+  activeView =
     VIEW_HEADERS[
       view
     ]
       ? view
       : "board";
-
-
-  activeView =
-    validView;
 
 
   localStorage.setItem(
@@ -2360,19 +2531,19 @@ function setView(
     .forEach(
       section => {
 
-        const isActive =
+        const active =
           section.dataset.appView
           ===
           activeView;
 
 
         section.hidden =
-          !isActive;
+          !active;
 
 
         section.classList.toggle(
           "active-view",
-          isActive
+          active
         );
 
       }
@@ -2394,47 +2565,34 @@ function setView(
     );
 
 
-  const header =
-    VIEW_HEADERS[
-      activeView
-    ];
-
-
   $("#screenEyebrow")
     .textContent =
-      header.eyebrow;
+      VIEW_HEADERS[
+        activeView
+      ].eyebrow;
 
 
   $("#screenTitle")
     .textContent =
-      header.title;
+      VIEW_HEADERS[
+        activeView
+      ].title;
 
 
-  window.scrollTo({
+  window.scrollTo(
+    {
 
-    top:
-      0,
+      top:
+        0,
 
-    behavior:
-      getSettings()
-        .reducedMotion
-        ? "auto"
-        : "smooth"
+      behavior:
+        getSettings()
+          .reducedMotion
+          ? "auto"
+          : "smooth"
 
-  });
-
-
-  if (
-    activeView ===
-    "character"
-  ) {
-
-    renderCharacterSummary(
-      normalizeWeek(),
-      getSettings()
-    );
-
-  }
+    }
+  );
 
 
   if (
@@ -2442,10 +2600,7 @@ function setView(
     "party"
   ) {
 
-    renderParty(
-      normalizeWeek(),
-      getSettings()
-    );
+    await refreshParty();
 
   }
 
@@ -2463,33 +2618,20 @@ function setView(
 }
 
 
-function handleNavigation(
-  button
-) {
-
-  setView(
-    button.dataset.view
-  );
-}
-
-
 // =========================================================
-// 34. SETTINGS RENDER
+// 36. SETTINGS RENDER
 // =========================================================
 
 function renderSettings(
   settings
 ) {
 
-  const character =
-    getCharacterConfig();
-
-
   $("#playerNameInput")
     .value =
       settings.playerName
       ||
-      character.defaultName;
+      getCharacterConfig()
+        .defaultName;
 
 
   $("#weeklyGoalSelect")
@@ -2515,28 +2657,50 @@ function renderSettings(
       );
 
 
-  const party =
-    getParty();
-
-
   $("#leavePartyButton")
     .disabled =
-      !party;
+      !currentParty;
+
+
+  if (
+    currentParty
+  ) {
+
+    $("#partySettingsStatus")
+      .textContent =
+        `Member of ${currentParty.name}.`;
+
+  }
+
+  else if (
+    supabaseReady
+  ) {
+
+    $("#partySettingsStatus")
+      .textContent =
+        "No fellowship joined.";
+
+  }
+
+  else {
+
+    $("#partySettingsStatus")
+      .textContent =
+        "Party sync is unavailable.";
+
+  }
 }
 
 
 // =========================================================
-// 35. SAVE PLAYER NAME
+// 37. SAVE PLAYER NAME
 // =========================================================
 
-function savePlayerName() {
-
-  const input =
-    $("#playerNameInput");
-
+async function savePlayerName() {
 
   const name =
-    input.value
+    $("#playerNameInput")
+      .value
       .trim();
 
 
@@ -2558,16 +2722,6 @@ function savePlayerName() {
     getSettings();
 
 
-  /*
-    This changes ONLY display name.
-
-    It does NOT affect:
-    - character class
-    - portrait
-    - save identity
-    - party identity
-  */
-
   settings.playerName =
     name;
 
@@ -2580,6 +2734,37 @@ function savePlayerName() {
   render();
 
 
+  if (
+    supabaseReady
+  ) {
+
+    try {
+
+      await syncProfileToSupabase();
+
+    }
+
+    catch (
+      error
+    ) {
+
+      console.error(
+        error
+      );
+
+
+      showToast(
+        "Name saved locally. Party profile sync failed."
+      );
+
+
+      return;
+
+    }
+
+  }
+
+
   showToast(
     "Adventurer name saved."
   );
@@ -2587,7 +2772,7 @@ function savePlayerName() {
 
 
 // =========================================================
-// 36. WEEKLY GOAL
+// 38. WEEKLY GOAL
 // =========================================================
 
 function saveWeeklyGoal() {
@@ -2603,8 +2788,6 @@ function saveWeeklyGoal() {
     !Number.isFinite(
       goal
     )
-    ||
-    goal < 1
   ) {
 
     return;
@@ -2635,7 +2818,7 @@ function saveWeeklyGoal() {
 
 
 // =========================================================
-// 37. REDUCED MOTION
+// 39. REDUCED MOTION
 // =========================================================
 
 function applyMotionSetting(
@@ -2672,18 +2855,11 @@ function saveReducedMotion() {
   applyMotionSetting(
     settings
   );
-
-
-  showToast(
-    settings.reducedMotion
-      ? "Reduced motion enabled."
-      : "Reduced motion disabled."
-  );
 }
 
 
 // =========================================================
-// 38. SOUND SETTING
+// 40. SOUND
 // =========================================================
 
 function saveSoundSetting() {
@@ -2700,30 +2876,19 @@ function saveSoundSetting() {
   saveSettings(
     settings
   );
-
-
-  showToast(
-    settings.soundEnabled
-      ? "Sound effects enabled."
-      : "Sound effects disabled."
-  );
 }
 
 
 // =========================================================
-// 39. RESET THIS WEEK
+// 41. RESET WEEK
 // =========================================================
 
 function resetThisWeek() {
 
-  const confirmed =
-    confirm(
-      "Reset this week's completed quests?\n\nXP, gold, and quest history will remain."
-    );
-
-
   if (
-    !confirmed
+    !confirm(
+      "Reset this week's personal progress?\n\nXP, gold, and history will remain."
+    )
   ) {
 
     return;
@@ -2758,19 +2923,15 @@ function resetThisWeek() {
 
 
 // =========================================================
-// 40. CLEAR HISTORY
+// 42. CLEAR HISTORY
 // =========================================================
 
 function clearQuestHistory() {
 
-  const confirmed =
-    confirm(
-      "Clear the quest chronicle?\n\nYour XP, levels, and gold will remain."
-    );
-
-
   if (
-    !confirmed
+    !confirm(
+      "Clear the personal quest chronicle?\n\nXP, levels, and gold will remain."
+    )
   ) {
 
     return;
@@ -2801,19 +2962,15 @@ function clearQuestHistory() {
 
 
 // =========================================================
-// 41. RESET CHARACTER
+// 43. RESET CHARACTER
 // =========================================================
 
 function resetCharacter() {
 
-  const confirmed =
-    confirm(
-      "Reset this character completely?\n\nThis will erase XP, gold, levels, weekly progress, and quest history on this device."
-    );
-
-
   if (
-    !confirmed
+    !confirm(
+      "Reset this character completely?\n\nThis erases local XP, gold, levels, weekly progress, and personal quest history."
+    )
   ) {
 
     return;
@@ -2836,7 +2993,7 @@ function resetCharacter() {
 
 
 // =========================================================
-// 42. LOCAL PARTY GENERATOR
+// 44. PARTY CODE
 // =========================================================
 
 function generatePartyCode() {
@@ -2850,9 +3007,9 @@ function generatePartyCode() {
 
 
   for (
-    let i = 0;
-    i < 6;
-    i++
+    let index = 0;
+    index < 6;
+    index++
   ) {
 
     code +=
@@ -2872,84 +3029,102 @@ function generatePartyCode() {
 
 
 // =========================================================
-// 43. CREATE PARTY
+// 45. CREATE PARTY
 // =========================================================
 
-function createParty() {
+async function createParty() {
 
-  const settings =
-    getSettings();
+  if (
+    !supabaseReady
+  ) {
 
-
-  const character =
-    getCharacterConfig();
-
-
-  const partyId =
-    globalThis.crypto
-      ?.randomUUID
-      ? globalThis.crypto.randomUUID()
-      : `party-${Date.now()}`;
+    showToast(
+      "Guild connection is not ready."
+    );
 
 
-  const party = {
+    return;
 
-    id:
-      partyId,
-
-    name:
-      "The Fellowship",
-
-    inviteCode:
-      generatePartyCode(),
-
-    createdAt:
-      new Date()
-        .toISOString(),
-
-    members: [
-
-      {
-
-        name:
-          settings.playerName
-          ||
-          character.defaultName,
-
-        profileId:
-          activeProfileId
-
-      }
-
-    ]
-
-  };
+  }
 
 
-  saveParty(
-    party
-  );
+  if (
+    currentParty
+  ) {
+
+    showToast(
+      "You already belong to a fellowship."
+    );
 
 
-  renderParty(
-    normalizeWeek(),
-    settings
-  );
+    return;
+
+  }
 
 
-  renderSettings(
-    settings
-  );
+  const inviteCode =
+    generatePartyCode();
 
 
-  showToast(
-    "Fellowship created."
-  );
+  try {
+
+    const {
+      data:
+        partyId,
+      error
+    } =
+      await supabaseClient.rpc(
+        "create_party",
+        {
+
+          supplied_name:
+            "The Fellowship",
+
+          supplied_invite_code:
+            inviteCode
+
+        }
+      );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    await loadCurrentParty();
+
+
+    showToast(
+      `Fellowship created · ${inviteCode}`
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Party creation failed:",
+      error
+    );
+
+
+    showToast(
+      "Could not create the fellowship."
+    );
+
+  }
 }
 
 
 // =========================================================
-// 44. SHOW JOIN PARTY
+// 46. JOIN PARTY FORM
 // =========================================================
 
 function toggleJoinPartyForm() {
@@ -2974,10 +3149,38 @@ function toggleJoinPartyForm() {
 
 
 // =========================================================
-// 45. JOIN PARTY
+// 47. JOIN PARTY
 // =========================================================
 
-function joinParty() {
+async function joinParty() {
+
+  if (
+    !supabaseReady
+  ) {
+
+    showToast(
+      "Guild connection is not ready."
+    );
+
+
+    return;
+
+  }
+
+
+  if (
+    currentParty
+  ) {
+
+    showToast(
+      "Leave your current fellowship first."
+    );
+
+
+    return;
+
+  }
+
 
   const code =
     $("#partyCodeInput")
@@ -3001,101 +3204,78 @@ function joinParty() {
   }
 
 
-  const settings =
-    getSettings();
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient.rpc(
+        "join_party_by_code",
+        {
+
+          supplied_code:
+            code
+
+        }
+      );
 
 
-  const character =
-    getCharacterConfig();
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
 
 
-  /*
-    LOCAL PROTOTYPE ONLY.
-
-    Supabase will replace this
-    local implementation.
-  */
-
-  const party = {
-
-    id:
-      `local-${code}`,
-
-    name:
-      "The Fellowship",
-
-    inviteCode:
-      code,
-
-    joinedAt:
-      new Date()
-        .toISOString(),
-
-    members: [
-
-      {
-
-        name:
-          settings.playerName
-          ||
-          character.defaultName,
-
-        profileId:
-          activeProfileId
-
-      }
-
-    ]
-
-  };
+    $("#partyCodeInput")
+      .value =
+        "";
 
 
-  saveParty(
-    party
-  );
+    $("#joinPartyForm")
+      .hidden =
+        true;
 
 
-  $("#partyCodeInput")
-    .value =
-      "";
+    await loadCurrentParty();
 
 
-  $("#joinPartyForm")
-    .hidden =
-      true;
+    showToast(
+      "Fellowship joined."
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Party join failed:",
+      error
+    );
 
 
-  renderParty(
-    normalizeWeek(),
-    settings
-  );
+    showToast(
+      "That party code could not be joined."
+    );
 
-
-  renderSettings(
-    settings
-  );
-
-
-  showToast(
-    "Fellowship joined."
-  );
+  }
 }
 
 
 // =========================================================
-// 46. LEAVE PARTY
+// 48. LEAVE PARTY
 // =========================================================
 
-function leaveParty() {
-
-  const confirmed =
-    confirm(
-      "Leave this fellowship?"
-    );
-
+async function leaveParty() {
 
   if (
-    !confirmed
+    !currentParty
+    ||
+    !supabaseUser
   ) {
 
     return;
@@ -3103,38 +3283,130 @@ function leaveParty() {
   }
 
 
-  clearParty();
+  if (
+    !confirm(
+      "Leave this fellowship?"
+    )
+  ) {
+
+    return;
+
+  }
 
 
-  renderParty(
-    normalizeWeek(),
-    getSettings()
-  );
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "party_members"
+        )
+        .delete()
+        .eq(
+          "party_id",
+          currentParty.id
+        )
+        .eq(
+          "user_id",
+          supabaseUser.id
+        );
 
 
-  renderSettings(
-    getSettings()
-  );
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
 
 
-  showToast(
-    "You left the fellowship."
-  );
+    currentParty =
+      null;
+
+
+    renderParty();
+
+
+    renderSettings(
+      getSettings()
+    );
+
+
+    showToast(
+      "You left the fellowship."
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Could not leave party:",
+      error
+    );
+
+
+    showToast(
+      "Could not leave the fellowship."
+    );
+
+  }
 }
 
 
 // =========================================================
-// 47. PARTY RENDER
+// 49. REFRESH PARTY
 // =========================================================
 
-function renderParty(
-  state,
-  settings
-) {
+async function refreshParty() {
 
-  const party =
-    getParty();
+  if (
+    !supabaseReady
+  ) {
 
+    renderParty();
+
+
+    return;
+
+  }
+
+
+  try {
+
+    await loadCurrentParty();
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Party refresh failed:",
+      error
+    );
+
+
+    setPartySyncStatus(
+      "Could not refresh fellowship data.",
+      "error"
+    );
+
+  }
+}
+
+
+// =========================================================
+// 50. RENDER PARTY
+// =========================================================
+
+async function renderParty() {
 
   const emptyState =
     $("#partyEmptyState");
@@ -3145,7 +3417,7 @@ function renderParty(
 
 
   if (
-    !party
+    !supabaseReady
   ) {
 
     emptyState.hidden =
@@ -3154,6 +3426,29 @@ function renderParty(
 
     dashboard.hidden =
       true;
+
+
+    return;
+
+  }
+
+
+  if (
+    !currentParty
+  ) {
+
+    emptyState.hidden =
+      false;
+
+
+    dashboard.hidden =
+      true;
+
+
+    setPartySyncStatus(
+      "Connected · No fellowship joined.",
+      "connected"
+    );
 
 
     return;
@@ -3171,62 +3466,304 @@ function renderParty(
 
   $("#partyName")
     .textContent =
-      party.name
+      currentParty.name
       ||
       "The Fellowship";
 
 
   $("#partyInviteCode")
     .textContent =
-      party.inviteCode
+      currentParty.invite_code
       ||
       "------";
 
 
-  renderPartyMembers(
-    party,
-    state,
-    settings
+  setPartySyncStatus(
+    "Fellowship synchronized.",
+    "connected"
   );
 
 
-  renderPartyChallenge(
-    state,
-    settings
-  );
+  try {
+
+    const [
+      members,
+      activity
+    ] =
+      await Promise.all(
+        [
+          fetchPartyMembers(),
+          fetchPartyActivity()
+        ]
+      );
 
 
-  renderPartyActivity(
-    state,
-    settings
+    renderPartyMembers(
+      members,
+      activity
+    );
+
+
+    renderPartyChallenge(
+      activity,
+      members.length
+    );
+
+
+    renderPartyActivity(
+      activity
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Party rendering failed:",
+      error
+    );
+
+
+    setPartySyncStatus(
+      "Connected, but some fellowship data could not load.",
+      "error"
+    );
+
+  }
+}
+
+
+// =========================================================
+// 51. FETCH PARTY MEMBERS
+// =========================================================
+
+async function fetchPartyMembers() {
+
+  if (
+    !currentParty
+  ) {
+
+    return [];
+
+  }
+
+
+  const {
+    data:
+      memberships,
+    error:
+      membershipError
+  } =
+    await supabaseClient
+      .from(
+        "party_members"
+      )
+      .select(
+        "user_id, joined_at"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .order(
+        "joined_at",
+        {
+          ascending:
+            true
+        }
+      );
+
+
+  if (
+    membershipError
+  ) {
+
+    throw membershipError;
+
+  }
+
+
+  const userIds =
+    memberships
+      .map(
+        item =>
+          item.user_id
+      );
+
+
+  if (
+    userIds.length ===
+    0
+  ) {
+
+    return [];
+
+  }
+
+
+  const {
+    data:
+      profiles,
+    error:
+      profileError
+  } =
+    await supabaseClient
+      .from(
+        "profiles"
+      )
+      .select(
+        "user_id, profile_id, display_name, class_name"
+      )
+      .in(
+        "user_id",
+        userIds
+      );
+
+
+  if (
+    profileError
+  ) {
+
+    throw profileError;
+
+  }
+
+
+  return (
+    memberships.map(
+      membership => {
+
+        const profile =
+          profiles.find(
+            item =>
+              item.user_id
+              ===
+              membership.user_id
+          );
+
+
+        return {
+
+          user_id:
+            membership.user_id,
+
+          joined_at:
+            membership.joined_at,
+
+          profile_id:
+            profile?.profile_id
+            ||
+            null,
+
+          display_name:
+            profile?.display_name
+            ||
+            "Adventurer",
+
+          class_name:
+            profile?.class_name
+            ||
+            "Unknown Class"
+
+        };
+
+      }
+    )
   );
 }
 
 
 // =========================================================
-// 48. PARTY MEMBERS
+// 52. FETCH PARTY ACTIVITY
+// =========================================================
+
+async function fetchPartyActivity() {
+
+  if (
+    !currentParty
+  ) {
+
+    return [];
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        "quest_activity"
+      )
+      .select(
+        "*"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .order(
+        "completed_at",
+        {
+          ascending:
+            false
+        }
+      )
+      .limit(
+        100
+      );
+
+
+  if (
+    error
+  ) {
+
+    throw error;
+
+  }
+
+
+  return (
+    data
+    ||
+    []
+  );
+}
+
+
+// =========================================================
+// 53. RENDER PARTY MEMBERS
 // =========================================================
 
 function renderPartyMembers(
-  party,
-  state,
-  settings
+  members,
+  activity
 ) {
 
-  const members =
-    Array.isArray(
-      party.members
-    )
-      ? party.members
-      : [];
+  if (
+    members.length ===
+    0
+  ) {
+
+    $("#partyMembers")
+      .innerHTML =
+        `
+          <p class="muted">
+            No companions found.
+          </p>
+        `;
 
 
-  const totalXp =
-    state.xp.strength
-    +
-    state.xp.endurance
-    +
-    state.xp.restoration;
+    return;
+
+  }
+
+
+  const currentWeek =
+    getWeekKey();
 
 
   $("#partyMembers")
@@ -3235,64 +3772,113 @@ function renderPartyMembers(
         .map(
           member => {
 
-            const memberProfileId =
-              normalizeProfileId(
-                member.profileId
-                ||
-                member.profile
+            const weeklyActivity =
+              activity.filter(
+                item =>
+                  item.user_id
+                    ===
+                    member.user_id
+                  &&
+                  item.week_key
+                    ===
+                    currentWeek
               );
 
 
-            const isCurrent =
-              memberProfileId
-              ===
-              activeProfileId;
+            const weeklyGold =
+              weeklyActivity.reduce(
+                (
+                  total,
+                  item
+                ) =>
+                  total
+                  +
+                  (
+                    Number(
+                      item.gold
+                    )
+                    ||
+                    0
+                  ),
+                0
+              );
 
 
-            const memberName =
-              member.name
+            const character =
+              member.profile_id
+                ? getCharacterConfig(
+                    member.profile_id
+                  )
+                : null;
+
+
+            const cardImage =
+              character?.card
               ||
-              "Adventurer";
+              "";
 
 
             return `
               <article class="party-member-card">
 
-                <div class="party-member-avatar">
-                  ${
-                    escapeHtml(
-                      memberName
-                        .charAt(0)
-                        .toUpperCase()
-                    )
-                  }
-                </div>
+                ${
+                  cardImage
+                    ? `
+                      <img
+                        class="party-member-portrait"
+                        src="${cardImage}"
+                        alt="${escapeHtml(
+                          member.display_name
+                        )}"
+                      >
+                    `
+                    : `
+                      <div class="party-member-avatar">
+                        ${escapeHtml(
+                          member.display_name
+                            .charAt(0)
+                            .toUpperCase()
+                        )}
+                      </div>
+                    `
+                }
 
                 <div class="party-member-info">
 
                   <strong>
                     ${escapeHtml(
-                      memberName
+                      member.display_name
                     )}
                   </strong>
 
                   <span>
-                    ${
-                      isCurrent
-                        ? `${state.weeklyCompleted.length} quests this week`
-                        : "Awaiting sync"
-                    }
+                    ${escapeHtml(
+                      member.class_name
+                    )}
                   </span>
+
+                  <small>
+                    ${weeklyActivity.length}
+                    quest${
+                      weeklyActivity.length === 1
+                        ? ""
+                        : "s"
+                    }
+                    this week
+                  </small>
 
                 </div>
 
+
                 <div class="party-member-score">
 
-                  ${
-                    isCurrent
-                      ? `${totalXp} XP · ${state.gold}g`
-                      : "—"
-                  }
+                  <strong>
+                    ${weeklyGold}g
+                  </strong>
+
+                  <span>
+                    earned
+                  </span>
 
                 </div>
 
@@ -3306,13 +3892,21 @@ function renderPartyMembers(
 
 
 // =========================================================
-// 49. PARTY CHALLENGE
+// 54. PARTY CHALLENGE
 // =========================================================
 
 function renderPartyChallenge(
-  state,
-  settings
+  activity,
+  memberCount
 ) {
+
+  const currentWeek =
+    getWeekKey();
+
+
+  const settings =
+    getSettings();
+
 
   const personalGoal =
     Number(
@@ -3322,14 +3916,30 @@ function renderPartyChallenge(
     DEFAULT_WEEKLY_GOAL;
 
 
+  const safeMemberCount =
+    Math.max(
+      1,
+      memberCount
+    );
+
+
   const partyGoal =
     personalGoal
     *
-    PARTY_GOAL_MULTIPLIER;
+    safeMemberCount;
+
+
+  const weeklyActivity =
+    activity.filter(
+      item =>
+        item.week_key
+        ===
+        currentWeek
+    );
 
 
   const completed =
-    state.weeklyCompleted.length;
+    weeklyActivity.length;
 
 
   const percent =
@@ -3343,6 +3953,11 @@ function renderPartyChallenge(
       *
       100
     );
+
+
+  $("#partyChallengeTitle")
+    .textContent =
+      `Complete ${partyGoal} Quests`;
 
 
   $("#partyChallengeProgress")
@@ -3383,48 +3998,21 @@ function renderPartyChallenge(
         "The campaign awaits.";
 
   }
-
-
-  const heading =
-    $(
-      "#partyDashboard .party-challenge h2"
-    );
-
-
-  if (
-    heading
-  ) {
-
-    heading.textContent =
-      `Complete ${partyGoal} Quests`;
-
-  }
 }
 
 
 // =========================================================
-// 50. PARTY ACTIVITY
+// 55. PARTY ACTIVITY
 // =========================================================
 
 function renderPartyActivity(
-  state,
-  settings
+  activity
 ) {
 
-  const character =
-    getCharacterConfig();
-
-
-  const displayName =
-    settings.playerName
-    ||
-    character.defaultName;
-
-
   const recent =
-    state.history.slice(
+    activity.slice(
       0,
-      5
+      12
     );
 
 
@@ -3455,11 +4043,11 @@ function renderPartyActivity(
 
             const date =
               new Date(
-                item.completedAt
+                item.completed_at
               );
 
 
-            const time =
+            const dateText =
               date.toLocaleDateString(
                 undefined,
                 {
@@ -3474,34 +4062,23 @@ function renderPartyActivity(
               );
 
 
-            const goldText =
-              item.gold > 0
-                ? ` · +${item.gold}g`
-                : "";
-
-
             return `
               <article class="party-activity-item">
 
                 <strong>
                   ${escapeHtml(
-                    displayName
+                    item.display_name
                   )}
                   completed
                   ${escapeHtml(
-                    item.title
+                    item.quest_title
                   )}
                 </strong>
 
                 <span>
-                  ${time}
-                  ·
-                  +${item.xp}
-                  ${capitalize(
-                    item.xpType
-                  )}
-                  XP
-                  ${goldText}
+                  ${dateText}
+                  · +${item.xp} XP
+                  · +${item.gold} Gold
                 </span>
 
               </article>
@@ -3514,7 +4091,68 @@ function renderPartyActivity(
 
 
 // =========================================================
-// 51. TOAST MESSAGE
+// 56. PARTY STATUS
+// =========================================================
+
+function setPartySyncStatus(
+  text,
+  state = ""
+) {
+
+  const element =
+    $("#partySyncStatus");
+
+
+  if (
+    !element
+  ) {
+
+    return;
+
+  }
+
+
+  element.textContent =
+    text;
+
+
+  element.dataset.state =
+    state;
+}
+
+
+// =========================================================
+// 57. PARTY REFRESH LOOP
+// =========================================================
+
+function startPartyRefreshLoop() {
+
+  clearInterval(
+    partyRefreshTimer
+  );
+
+
+  partyRefreshTimer =
+    setInterval(
+      async () => {
+
+        if (
+          activeView ===
+          "party"
+        ) {
+
+          await refreshParty();
+
+        }
+
+      },
+      PARTY_REFRESH_INTERVAL
+    );
+}
+
+
+// =========================================================
+// 58. TOAST
 // =========================================================
 
 function showToast(
@@ -3548,13 +4186,13 @@ function showToast(
         );
 
       },
-      2200
+      2400
     );
 }
 
 
 // =========================================================
-// 52. UTILITY
+// 59. UTILITIES
 // =========================================================
 
 function capitalize(
@@ -3571,10 +4209,15 @@ function capitalize(
 
 
   return (
-    text.charAt(0)
+    text
+      .charAt(
+        0
+      )
       .toUpperCase()
     +
-    text.slice(1)
+    text.slice(
+      1
+    )
   );
 }
 
@@ -3610,7 +4253,7 @@ function escapeHtml(
 
 
 // =========================================================
-// 53. EVENT LISTENERS
+// 60. EVENTS
 // =========================================================
 
 $("#closeQuestButton")
@@ -3662,8 +4305,8 @@ $$(".nav-item")
       button.addEventListener(
         "click",
         () =>
-          handleNavigation(
-            button
+          setView(
+            button.dataset.view
           )
       );
 
@@ -3672,7 +4315,7 @@ $$(".nav-item")
 
 
 // =========================================================
-// 54. SETTINGS EVENTS
+// 61. SETTINGS EVENTS
 // =========================================================
 
 $("#savePlayerNameButton")
@@ -3725,7 +4368,7 @@ $("#resetCharacterButton")
 
 
 // =========================================================
-// 55. PARTY EVENTS
+// 62. PARTY EVENTS
 // =========================================================
 
 $("#createPartyButton")
@@ -3774,8 +4417,15 @@ $("#leavePartyButton")
   );
 
 
+$("#refreshPartyButton")
+  ?.addEventListener(
+    "click",
+    refreshParty
+  );
+
+
 // =========================================================
-// 56. CLICK OUTSIDE DIALOG TO CLOSE
+// 63. DIALOG OUTSIDE CLICK
 // =========================================================
 
 $("#questDialog")
@@ -3815,7 +4465,7 @@ $("#historyDialog")
 
 
 // =========================================================
-// 57. ESCAPE KEY
+// 64. ESCAPE
 // =========================================================
 
 document.addEventListener(
@@ -3859,15 +4509,39 @@ document.addEventListener(
 
 
 // =========================================================
-// 58. INITIALIZE APP
+// 65. INITIALIZE
 // =========================================================
 
-chooseProfile();
+async function initializeApp() {
+
+  chooseProfile();
 
 
-render();
+  render();
 
 
-setView(
-  activeView
-);
+  await setView(
+    activeView
+  );
+
+
+  await initializeSupabase();
+
+
+  renderSettings(
+    getSettings()
+  );
+
+
+  if (
+    activeView ===
+    "party"
+  ) {
+
+    await refreshParty();
+
+  }
+}
+
+
+initializeApp();
