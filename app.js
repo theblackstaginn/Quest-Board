@@ -2,12 +2,16 @@
 // QUEST BOARD
 // app.js
 //
-// Phase 4:
+// Phase 5:
 // - Stable Farmer / Jess profile identities
 // - Character tarot cards
 // - XP + levels
 // - Gold economy
 // - Configurable weekly goals
+// - Week Conquered victory reward
+// - Boss Battle victory + claim reward
+// - Weekly reward protection
+// - Boss reward protection
 // - Anonymous Supabase authentication
 // - Real cross-device parties
 // - Invite-code joining
@@ -218,9 +222,16 @@ const SPECIAL_QUESTS = {
     category: "Boss",
     time: "30–45 min",
 
+    /*
+      Boss rewards are handled separately.
+
+      These values are intentionally NOT
+      awarded by completeQuest().
+    */
+
     xpType: "strength",
-    xp: 50,
-    gold: 50,
+    xp: 0,
+    gold: 0,
 
     description:
       "The weekly challenge. Walk the mile, then complete twenty minutes of strength training.",
@@ -308,6 +319,26 @@ const PARTY_GOAL_MULTIPLIER =
 
 const PARTY_REFRESH_INTERVAL =
   15000;
+
+
+// WEEK CONQUERED REWARD
+
+const WEEK_CONQUERED_GOLD =
+  25;
+
+
+// BOSS REWARDS
+
+const BOSS_STRENGTH_XP =
+  50;
+
+
+const BOSS_ENDURANCE_XP =
+  50;
+
+
+const BOSS_GOLD =
+  100;
 
 
 // =========================================================
@@ -588,9 +619,7 @@ function getSettings() {
     !saved
   ) {
 
-    return (
-      createFreshSettings()
-    );
+    return createFreshSettings();
 
   }
 
@@ -619,9 +648,7 @@ function getSettings() {
     );
 
 
-    return (
-      createFreshSettings()
-    );
+    return createFreshSettings();
 
   }
 }
@@ -671,7 +698,22 @@ function createFreshState() {
       0,
 
     history:
-      []
+      [],
+
+
+    /*
+      These hold the exact week key when
+      each one-time reward/event occurred.
+    */
+
+    weekConqueredRewardWeek:
+      null,
+
+    bossDefeatedWeek:
+      null,
+
+    bossRewardsClaimedWeek:
+      null
 
   };
 }
@@ -722,7 +764,22 @@ function migrateState(
         parsed?.history
       )
         ? parsed.history
-        : []
+        : [],
+
+    weekConqueredRewardWeek:
+      parsed?.weekConqueredRewardWeek
+      ||
+      null,
+
+    bossDefeatedWeek:
+      parsed?.bossDefeatedWeek
+      ||
+      null,
+
+    bossRewardsClaimedWeek:
+      parsed?.bossRewardsClaimedWeek
+      ||
+      null
 
   };
 }
@@ -740,9 +797,7 @@ function getState() {
     !saved
   ) {
 
-    return (
-      createFreshState()
-    );
+    return createFreshState();
 
   }
 
@@ -769,9 +824,7 @@ function getState() {
     );
 
 
-    return (
-      createFreshState()
-    );
+    return createFreshState();
 
   }
 }
@@ -1210,6 +1263,7 @@ async function loadCurrentParty() {
 
     renderParty();
 
+
     renderSettings(
       getSettings()
     );
@@ -1261,9 +1315,7 @@ async function loadCurrentParty() {
   );
 
 
-  return (
-    currentParty
-  );
+  return currentParty;
 }
 
 
@@ -1472,22 +1524,59 @@ function renderBossBattle(
     DEFAULT_WEEKLY_GOAL;
 
 
-  const unlocked =
+  const weekKey =
+    getWeekKey();
+
+
+  const weekConquered =
     state.weeklyCompleted.length
     >=
     goal;
 
 
-  $("#bossButton")
-    .disabled =
-      !unlocked;
+  const bossDefeated =
+    state.bossDefeatedWeek
+    ===
+    weekKey;
 
 
-  $("#bossLockText")
-    .textContent =
-      unlocked
-        ? "Unlocked. Face the boss."
-        : `Unlock by completing ${goal} quests.`;
+  const bossButton =
+    $("#bossButton");
+
+
+  bossButton.disabled =
+    !weekConquered
+    ||
+    bossDefeated;
+
+
+  if (
+    bossDefeated
+  ) {
+
+    $("#bossLockText")
+      .textContent =
+        "Defeated this week.";
+
+  }
+
+  else if (
+    weekConquered
+  ) {
+
+    $("#bossLockText")
+      .textContent =
+        "Unlocked. Face the boss.";
+
+  }
+
+  else {
+
+    $("#bossLockText")
+      .textContent =
+        `Unlock by completing ${goal} quests.`;
+
+  }
 }
 
 
@@ -1788,6 +1877,55 @@ function openQuest(
   }
 
 
+  if (
+    id ===
+    "boss"
+  ) {
+
+    const state =
+      normalizeWeek();
+
+
+    const settings =
+      getSettings();
+
+
+    const goal =
+      Number(
+        settings.weeklyGoal
+      )
+      ||
+      DEFAULT_WEEKLY_GOAL;
+
+
+    const weekKey =
+      getWeekKey();
+
+
+    if (
+      state.weeklyCompleted.length
+      <
+      goal
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      state.bossDefeatedWeek
+      ===
+      weekKey
+    ) {
+
+      return;
+
+    }
+
+  }
+
+
   activeQuest =
     quest;
 
@@ -1815,17 +1953,32 @@ function openQuest(
       quest.time;
 
 
-  $("#dialogReward")
-    .textContent =
-      (
-        `+${quest.xp} `
-        +
-        `${capitalize(
-          quest.xpType
-        )} XP`
-        +
-        ` · +${quest.gold} Gold`
-      );
+  if (
+    quest.id ===
+    "boss"
+  ) {
+
+    $("#dialogReward")
+      .textContent =
+        "Victory Reward · 100 XP · 100 Gold";
+
+  }
+
+  else {
+
+    $("#dialogReward")
+      .textContent =
+        (
+          `+${quest.xp} `
+          +
+          `${capitalize(
+            quest.xpType
+          )} XP`
+          +
+          ` · +${quest.gold} Gold`
+        );
+
+  }
 
 
   renderExerciseList(
@@ -1893,8 +2046,45 @@ async function completeQuest() {
     activeQuest;
 
 
+  /*
+    Boss Battles use their own reward path.
+  */
+
+  if (
+    completedQuest.id ===
+    "boss"
+  ) {
+
+    await completeBossBattle();
+
+
+    return;
+
+  }
+
+
   const state =
     normalizeWeek();
+
+
+  const settings =
+    getSettings();
+
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    ||
+    DEFAULT_WEEKLY_GOAL;
+
+
+  const weekKey =
+    getWeekKey();
+
+
+  const completedBefore =
+    state.weeklyCompleted.length;
 
 
   const completedAt =
@@ -1967,6 +2157,48 @@ async function completeQuest() {
   );
 
 
+  /*
+    WEEK CONQUERED
+
+    Reward only if this exact completion
+    crosses the goal threshold.
+
+    Changing the goal in Settings later
+    cannot accidentally award the bonus.
+  */
+
+  const completedAfter =
+    state.weeklyCompleted.length;
+
+
+  const conqueredWeekNow =
+    completedBefore
+      <
+      goal
+    &&
+    completedAfter
+      >=
+      goal
+    &&
+    state.weekConqueredRewardWeek
+      !==
+      weekKey;
+
+
+  if (
+    conqueredWeekNow
+  ) {
+
+    state.gold +=
+      WEEK_CONQUERED_GOLD;
+
+
+    state.weekConqueredRewardWeek =
+      weekKey;
+
+  }
+
+
   saveState(
     state
   );
@@ -2000,6 +2232,35 @@ async function completeQuest() {
   }
 
 
+  render();
+
+
+  if (
+    currentParty
+  ) {
+
+    await renderParty();
+
+  }
+
+
+  /*
+    Victory screen takes priority over
+    the normal completion toast.
+  */
+
+  if (
+    conqueredWeekNow
+  ) {
+
+    openWeekConquered();
+
+
+    return;
+
+  }
+
+
   if (
     supabaseReady
     &&
@@ -2021,6 +2282,346 @@ async function completeQuest() {
     );
 
   }
+}
+
+
+// =========================================================
+// 30. WEEK CONQUERED
+// =========================================================
+
+function openWeekConquered() {
+
+  const dialog =
+    $("#weekConqueredDialog");
+
+
+  if (
+    dialog
+    &&
+    !dialog.open
+  ) {
+
+    dialog.showModal();
+
+  }
+}
+
+
+function closeWeekConquered() {
+
+  const dialog =
+    $("#weekConqueredDialog");
+
+
+  if (
+    dialog?.open
+  ) {
+
+    dialog.close();
+
+  }
+
+
+  /*
+    Render again so the freshly unlocked
+    Boss Battle is unmistakably active.
+  */
+
+  render();
+
+
+  showToast(
+    `Week Conquered · +${WEEK_CONQUERED_GOLD} Gold · Boss Battle Unlocked`
+  );
+}
+
+
+// =========================================================
+// 31. COMPLETE BOSS BATTLE
+// =========================================================
+
+async function completeBossBattle() {
+
+  const state =
+    normalizeWeek();
+
+
+  const settings =
+    getSettings();
+
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    ||
+    DEFAULT_WEEKLY_GOAL;
+
+
+  const weekKey =
+    getWeekKey();
+
+
+  /*
+    Defensive checks.
+
+    Even if the button state somehow gets
+    out of sync, the Boss cannot be completed
+    before the week is conquered or twice
+    during the same week.
+  */
+
+  if (
+    state.weeklyCompleted.length
+    <
+    goal
+  ) {
+
+    closeQuest();
+
+
+    activeQuest =
+      null;
+
+
+    showToast(
+      "Conquer the week before facing the Boss."
+    );
+
+
+    return;
+
+  }
+
+
+  if (
+    state.bossDefeatedWeek
+    ===
+    weekKey
+  ) {
+
+    closeQuest();
+
+
+    activeQuest =
+      null;
+
+
+    showToast(
+      "The Boss has already been defeated this week."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    Mark the Boss defeated NOW.
+
+    Rewards are NOT granted until the
+    Claim Rewards sticker is pressed.
+  */
+
+  state.bossDefeatedWeek =
+    weekKey;
+
+
+  saveState(
+    state
+  );
+
+
+  activeQuest =
+    null;
+
+
+  closeQuest();
+
+
+  render();
+
+
+  openBossDefeated();
+}
+
+
+// =========================================================
+// 32. BOSS DEFEATED MODAL
+// =========================================================
+
+function openBossDefeated() {
+
+  const dialog =
+    $("#bossDefeatedDialog");
+
+
+  if (
+    dialog
+    &&
+    !dialog.open
+  ) {
+
+    dialog.showModal();
+
+  }
+}
+
+
+// =========================================================
+// 33. CLAIM BOSS REWARDS
+// =========================================================
+
+async function claimBossRewards() {
+
+  const state =
+    normalizeWeek();
+
+
+  const weekKey =
+    getWeekKey();
+
+
+  /*
+    Claim only after an actual Boss victory.
+  */
+
+  if (
+    state.bossDefeatedWeek
+    !==
+    weekKey
+  ) {
+
+    showToast(
+      "No Boss reward is waiting."
+    );
+
+
+    return;
+
+  }
+
+
+  /*
+    Idempotency guard.
+
+    No amount of tapping can duplicate
+    this week's Boss reward.
+  */
+
+  if (
+    state.bossRewardsClaimedWeek
+    ===
+    weekKey
+  ) {
+
+    closeBossDefeated();
+
+
+    showToast(
+      "Boss rewards already claimed."
+    );
+
+
+    return;
+
+  }
+
+
+  const completedAt =
+    new Date()
+      .toISOString();
+
+
+  state.xp.strength +=
+    BOSS_STRENGTH_XP;
+
+
+  state.xp.endurance +=
+    BOSS_ENDURANCE_XP;
+
+
+  state.gold +=
+    BOSS_GOLD;
+
+
+  state.bossRewardsClaimedWeek =
+    weekKey;
+
+
+  /*
+    Record the Boss as an individual
+    character victory.
+
+    It does NOT count toward weeklyCompleted,
+    because the personal weekly campaign
+    was already conquered before unlocking it.
+  */
+
+  state.history.unshift(
+    {
+
+      questId:
+        "boss",
+
+      title:
+        "Boss Battle",
+
+      category:
+        "Boss",
+
+      xp:
+        BOSS_STRENGTH_XP
+        +
+        BOSS_ENDURANCE_XP,
+
+      xpType:
+        "mixed",
+
+      gold:
+        BOSS_GOLD,
+
+      completedAt
+
+    }
+  );
+
+
+  saveState(
+    state
+  );
+
+
+  /*
+    Sync the Boss victory into the Fellowship
+    activity feed.
+
+    This creates one cross-device Boss victory
+    record with the combined 100 XP reward.
+  */
+
+  let partySynced =
+    false;
+
+
+  if (
+    supabaseReady
+    &&
+    supabaseUser
+    &&
+    currentParty
+  ) {
+
+    partySynced =
+      await syncBossActivityToParty(
+        completedAt
+      );
+
+  }
+
+
+  closeBossDefeated();
 
 
   render();
@@ -2033,11 +2634,50 @@ async function completeQuest() {
     await renderParty();
 
   }
+
+
+  if (
+    supabaseReady
+    &&
+    currentParty
+    &&
+    !partySynced
+  ) {
+
+    showToast(
+      "Boss Rewards Claimed · +100 XP · +100 Gold · Party sync failed"
+    );
+
+  }
+
+  else {
+
+    showToast(
+      "Boss Rewards Claimed · +100 XP · +100 Gold"
+    );
+
+  }
+}
+
+
+function closeBossDefeated() {
+
+  const dialog =
+    $("#bossDefeatedDialog");
+
+
+  if (
+    dialog?.open
+  ) {
+
+    dialog.close();
+
+  }
 }
 
 
 // =========================================================
-// 30. SYNC QUEST ACTIVITY
+// 34. SYNC QUEST ACTIVITY
 // =========================================================
 
 async function syncQuestActivityToParty(
@@ -2131,7 +2771,102 @@ async function syncQuestActivityToParty(
 
 
 // =========================================================
-// 31. CLOSE QUEST
+// 35. SYNC BOSS ACTIVITY
+// =========================================================
+
+async function syncBossActivityToParty(
+  completedAt
+) {
+
+  try {
+
+    const settings =
+      getSettings();
+
+
+    const character =
+      getCharacterConfig();
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "quest_activity"
+        )
+        .insert(
+          {
+
+            party_id:
+              currentParty.id,
+
+            user_id:
+              supabaseUser.id,
+
+            profile_id:
+              activeProfileId,
+
+            display_name:
+              settings.playerName
+              ||
+              character.defaultName,
+
+            quest_id:
+              "boss",
+
+            quest_title:
+              "Boss Battle",
+
+            xp:
+              BOSS_STRENGTH_XP
+              +
+              BOSS_ENDURANCE_XP,
+
+            gold:
+              BOSS_GOLD,
+
+            week_key:
+              getWeekKey(),
+
+            completed_at:
+              completedAt
+
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    return true;
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Could not sync Boss victory to party:",
+      error
+    );
+
+
+    return false;
+
+  }
+}
+
+
+// =========================================================
+// 36. CLOSE QUEST
 // =========================================================
 
 function closeQuest() {
@@ -2154,7 +2889,7 @@ function closeQuest() {
 
 
 // =========================================================
-// 32. TIMER
+// 37. TIMER
 // =========================================================
 
 function startTimer() {
@@ -2337,7 +3072,7 @@ function updateTimerDisplay() {
 
 
 // =========================================================
-// 33. HISTORY
+// 38. HISTORY
 // =========================================================
 
 function openHistory() {
@@ -2402,6 +3137,15 @@ function openHistory() {
                 0;
 
 
+              const xpTypeText =
+                item.xpType ===
+                "mixed"
+                  ? "Mixed"
+                  : capitalize(
+                      item.xpType
+                    );
+
+
               return `
                 <article class="history-item">
 
@@ -2414,9 +3158,7 @@ function openHistory() {
                   <span>
                     ${dateText}
                     · +${item.xp}
-                    ${capitalize(
-                      item.xpType
-                    )} XP
+                    ${xpTypeText} XP
                     ${
                       gold
                         ? ` · +${gold} Gold`
@@ -2454,7 +3196,7 @@ function closeHistory() {
 
 
 // =========================================================
-// 34. VIEW HEADERS
+// 39. VIEW HEADERS
 // =========================================================
 
 const VIEW_HEADERS = {
@@ -2506,7 +3248,7 @@ const VIEW_HEADERS = {
 
 
 // =========================================================
-// 35. VIEW NAVIGATION
+// 40. VIEW NAVIGATION
 // =========================================================
 
 async function setView(
@@ -2619,7 +3361,7 @@ async function setView(
 
 
 // =========================================================
-// 36. SETTINGS RENDER
+// 41. SETTINGS RENDER
 // =========================================================
 
 function renderSettings(
@@ -2693,7 +3435,7 @@ function renderSettings(
 
 
 // =========================================================
-// 37. SAVE PLAYER NAME
+// 42. SAVE PLAYER NAME
 // =========================================================
 
 async function savePlayerName() {
@@ -2772,7 +3514,7 @@ async function savePlayerName() {
 
 
 // =========================================================
-// 38. WEEKLY GOAL
+// 43. WEEKLY GOAL
 // =========================================================
 
 function saveWeeklyGoal() {
@@ -2818,7 +3560,7 @@ function saveWeeklyGoal() {
 
 
 // =========================================================
-// 39. REDUCED MOTION
+// 44. REDUCED MOTION
 // =========================================================
 
 function applyMotionSetting(
@@ -2859,7 +3601,7 @@ function saveReducedMotion() {
 
 
 // =========================================================
-// 40. SOUND
+// 45. SOUND
 // =========================================================
 
 function saveSoundSetting() {
@@ -2880,7 +3622,7 @@ function saveSoundSetting() {
 
 
 // =========================================================
-// 41. RESET WEEK
+// 46. RESET WEEK
 // =========================================================
 
 function resetThisWeek() {
@@ -2900,12 +3642,60 @@ function resetThisWeek() {
     getState();
 
 
-  state.weekKey =
+  const weekKey =
     getWeekKey();
+
+
+  state.weekKey =
+    weekKey;
 
 
   state.weeklyCompleted =
     [];
+
+
+  /*
+    Reset the current week's campaign flags,
+    but do NOT subtract rewards already earned.
+
+    This prevents Reset Week from becoming
+    a gold farming exploit.
+  */
+
+  if (
+    state.weekConqueredRewardWeek
+    ===
+    weekKey
+  ) {
+
+    state.weekConqueredRewardWeek =
+      `claimed-${weekKey}`;
+
+  }
+
+
+  if (
+    state.bossDefeatedWeek
+    ===
+    weekKey
+  ) {
+
+    state.bossDefeatedWeek =
+      `defeated-${weekKey}`;
+
+  }
+
+
+  if (
+    state.bossRewardsClaimedWeek
+    ===
+    weekKey
+  ) {
+
+    state.bossRewardsClaimedWeek =
+      `claimed-${weekKey}`;
+
+  }
 
 
   saveState(
@@ -2923,7 +3713,7 @@ function resetThisWeek() {
 
 
 // =========================================================
-// 42. CLEAR HISTORY
+// 47. CLEAR HISTORY
 // =========================================================
 
 function clearQuestHistory() {
@@ -2962,14 +3752,14 @@ function clearQuestHistory() {
 
 
 // =========================================================
-// 43. RESET CHARACTER
+// 48. RESET CHARACTER
 // =========================================================
 
 function resetCharacter() {
 
   if (
     !confirm(
-      "Reset this character completely?\n\nThis erases local XP, gold, levels, weekly progress, and personal quest history."
+      "Reset this character completely?\n\nThis erases local XP, gold, levels, weekly progress, rewards, Boss victories, and personal quest history."
     )
   ) {
 
@@ -2993,7 +3783,7 @@ function resetCharacter() {
 
 
 // =========================================================
-// 44. PARTY CODE
+// 49. PARTY CODE
 // =========================================================
 
 function generatePartyCode() {
@@ -3029,7 +3819,7 @@ function generatePartyCode() {
 
 
 // =========================================================
-// 45. CREATE PARTY
+// 50. CREATE PARTY
 // =========================================================
 
 async function createParty() {
@@ -3124,7 +3914,7 @@ async function createParty() {
 
 
 // =========================================================
-// 46. JOIN PARTY FORM
+// 51. JOIN PARTY FORM
 // =========================================================
 
 function toggleJoinPartyForm() {
@@ -3149,7 +3939,7 @@ function toggleJoinPartyForm() {
 
 
 // =========================================================
-// 47. JOIN PARTY
+// 52. JOIN PARTY
 // =========================================================
 
 async function joinParty() {
@@ -3267,7 +4057,7 @@ async function joinParty() {
 
 
 // =========================================================
-// 48. LEAVE PARTY
+// 53. LEAVE PARTY
 // =========================================================
 
 async function leaveParty() {
@@ -3360,7 +4150,7 @@ async function leaveParty() {
 
 
 // =========================================================
-// 49. REFRESH PARTY
+// 54. REFRESH PARTY
 // =========================================================
 
 async function refreshParty() {
@@ -3403,7 +4193,7 @@ async function refreshParty() {
 
 
 // =========================================================
-// 50. RENDER PARTY
+// 55. RENDER PARTY
 // =========================================================
 
 async function renderParty() {
@@ -3536,7 +4326,7 @@ async function renderParty() {
 
 
 // =========================================================
-// 51. FETCH PARTY MEMBERS
+// 56. FETCH PARTY MEMBERS
 // =========================================================
 
 async function fetchPartyMembers() {
@@ -3676,7 +4466,7 @@ async function fetchPartyMembers() {
 
 
 // =========================================================
-// 52. FETCH PARTY ACTIVITY
+// 57. FETCH PARTY ACTIVITY
 // =========================================================
 
 async function fetchPartyActivity() {
@@ -3735,7 +4525,7 @@ async function fetchPartyActivity() {
 
 
 // =========================================================
-// 53. RENDER PARTY MEMBERS
+// 58. RENDER PARTY MEMBERS
 // =========================================================
 
 function renderPartyMembers(
@@ -3892,7 +4682,7 @@ function renderPartyMembers(
 
 
 // =========================================================
-// 54. PARTY CHALLENGE
+// 59. PARTY CHALLENGE
 // =========================================================
 
 function renderPartyChallenge(
@@ -3929,12 +4719,24 @@ function renderPartyChallenge(
     safeMemberCount;
 
 
+  /*
+    Boss Battles are intentionally excluded
+    from the Fellowship's normal weekly quest
+    target.
+
+    They are bonus endgame victories.
+  */
+
   const weeklyActivity =
     activity.filter(
       item =>
         item.week_key
-        ===
-        currentWeek
+          ===
+          currentWeek
+        &&
+        item.quest_id
+          !==
+          "boss"
     );
 
 
@@ -4002,7 +4804,7 @@ function renderPartyChallenge(
 
 
 // =========================================================
-// 55. PARTY ACTIVITY
+// 60. PARTY ACTIVITY
 // =========================================================
 
 function renderPartyActivity(
@@ -4062,6 +4864,11 @@ function renderPartyActivity(
               );
 
 
+            const boss =
+              item.quest_id ===
+              "boss";
+
+
             return `
               <article class="party-activity-item">
 
@@ -4069,7 +4876,11 @@ function renderPartyActivity(
                   ${escapeHtml(
                     item.display_name
                   )}
-                  completed
+                  ${
+                    boss
+                      ? "defeated"
+                      : "completed"
+                  }
                   ${escapeHtml(
                     item.quest_title
                   )}
@@ -4091,7 +4902,7 @@ function renderPartyActivity(
 
 
 // =========================================================
-// 56. PARTY STATUS
+// 61. PARTY STATUS
 // =========================================================
 
 function setPartySyncStatus(
@@ -4122,7 +4933,7 @@ function setPartySyncStatus(
 
 
 // =========================================================
-// 57. PARTY REFRESH LOOP
+// 62. PARTY REFRESH LOOP
 // =========================================================
 
 function startPartyRefreshLoop() {
@@ -4152,7 +4963,7 @@ function startPartyRefreshLoop() {
 
 
 // =========================================================
-// 58. TOAST
+// 63. TOAST
 // =========================================================
 
 function showToast(
@@ -4192,7 +5003,7 @@ function showToast(
 
 
 // =========================================================
-// 59. UTILITIES
+// 64. UTILITIES
 // =========================================================
 
 function capitalize(
@@ -4253,7 +5064,7 @@ function escapeHtml(
 
 
 // =========================================================
-// 60. EVENTS
+// 65. EVENTS
 // =========================================================
 
 $("#closeQuestButton")
@@ -4298,6 +5109,20 @@ $("#closeHistoryButton")
   );
 
 
+$("#weekContinueButton")
+  ?.addEventListener(
+    "click",
+    closeWeekConquered
+  );
+
+
+$("#claimBossRewardsButton")
+  ?.addEventListener(
+    "click",
+    claimBossRewards
+  );
+
+
 $$(".nav-item")
   .forEach(
     button => {
@@ -4315,7 +5140,7 @@ $$(".nav-item")
 
 
 // =========================================================
-// 61. SETTINGS EVENTS
+// 66. SETTINGS EVENTS
 // =========================================================
 
 $("#savePlayerNameButton")
@@ -4368,7 +5193,7 @@ $("#resetCharacterButton")
 
 
 // =========================================================
-// 62. PARTY EVENTS
+// 67. PARTY EVENTS
 // =========================================================
 
 $("#createPartyButton")
@@ -4425,7 +5250,7 @@ $("#refreshPartyButton")
 
 
 // =========================================================
-// 63. DIALOG OUTSIDE CLICK
+// 68. DIALOG OUTSIDE CLICK
 // =========================================================
 
 $("#questDialog")
@@ -4465,7 +5290,45 @@ $("#historyDialog")
 
 
 // =========================================================
-// 64. ESCAPE
+// 69. LOCK VICTORY DIALOGS
+// =========================================================
+
+/*
+  Victory screens require their real action.
+
+  Week Conquered:
+  Continue.
+
+  Boss Defeated:
+  Claim Rewards.
+
+  Escape cannot silently dismiss either one.
+*/
+
+$("#weekConqueredDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+
+      event.preventDefault();
+
+    }
+  );
+
+
+$("#bossDefeatedDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+
+      event.preventDefault();
+
+    }
+  );
+
+
+// =========================================================
+// 70. ESCAPE
 // =========================================================
 
 document.addEventListener(
@@ -4476,6 +5339,26 @@ document.addEventListener(
       event.key !==
       "Escape"
     ) {
+
+      return;
+
+    }
+
+
+    /*
+      Victory dialogs deliberately ignore Escape.
+    */
+
+    if (
+      $("#weekConqueredDialog")
+        ?.open
+      ||
+      $("#bossDefeatedDialog")
+        ?.open
+    ) {
+
+      event.preventDefault();
+
 
       return;
 
@@ -4509,7 +5392,46 @@ document.addEventListener(
 
 
 // =========================================================
-// 65. INITIALIZE
+// 71. RESTORE PENDING BOSS REWARD
+// =========================================================
+
+function restorePendingVictory() {
+
+  const state =
+    normalizeWeek();
+
+
+  const weekKey =
+    getWeekKey();
+
+
+  /*
+    If Safari reloads/crashes AFTER the Boss
+    was defeated but BEFORE Claim Rewards,
+    reopen the reward screen.
+
+    This prevents a reload from losing the
+    player's treasure.
+  */
+
+  if (
+    state.bossDefeatedWeek
+      ===
+      weekKey
+    &&
+    state.bossRewardsClaimedWeek
+      !==
+      weekKey
+  ) {
+
+    openBossDefeated();
+
+  }
+}
+
+
+// =========================================================
+// 72. INITIALIZE
 // =========================================================
 
 async function initializeApp() {
@@ -4541,6 +5463,9 @@ async function initializeApp() {
     await refreshParty();
 
   }
+
+
+  restorePendingVictory();
 }
 
 
