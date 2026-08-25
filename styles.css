@@ -4867,6 +4867,439 @@ body[data-character-theme="amethyst"] .character-class-name {
 }
 
 /* =========================================================
+   36. VICTORY MODALS
+   Week Conquered + Boss Defeated
+========================================================= */
+
+.victory-dialog {
+
+  width:
+    min(
+      calc(100% - 20px),
+      620px
+    );
+
+  max-width:
+    620px;
+
+  max-height:
+    94vh;
+
+  margin:
+    auto;
+
+  padding:
+    0;
+
+  overflow:
+    visible;
+
+  border:
+    0;
+
+  outline:
+    0;
+
+  background:
+    transparent;
+
+  color:
+    transparent;
+
+  box-shadow:
+    none;
+
+}
+
+
+.victory-dialog::backdrop {
+
+  background:
+    rgba(0, 0, 0, 0.82);
+
+  backdrop-filter:
+    blur(5px);
+
+  -webkit-backdrop-filter:
+    blur(5px);
+
+}
+
+
+.victory-panel {
+
+  position:
+    relative;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    100%;
+
+  filter:
+    drop-shadow(
+      0 24px 45px
+      rgba(0, 0, 0, 0.72)
+    );
+
+}
+
+
+.victory-art {
+
+  display:
+    block;
+
+  width:
+    100%;
+
+  max-height:
+    min(
+      76vh,
+      720px
+    );
+
+  object-fit:
+    contain;
+
+  pointer-events:
+    none;
+
+  user-select:
+    none;
+
+  -webkit-user-select:
+    none;
+
+}
+
+
+/* =========================================================
+   VICTORY STICKER BUTTONS
+========================================================= */
+
+.victory-image-button {
+
+  position:
+    relative;
+
+  z-index:
+    2;
+
+  display:
+    block;
+
+  width:
+    min(
+      72%,
+      360px
+    );
+
+  aspect-ratio:
+    3.5 / 1;
+
+  margin:
+    -18px
+    auto
+    0;
+
+  padding:
+    0;
+
+  border:
+    0;
+
+  outline:
+    0;
+
+  background-color:
+    transparent;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
+
+  background-size:
+    contain;
+
+  color:
+    transparent;
+
+  font-size:
+    0;
+
+  cursor:
+    pointer;
+
+  filter:
+    drop-shadow(
+      0 9px 12px
+      rgba(0, 0, 0, 0.55)
+    );
+
+  transition:
+    transform
+    140ms
+    ease,
+    filter
+    140ms
+    ease;
+
+  -webkit-tap-highlight-color:
+    transparent;
+
+}
+
+
+.victory-image-button:hover {
+
+  transform:
+    translateY(-2px)
+    scale(1.025);
+
+  filter:
+    brightness(1.06)
+    drop-shadow(
+      0 11px 14px
+      rgba(0, 0, 0, 0.58)
+    );
+
+}
+
+
+.victory-image-button:active {
+
+  transform:
+    translateY(1px)
+    scale(0.96);
+
+  filter:
+    brightness(0.94)
+    drop-shadow(
+      0 5px 8px
+      rgba(0, 0, 0, 0.48)
+    );
+
+}
+
+
+/* WEEK CONQUERED — CONTINUE ONLY */
+
+.continue-victory-button {
+
+  background-image:
+    url("buttons/cont-btn.webp");
+
+}
+
+
+/* BOSS DEFEATED — CLAIM REWARDS ONLY */
+
+.claim-reward-button {
+
+  background-image:
+    url("buttons/claim-rw-btn.webp");
+
+}
+
+
+/* =========================================================
+   VICTORY ENTRANCE
+========================================================= */
+
+.victory-dialog[open] .victory-panel {
+
+  animation:
+    victoryReveal
+    420ms
+    cubic-bezier(
+      0.2,
+      0.85,
+      0.25,
+      1
+    );
+
+}
+
+
+.victory-dialog[open] .victory-image-button {
+
+  animation:
+    victoryButtonReveal
+    520ms
+    160ms
+    cubic-bezier(
+      0.2,
+      0.85,
+      0.25,
+      1
+    )
+    both;
+
+}
+
+
+@keyframes victoryReveal {
+
+  from {
+
+    opacity:
+      0;
+
+    transform:
+      translateY(22px)
+      scale(0.9);
+
+    filter:
+      drop-shadow(
+        0 0 0
+        rgba(0, 0, 0, 0)
+      )
+      brightness(1.35);
+
+  }
+
+  65% {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(-4px)
+      scale(1.025);
+
+  }
+
+  to {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(0)
+      scale(1);
+
+  }
+
+}
+
+
+@keyframes victoryButtonReveal {
+
+  from {
+
+    opacity:
+      0;
+
+    transform:
+      translateY(16px)
+      scale(0.86);
+
+  }
+
+  70% {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(-3px)
+      scale(1.035);
+
+  }
+
+  to {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(0)
+      scale(1);
+
+  }
+
+}
+
+
+/* =========================================================
+   VICTORY MOBILE
+========================================================= */
+
+@media (max-width: 560px) {
+
+  .victory-dialog {
+
+    width:
+      calc(100% - 12px);
+
+    max-height:
+      96vh;
+
+  }
+
+
+  .victory-art {
+
+    width:
+      100%;
+
+    max-height:
+      78vh;
+
+  }
+
+
+  .victory-image-button {
+
+    width:
+      min(
+        78%,
+        340px
+      );
+
+    margin-top:
+      -14px;
+
+  }
+
+}
+
+
+@media (max-width: 390px) {
+
+  .victory-dialog {
+
+    width:
+      calc(100% - 8px);
+
+  }
+
+
+  .victory-image-button {
+
+    width:
+      82%;
+
+    margin-top:
+      -10px;
+
+  }
+
+}
+/* =========================================================
    36. REDUCED MOTION
 ========================================================= */
 
