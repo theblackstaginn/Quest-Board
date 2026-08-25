@@ -1,7 +1,7 @@
 /* =========================================================
    QUEST BOARD
    FULL FANTASY UI PASS
-   Corrected fixed background version
+   Fixed background stacking version
 ========================================================= */
 
 
@@ -54,12 +54,10 @@
     rgba(202, 157, 82, 0.34);
 
   --shadow:
-    0 18px 45px
-    rgba(0, 0, 0, 0.58);
+    0 18px 45px rgba(0, 0, 0, 0.58);
 
   --shadow-heavy:
-    0 26px 70px
-    rgba(0, 0, 0, 0.78);
+    0 26px 70px rgba(0, 0, 0, 0.78);
 
   --app-width:
     760px;
@@ -86,7 +84,7 @@ html {
   min-height: 100%;
 
   background:
-    var(--bg);
+    #0a0b08;
 
   color-scheme:
     dark;
@@ -132,10 +130,7 @@ button,
 input,
 textarea,
 select {
-
-  font:
-    inherit;
-
+  font: inherit;
 }
 
 
@@ -159,22 +154,24 @@ h1,
 h2,
 h3,
 p {
-
-  margin-top:
-    0;
-
+  margin-top: 0;
 }
 
 
 /* =========================================================
-   3. TRUE FIXED BACKGROUND
-   Mobile / Safari friendly
+   3. FIXED WORLD BACKGROUND
 ========================================================= */
 
-body::before {
+body::before,
+body::after {
+  display: none;
+}
 
-  content:
-    "";
+
+.world-overlay {
+
+  display:
+    block;
 
   position:
     fixed;
@@ -183,10 +180,13 @@ body::before {
     0;
 
   z-index:
-    -1;
+    0;
 
   width:
     100vw;
+
+  height:
+    100vh;
 
   height:
     100dvh;
@@ -206,16 +206,6 @@ body::before {
   pointer-events:
     none;
 
-  transform:
-    translateZ(0);
-
-}
-
-
-/* old overlay disabled */
-
-.world-overlay {
-  display: none;
 }
 
 
@@ -413,14 +403,10 @@ h3 {
     48px;
 
   padding:
-    6px
-    14px
-    6px
-    6px;
+    6px 14px 6px 6px;
 
   border:
-    1px solid
-    rgba(207, 161, 87, 0.42);
+    1px solid rgba(207, 161, 87, 0.42);
 
   border-radius:
     999px;
@@ -467,8 +453,7 @@ h3 {
     50%;
 
   border:
-    1px solid
-    var(--gold-dark);
+    1px solid var(--gold-dark);
 
   background:
     radial-gradient(
@@ -527,8 +512,7 @@ h3 {
     hidden;
 
   border:
-    1px solid
-    var(--stone-border);
+    1px solid var(--stone-border);
 
   background-image:
 
@@ -608,10 +592,7 @@ h3 {
 
 
 .weekly-copy {
-
-  margin-bottom:
-    26px;
-
+  margin-bottom: 26px;
 }
 
 
@@ -676,10 +657,7 @@ h3 {
 
 
 .progress-meta strong {
-
-  color:
-    var(--gold-light);
-
+  color: var(--gold-light);
 }
 
 
@@ -769,8 +747,7 @@ h3 {
     12px;
 
   margin:
-    14px 0
-    35px;
+    14px 0 35px;
 
 }
 
@@ -994,10 +971,7 @@ h3 {
 
 .quest-section,
 .character-section {
-
-  margin-bottom:
-    36px;
-
+  margin-bottom: 36px;
 }
 
 
@@ -1065,13 +1039,8 @@ h3 {
 ========================================================= */
 
 .quest-grid {
-
-  display:
-    grid;
-
-  gap:
-    13px;
-
+  display: grid;
+  gap: 13px;
 }
 
 
@@ -1140,18 +1109,12 @@ h3 {
 
 
 .quest-card:hover {
-
-  filter:
-    brightness(1.04);
-
+  filter: brightness(1.04);
 }
 
 
 .quest-card:active {
-
-  transform:
-    scale(0.99);
-
+  transform: scale(0.99);
 }
 
 
@@ -1228,50 +1191,32 @@ h3 {
 
 
 .quest-card[data-quest-id="there-back"]::before {
-
-  background-image:
-    url("icons/there-and-back.webp");
-
+  background-image: url("icons/there-and-back.webp");
 }
 
 
 .quest-card[data-quest-id="keep"]::before {
-
-  background-image:
-    url("icons/the-keep.webp");
-
+  background-image: url("icons/the-keep.webp");
 }
 
 
 .quest-card[data-quest-id="dragonstrength"]::before {
-
-  background-image:
-    url("icons/dragonstrength.webp");
-
+  background-image: url("icons/dragonstrength.webp");
 }
 
 
 .quest-card[data-quest-id="rogue"]::before {
-
-  background-image:
-    url("icons/rogue-mode.webp");
-
+  background-image: url("icons/rogue-mode.webp");
 }
 
 
 .quest-card[data-quest-id="restoration"]::before {
-
-  background-image:
-    url("icons/restoration.webp");
-
+  background-image: url("icons/restoration.webp");
 }
 
 
 .quest-card[data-quest-id="ranger"]::before {
-
-  background-image:
-    url("icons/ranger-training.webp");
-
+  background-image: url("icons/ranger-training.webp");
 }
 
 
@@ -1425,47 +1370,25 @@ h3 {
 }
 
 
-/* category colors */
-
-.quest-card[data-quest-id="there-back"]
-.quest-type,
-
-.quest-card[data-quest-id="ranger"]
-.quest-type {
-
-  color:
-    var(--endurance);
-
+.quest-card[data-quest-id="there-back"] .quest-type,
+.quest-card[data-quest-id="ranger"] .quest-type {
+  color: var(--endurance);
 }
 
 
-.quest-card[data-quest-id="keep"]
-.quest-type,
-
-.quest-card[data-quest-id="dragonstrength"]
-.quest-type {
-
-  color:
-    var(--strength);
-
+.quest-card[data-quest-id="keep"] .quest-type,
+.quest-card[data-quest-id="dragonstrength"] .quest-type {
+  color: var(--strength);
 }
 
 
-.quest-card[data-quest-id="restoration"]
-.quest-type {
-
-  color:
-    var(--restoration);
-
+.quest-card[data-quest-id="restoration"] .quest-type {
+  color: var(--restoration);
 }
 
 
-.quest-card[data-quest-id="rogue"]
-.quest-type {
-
-  color:
-    var(--mixed);
-
+.quest-card[data-quest-id="rogue"] .quest-type {
+  color: var(--mixed);
 }
 
 
@@ -1555,8 +1478,7 @@ h3 {
     block;
 
   margin:
-    6px 0
-    12px;
+    6px 0 12px;
 
   color:
     var(--cream);
@@ -1681,9 +1603,6 @@ h3 {
       720px
     );
 
-  min-height:
-    auto;
-
   display:
     grid;
 
@@ -1705,16 +1624,8 @@ h3 {
   box-shadow:
     none;
 
-  backdrop-filter:
-    none;
-
-  -webkit-backdrop-filter:
-    none;
-
 }
 
-
-/* actual button shell */
 
 .nav-item {
 
@@ -1734,9 +1645,6 @@ h3 {
     0;
 
   border:
-    0;
-
-  border-radius:
     0;
 
   background-color:
@@ -1802,37 +1710,23 @@ h3 {
 }
 
 
-/* each image */
-
 .nav-item[data-view="board"] {
-
-  background-image:
-    url("buttons/board-btn.webp");
-
+  background-image: url("buttons/board-btn.webp");
 }
 
 
 .nav-item[data-view="character"] {
-
-  background-image:
-    url("buttons/character-btn.webp");
-
+  background-image: url("buttons/character-btn.webp");
 }
 
 
 .nav-item[data-view="party"] {
-
-  background-image:
-    url("buttons/party-btn.webp");
-
+  background-image: url("buttons/party-btn.webp");
 }
 
 
 .nav-item[data-view="settings"] {
-
-  background-image:
-    url("buttons/settings-btn.webp");
-
+  background-image: url("buttons/settings-btn.webp");
 }
 
 
@@ -1842,6 +1736,9 @@ h3 {
 
 .quest-dialog,
 .history-dialog {
+
+  z-index:
+    100;
 
   width:
     min(
@@ -1887,13 +1784,13 @@ h3 {
 .history-dialog::backdrop {
 
   background:
-    rgba(0, 0, 0, 0.72);
+    rgba(0, 0, 0, 0.62);
 
   backdrop-filter:
-    blur(4px);
+    blur(3px);
 
   -webkit-backdrop-filter:
-    blur(4px);
+    blur(3px);
 
 }
 
@@ -1950,9 +1847,6 @@ h3 {
   border:
     0;
 
-  border-radius:
-    0;
-
   background-color:
     transparent;
 
@@ -2003,10 +1897,7 @@ h3 {
 
 
 .close-button:active {
-
-  transform:
-    scale(0.94);
-
+  transform: scale(0.94);
 }
 
 
@@ -2160,19 +2051,12 @@ h3 {
 
 
 .exercise-row:has(input:checked) {
-
-  opacity:
-    0.52;
-
+  opacity: 0.52;
 }
 
 
-.exercise-row:has(input:checked)
-span {
-
-  text-decoration:
-    line-through;
-
+.exercise-row:has(input:checked) span {
+  text-decoration: line-through;
 }
 
 
@@ -2399,7 +2283,7 @@ span {
     fixed;
 
   z-index:
-    100;
+    110;
 
   left:
     50%;
@@ -2412,10 +2296,7 @@ span {
     );
 
   transform:
-    translate(
-      -50%,
-      15px
-    );
+    translate(-50%, 15px);
 
   max-width:
     calc(100% - 40px);
@@ -2480,10 +2361,7 @@ span {
     1;
 
   transform:
-    translate(
-      -50%,
-      0
-    );
+    translate(-50%, 0);
 
 }
 
@@ -2494,7 +2372,7 @@ span {
 
 @media (max-width: 560px) {
 
-  body::before {
+  .world-overlay {
 
     background-position:
       58% center;
@@ -2557,10 +2435,7 @@ span {
 
 
   .stats-grid {
-
-    grid-template-columns:
-      1fr;
-
+    grid-template-columns: 1fr;
   }
 
 
@@ -2610,10 +2485,7 @@ span {
 
 
   .stat-card small {
-
-    grid-column:
-      1 / -1;
-
+    grid-column: 1 / -1;
   }
 
 
@@ -2663,18 +2535,12 @@ span {
 
 
   .quick-quests {
-
-    grid-template-columns:
-      1fr;
-
+    grid-template-columns: 1fr;
   }
 
 
   .quick-quest {
-
-    min-height:
-      120px;
-
+    min-height: 120px;
   }
 
 
@@ -2721,10 +2587,7 @@ span {
 
 
   .nav-item {
-
-    aspect-ratio:
-      2.7 / 1;
-
+    aspect-ratio: 2.7 / 1;
   }
 
 }
@@ -2737,10 +2600,7 @@ span {
 @media (min-width: 700px) {
 
   .app-shell {
-
-    padding-inline:
-      26px;
-
+    padding-inline: 26px;
   }
 
 
@@ -2793,10 +2653,7 @@ span {
    28. REDUCED MOTION
 ========================================================= */
 
-@media (
-  prefers-reduced-motion:
-  reduce
-) {
+@media (prefers-reduced-motion: reduce) {
 
   *,
   *::before,
