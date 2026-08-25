@@ -3,6 +3,7 @@
    FULL FANTASY UI PASS
    Artwork-Driven Panels
    Fantasy Typography
+   Character Tarot Cards
    Party + Settings Views
 ========================================================= */
 
@@ -1555,7 +1556,271 @@ p {
 
 
 /* =========================================================
-   15. CHARACTER STATS
+   15. CHARACTER HERO / TAROT CARD
+========================================================= */
+
+.character-hero {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(220px, 0.85fr);
+
+  align-items:
+    center;
+
+  gap:
+    24px;
+
+  margin-bottom:
+    34px;
+
+}
+
+
+.character-card-wrap {
+
+  position:
+    relative;
+
+  width:
+    100%;
+
+  max-width:
+    430px;
+
+  margin-inline:
+    auto;
+
+  filter:
+    drop-shadow(
+      0 22px 30px
+      rgba(0, 0, 0, 0.62)
+    );
+
+}
+
+
+.character-card-image {
+
+  display:
+    block;
+
+  width:
+    100%;
+
+  height:
+    auto;
+
+  border:
+    0;
+
+  object-fit:
+    contain;
+
+}
+
+
+.character-identity {
+
+  min-width:
+    0;
+
+  padding:
+    24px;
+
+  background-image:
+    url("mossy-stone.webp");
+
+  background-size:
+    100% 100%;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
+
+  box-shadow:
+    var(--shadow);
+
+}
+
+
+.character-identity h2 {
+
+  margin-bottom:
+    6px;
+
+  color:
+    var(--cream);
+
+}
+
+
+.character-class {
+
+  margin-bottom:
+    22px;
+
+  color:
+    var(--gold-light);
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.76rem;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.35;
+
+  letter-spacing:
+    0.09em;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.8);
+
+}
+
+
+.character-wallet {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    18px;
+
+  padding:
+    15px
+    0
+    4px;
+
+  border-top:
+    1px solid
+    rgba(221, 170, 83, 0.32);
+
+}
+
+
+.gold-label {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    8px;
+
+  color:
+    var(--cream-soft);
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.68rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.08em;
+
+  text-transform:
+    uppercase;
+
+}
+
+
+.gold-label::before {
+
+  content:
+    "";
+
+  width:
+    18px;
+
+  height:
+    18px;
+
+  flex:
+    0 0 18px;
+
+  border:
+    1px solid
+    #6f4b1e;
+
+  border-radius:
+    50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #ffe284 0%,
+      #e1ad43 38%,
+      #9e6720 72%,
+      #5f3a13 100%
+    );
+
+  box-shadow:
+    inset
+    0 1px 2px
+    rgba(255, 246, 191, 0.72),
+    0 2px 4px
+    rgba(0, 0, 0, 0.45);
+
+}
+
+
+#characterGold {
+
+  color:
+    #efc66f;
+
+  font-family:
+    var(--font-display);
+
+  font-size:
+    clamp(
+      1.6rem,
+      5vw,
+      2.25rem
+    );
+
+  font-weight:
+    700;
+
+  line-height:
+    1;
+
+  text-shadow:
+    0 2px 5px
+    rgba(0, 0, 0, 0.76);
+
+}
+
+
+/* =========================================================
+   16. CHARACTER STATS
 ========================================================= */
 
 .stats-grid {
@@ -1804,7 +2069,7 @@ p {
 
 
 /* =========================================================
-   16. CHARACTER SUMMARY
+   17. CHARACTER SUMMARY
 ========================================================= */
 
 .character-summary-panel {
@@ -1829,14 +2094,6 @@ p {
 
   box-shadow:
     var(--shadow);
-
-}
-
-
-.character-summary-panel h2 {
-
-  margin-bottom:
-    20px;
 
 }
 
@@ -1898,7 +2155,7 @@ p {
 
 
 /* =========================================================
-   17. PARTY VIEW
+   18. PARTY VIEW
 ========================================================= */
 
 .party-hero,
@@ -2017,7 +2274,7 @@ p {
 
 
 /* =========================================================
-   18. FANTASY ACTION BUTTONS
+   19. FANTASY ACTION BUTTONS
 ========================================================= */
 
 .fantasy-action-button {
@@ -2087,7 +2344,7 @@ p {
 
 
 /* =========================================================
-   19. JOIN PARTY
+   20. JOIN PARTY
 ========================================================= */
 
 .join-party-form {
@@ -2194,7 +2451,7 @@ p {
 
 
 /* =========================================================
-   20. PARTY DASHBOARD
+   21. PARTY DASHBOARD
 ========================================================= */
 
 .party-dashboard[hidden] {
@@ -2482,7 +2739,7 @@ p {
 
 
 /* =========================================================
-   21. SETTINGS
+   22. SETTINGS
 ========================================================= */
 
 .settings-panel {
@@ -2610,7 +2867,7 @@ p {
 
 
 /* =========================================================
-   22. SETTINGS DANGER CONTROLS
+   23. SETTINGS DANGER CONTROLS
 ========================================================= */
 
 .danger-panel {
@@ -2690,7 +2947,7 @@ p {
 
 
 /* =========================================================
-   23. CUSTOM BOTTOM NAV
+   24. CUSTOM BOTTOM NAV
 ========================================================= */
 
 .bottom-nav {
@@ -2863,7 +3120,7 @@ p {
 
 
 /* =========================================================
-   24. DIALOGS
+   25. DIALOGS
 ========================================================= */
 
 .quest-dialog,
@@ -2958,7 +3215,7 @@ p {
 
 
 /* =========================================================
-   25. X BUTTON
+   26. X BUTTON
 ========================================================= */
 
 .close-button {
@@ -3020,7 +3277,7 @@ p {
 
 
 /* =========================================================
-   26. QUEST DIALOG CONTENT
+   27. QUEST DIALOG CONTENT
 ========================================================= */
 
 .quest-description {
@@ -3089,7 +3346,7 @@ p {
 
 
 /* =========================================================
-   27. CHECKLIST
+   28. CHECKLIST
 ========================================================= */
 
 .exercise-list {
@@ -3188,7 +3445,7 @@ p {
 
 
 /* =========================================================
-   28. TIMER
+   29. TIMER
 ========================================================= */
 
 .quest-timer {
@@ -3294,7 +3551,7 @@ p {
 
 
 /* =========================================================
-   29. COMPLETE QUEST
+   30. COMPLETE QUEST
 ========================================================= */
 
 .complete-quest-button {
@@ -3343,7 +3600,7 @@ p {
 
 
 /* =========================================================
-   30. HISTORY
+   31. HISTORY
 ========================================================= */
 
 #historyList {
@@ -3410,7 +3667,7 @@ p {
 
 
 /* =========================================================
-   31. TOAST
+   32. TOAST
 ========================================================= */
 
 .toast {
@@ -3512,7 +3769,7 @@ p {
 
 
 /* =========================================================
-   32. MOBILE
+   33. MOBILE
 ========================================================= */
 
 @media (max-width: 560px) {
@@ -3575,6 +3832,78 @@ p {
 
     width:
       100%;
+
+  }
+
+
+  /* CHARACTER TAROT */
+
+  .character-hero {
+
+    grid-template-columns:
+      1fr;
+
+    gap:
+      16px;
+
+  }
+
+
+  .character-card-wrap {
+
+    width:
+      min(
+        100%,
+        440px
+      );
+
+  }
+
+
+  .character-card-image {
+
+    width:
+      100%;
+
+  }
+
+
+  .character-identity {
+
+    padding:
+      22px 24px;
+
+  }
+
+
+  .character-identity .eyebrow {
+
+    margin-bottom:
+      5px;
+
+  }
+
+
+  .character-identity h2 {
+
+    font-size:
+      1.6rem;
+
+  }
+
+
+  .character-class {
+
+    margin-bottom:
+      16px;
+
+  }
+
+
+  .character-wallet {
+
+    padding-top:
+      13px;
 
   }
 
@@ -3654,7 +3983,37 @@ p {
   .character-summary-grid {
 
     grid-template-columns:
-      1fr;
+      repeat(3, 1fr);
+
+  }
+
+
+  .summary-stat {
+
+    padding:
+      10px 8px;
+
+    text-align:
+      center;
+
+  }
+
+
+  .summary-stat span {
+
+    font-size:
+      0.68rem;
+
+    line-height:
+      1.2;
+
+  }
+
+
+  .summary-stat strong {
+
+    font-size:
+      0.95rem;
 
   }
 
@@ -3706,7 +4065,7 @@ p {
 
 
 /* =========================================================
-   33. SMALL PHONES
+   34. SMALL PHONES
 ========================================================= */
 
 @media (max-width: 390px) {
@@ -3783,6 +4142,46 @@ p {
   }
 
 
+  .character-card-wrap {
+
+    width:
+      100%;
+
+  }
+
+
+  .character-identity {
+
+    padding:
+      19px 20px;
+
+  }
+
+
+  .character-identity h2 {
+
+    font-size:
+      1.4rem;
+
+  }
+
+
+  .character-class {
+
+    font-size:
+      0.66rem;
+
+  }
+
+
+  #characterGold {
+
+    font-size:
+      1.7rem;
+
+  }
+
+
   .stat-card {
 
     min-height:
@@ -3791,6 +4190,45 @@ p {
     padding:
       30px
       27px;
+
+  }
+
+
+  .character-summary-grid {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .summary-stat {
+
+    display:
+      flex;
+
+    align-items:
+      center;
+
+    justify-content:
+      space-between;
+
+    gap:
+      15px;
+
+    text-align:
+      left;
+
+  }
+
+
+  .summary-stat span {
+
+    margin-bottom:
+      0;
+
+    font-size:
+      0.78rem;
 
   }
 
@@ -3858,7 +4296,7 @@ p {
 
 
 /* =========================================================
-   34. TABLET / DESKTOP
+   35. TABLET / DESKTOP
 ========================================================= */
 
 @media (min-width: 700px) {
@@ -3929,7 +4367,7 @@ p {
 
 
 /* =========================================================
-   35. REDUCED MOTION
+   36. REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
