@@ -2,7 +2,9 @@
 // QUEST BOARD
 // app.js
 //
-// Phase 3:
+// Phase 3.1:
+// - Stable profile IDs separate from display names
+// - Automatic migration from legacy Farmer / Jess identity
 // - Independent device profiles
 // - Four real app views
 // - Weekly configurable objective
@@ -11,7 +13,7 @@
 // - XP + levels
 // - Gold economy
 // - Character tarot cards
-// - Character classes
+// - Fixed character classes
 // - History
 // - Boss Battle unlock
 // - Character summary
@@ -26,11 +28,13 @@
 // =========================================================
 
 const QUESTS = [
+
   {
     id: "there-back",
     title: "There and Back",
     category: "Endurance",
     time: "15–25 min",
+
     xpType: "endurance",
     xp: 20,
     gold: 12,
@@ -43,11 +47,13 @@ const QUESTS = [
     ]
   },
 
+
   {
     id: "keep",
     title: "The Keep",
     category: "Strength",
     time: "10–20 min",
+
     xpType: "strength",
     xp: 25,
     gold: 15,
@@ -64,11 +70,13 @@ const QUESTS = [
     ]
   },
 
+
   {
     id: "dragonstrength",
     title: "DragonStrength",
     category: "Strength",
     time: "10–20 min",
+
     xpType: "strength",
     xp: 30,
     gold: 20,
@@ -85,11 +93,13 @@ const QUESTS = [
     ]
   },
 
+
   {
     id: "rogue",
     title: "Rogue Mode",
     category: "Mixed",
     time: "10 min",
+
     xpType: "strength",
     xp: 20,
     gold: 15,
@@ -106,11 +116,13 @@ const QUESTS = [
     ]
   },
 
+
   {
     id: "restoration",
     title: "Restoration",
     category: "Recovery",
     time: "10–20 min",
+
     xpType: "restoration",
     xp: 20,
     gold: 10,
@@ -128,11 +140,13 @@ const QUESTS = [
     ]
   },
 
+
   {
     id: "ranger",
     title: "Ranger Training",
     category: "Endurance",
     time: "20–30 min",
+
     xpType: "endurance",
     xp: 30,
     gold: 20,
@@ -148,6 +162,7 @@ const QUESTS = [
       "Complete the full 1-mile route"
     ]
   }
+
 ];
 
 
@@ -158,10 +173,12 @@ const QUESTS = [
 const SPECIAL_QUESTS = {
 
   emergency: {
+
     id: "emergency",
     title: "Emergency Quest",
     category: "Emergency",
     time: "5 min",
+
     xpType: "strength",
     xp: 10,
     gold: 5,
@@ -176,13 +193,17 @@ const SPECIAL_QUESTS = {
       "10 deadlifts",
       "Repeat until five minutes is complete"
     ]
+
   },
 
+
   boss: {
+
     id: "boss",
     title: "Boss Battle",
     category: "Boss",
     time: "30–45 min",
+
     xpType: "strength",
     xp: 50,
     gold: 50,
@@ -195,17 +216,29 @@ const SPECIAL_QUESTS = {
       "Choose The Keep, DragonStrength, or Rogue Mode",
       "Complete 20 minutes of strength work"
     ]
+
   }
+
 };
 
 
 // =========================================================
-// 3. CHARACTER DATA
+// 3. CHARACTER / PROFILE DATA
 // =========================================================
 
 const CHARACTER_PROFILES = {
 
-  Farmer: {
+  farmer: {
+
+    profileId:
+      "farmer",
+
+    legacyName:
+      "Farmer",
+
+    defaultName:
+      "Farmer",
+
     className:
       "Half-Orc Wizard",
 
@@ -214,9 +247,21 @@ const CHARACTER_PROFILES = {
 
     theme:
       "ember"
+
   },
 
-  Jess: {
+
+  jess: {
+
+    profileId:
+      "jess",
+
+    legacyName:
+      "Jess",
+
+    defaultName:
+      "Jess",
+
     className:
       "Rogue Witch Assassin",
 
@@ -225,7 +270,9 @@ const CHARACTER_PROFILES = {
 
     theme:
       "amethyst"
+
   }
+
 };
 
 
@@ -233,33 +280,158 @@ const CHARACTER_PROFILES = {
 // 4. APP CONSTANTS
 // =========================================================
 
-const DEFAULT_PROFILES = [
-  "Farmer",
-  "Jess"
-];
+const DEFAULT_WEEKLY_GOAL =
+  3;
 
-const DEFAULT_WEEKLY_GOAL = 3;
+const XP_PER_LEVEL =
+  100;
 
-const XP_PER_LEVEL = 100;
-
-const PARTY_GOAL_MULTIPLIER = 2;
+const PARTY_GOAL_MULTIPLIER =
+  2;
 
 
 // =========================================================
-// 5. APP STATE
+// 5. PROFILE ID HELPERS
 // =========================================================
 
-let activeProfile =
-  localStorage.getItem(
-    "questBoardActiveProfile"
-  ) ||
-  null;
+function normalizeProfileId(
+  value
+) {
+
+  const normalized =
+    String(
+      value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+
+  if (
+    normalized === "jess"
+  ) {
+
+    return "jess";
+
+  }
+
+
+  if (
+    normalized === "farmer"
+  ) {
+
+    return "farmer";
+
+  }
+
+
+  return null;
+}
+
+
+function getLegacyProfileName(
+  profileId
+) {
+
+  return (
+    CHARACTER_PROFILES[
+      profileId
+    ]?.legacyName
+    ||
+    "Farmer"
+  );
+}
+
+
+function getCharacterConfig(
+  profileId = activeProfileId
+) {
+
+  return (
+    CHARACTER_PROFILES[
+      profileId
+    ]
+    ||
+    CHARACTER_PROFILES.farmer
+  );
+}
+
+
+// =========================================================
+// 6. PROFILE ID MIGRATION
+// =========================================================
+
+function getInitialProfileId() {
+
+  /*
+    New architecture uses:
+
+    questBoardActiveProfileId = "farmer"
+    questBoardActiveProfileId = "jess"
+
+    Older builds used:
+
+    questBoardActiveProfile = "Farmer"
+    questBoardActiveProfile = "Jess"
+  */
+
+
+  const newSavedId =
+    normalizeProfileId(
+      localStorage.getItem(
+        "questBoardActiveProfileId"
+      )
+    );
+
+
+  if (
+    newSavedId
+  ) {
+
+    return newSavedId;
+
+  }
+
+
+  const legacyValue =
+    normalizeProfileId(
+      localStorage.getItem(
+        "questBoardActiveProfile"
+      )
+    );
+
+
+  if (
+    legacyValue
+  ) {
+
+    localStorage.setItem(
+      "questBoardActiveProfileId",
+      legacyValue
+    );
+
+
+    return legacyValue;
+
+  }
+
+
+  return null;
+}
+
+
+// =========================================================
+// 7. APP STATE
+// =========================================================
+
+let activeProfileId =
+  getInitialProfileId();
 
 
 let activeView =
   localStorage.getItem(
     "questBoardActiveView"
-  ) ||
+  )
+  ||
   "board";
 
 
@@ -280,7 +452,7 @@ let toastTimeout =
 
 
 // =========================================================
-// 6. DOM HELPERS
+// 8. DOM HELPERS
 // =========================================================
 
 const $ =
@@ -298,13 +470,17 @@ const $$ =
 
 
 // =========================================================
-// 7. PROFILE SETUP
+// 9. PROFILE SETUP
 // =========================================================
 
 function chooseProfile() {
 
-  if (activeProfile) {
+  if (
+    activeProfileId
+  ) {
+
     return;
+
   }
 
 
@@ -314,69 +490,109 @@ function chooseProfile() {
     );
 
 
-  if (
-    choice &&
-    choice.trim().toLowerCase() === "jess"
-  ) {
+  const selectedId =
+    normalizeProfileId(
+      choice
+    );
 
-    activeProfile =
-      "Jess";
 
-  }
-
-  else {
-
-    activeProfile =
-      "Farmer";
-
-  }
+  activeProfileId =
+    selectedId
+    ||
+    "farmer";
 
 
   localStorage.setItem(
+    "questBoardActiveProfileId",
+    activeProfileId
+  );
+
+
+  /*
+    Keep the legacy key updated too.
+
+    This makes older builds less likely
+    to behave strangely if they are still
+    temporarily cached.
+  */
+
+  localStorage.setItem(
     "questBoardActiveProfile",
-    activeProfile
+    getLegacyProfileName(
+      activeProfileId
+    )
   );
 }
 
 
 // =========================================================
-// 8. STORAGE KEYS
+// 10. STORAGE KEYS
 // =========================================================
 
 function getStorageKey() {
 
+  /*
+    Intentionally retain the old
+    Farmer / Jess key format.
+
+    That means existing save data survives
+    without having to copy/delete storage.
+  */
+
+  const legacyName =
+    getLegacyProfileName(
+      activeProfileId
+    );
+
+
   return (
-    `questBoardState-${activeProfile}`
+    `questBoardState-${legacyName}`
   );
 }
 
 
 function getSettingsKey() {
 
+  const legacyName =
+    getLegacyProfileName(
+      activeProfileId
+    );
+
+
   return (
-    `questBoardSettings-${activeProfile}`
+    `questBoardSettings-${legacyName}`
   );
 }
 
 
 function getPartyKey() {
 
+  const legacyName =
+    getLegacyProfileName(
+      activeProfileId
+    );
+
+
   return (
-    `questBoardParty-${activeProfile}`
+    `questBoardParty-${legacyName}`
   );
 }
 
 
 // =========================================================
-// 9. SETTINGS STORAGE
+// 11. SETTINGS STORAGE
 // =========================================================
 
 function createFreshSettings() {
 
+  const character =
+    getCharacterConfig();
+
+
   return {
 
     playerName:
-      activeProfile,
+      character.defaultName,
 
     weeklyGoal:
       DEFAULT_WEEKLY_GOAL,
@@ -399,7 +615,9 @@ function getSettings() {
     );
 
 
-  if (!saved) {
+  if (
+    !saved
+  ) {
 
     return (
       createFreshSettings()
@@ -410,19 +628,25 @@ function getSettings() {
 
   try {
 
+    const parsed =
+      JSON.parse(
+        saved
+      );
+
+
     return {
 
       ...createFreshSettings(),
 
-      ...JSON.parse(
-        saved
-      )
+      ...parsed
 
     };
 
   }
 
-  catch (error) {
+  catch (
+    error
+  ) {
 
     console.error(
       "Could not read Quest Board settings.",
@@ -433,6 +657,7 @@ function getSettings() {
     return (
       createFreshSettings()
     );
+
   }
 }
 
@@ -451,7 +676,7 @@ function saveSettings(
 
 
 // =========================================================
-// 10. QUEST STATE STORAGE
+// 12. QUEST STATE STORAGE
 // =========================================================
 
 function createFreshState() {
@@ -488,7 +713,7 @@ function createFreshState() {
 
 
 // =========================================================
-// 11. SAVE MIGRATION
+// 13. SAVE MIGRATION
 // =========================================================
 
 function migrateState(
@@ -497,6 +722,12 @@ function migrateState(
 
   const fresh =
     createFreshState();
+
+
+  const safeGold =
+    Number(
+      parsed?.gold
+    );
 
 
   return {
@@ -510,7 +741,8 @@ function migrateState(
       ...fresh.xp,
 
       ...(
-        parsed.xp ||
+        parsed?.xp
+        ||
         {}
       )
 
@@ -518,41 +750,45 @@ function migrateState(
 
     gold:
       Number.isFinite(
-        Number(
-          parsed.gold
-        )
+        safeGold
       )
-        ? Number(
-            parsed.gold
-          )
+        ? safeGold
         : 0,
 
     weeklyCompleted:
       Array.isArray(
-        parsed.weeklyCompleted
+        parsed?.weeklyCompleted
       )
         ? parsed.weeklyCompleted
         : [],
 
     history:
       Array.isArray(
-        parsed.history
+        parsed?.history
       )
         ? parsed.history.map(
-            item => ({
-              ...item,
+            item => {
 
-              gold:
-                Number.isFinite(
-                  Number(
-                    item.gold
+              const historicalGold =
+                Number(
+                  item?.gold
+                );
+
+
+              return {
+
+                ...item,
+
+                gold:
+                  Number.isFinite(
+                    historicalGold
                   )
-                )
-                  ? Number(
-                      item.gold
-                    )
-                  : 0
-            })
+                    ? historicalGold
+                    : 0
+
+              };
+
+            }
           )
         : []
 
@@ -561,7 +797,7 @@ function migrateState(
 
 
 // =========================================================
-// 12. READ STATE
+// 14. READ / SAVE STATE
 // =========================================================
 
 function getState() {
@@ -572,7 +808,9 @@ function getState() {
     );
 
 
-  if (!saved) {
+  if (
+    !saved
+  ) {
 
     return (
       createFreshState()
@@ -597,7 +835,9 @@ function getState() {
 
   }
 
-  catch (error) {
+  catch (
+    error
+  ) {
 
     console.error(
       "Could not read Quest Board save data.",
@@ -608,6 +848,7 @@ function getState() {
     return (
       createFreshState()
     );
+
   }
 }
 
@@ -626,8 +867,71 @@ function saveState(
 
 
 // =========================================================
-// 13. LOCAL PARTY STORAGE
+// 15. LOCAL PARTY STORAGE
 // =========================================================
+
+function migrateParty(
+  party
+) {
+
+  if (
+    !party
+  ) {
+
+    return null;
+
+  }
+
+
+  const members =
+    Array.isArray(
+      party.members
+    )
+      ? party.members.map(
+          member => {
+
+            const migratedProfileId =
+              normalizeProfileId(
+                member.profileId
+                ||
+                member.profile
+              );
+
+
+            return {
+
+              ...member,
+
+              profileId:
+                migratedProfileId,
+
+              name:
+                member.name
+                ||
+                (
+                  migratedProfileId
+                    ? getCharacterConfig(
+                        migratedProfileId
+                      ).defaultName
+                    : "Adventurer"
+                )
+
+            };
+
+          }
+        )
+      : [];
+
+
+  return {
+
+    ...party,
+
+    members
+
+  };
+}
+
 
 function getParty() {
 
@@ -637,22 +941,34 @@ function getParty() {
     );
 
 
-  if (!saved) {
+  if (
+    !saved
+  ) {
+
     return null;
+
   }
 
 
   try {
 
-    return (
+    const parsed =
       JSON.parse(
         saved
+      );
+
+
+    return (
+      migrateParty(
+        parsed
       )
     );
 
   }
 
-  catch (error) {
+  catch (
+    error
+  ) {
 
     console.error(
       "Could not read party data.",
@@ -661,6 +977,7 @@ function getParty() {
 
 
     return null;
+
   }
 }
 
@@ -687,7 +1004,7 @@ function clearParty() {
 
 
 // =========================================================
-// 14. WEEK HANDLING
+// 16. WEEK HANDLING
 // =========================================================
 
 function getWeekKey(
@@ -705,7 +1022,8 @@ function getWeekKey(
 
 
   const dayNumber =
-    workingDate.getUTCDay() ||
+    workingDate.getUTCDay()
+    ||
     7;
 
 
@@ -732,7 +1050,8 @@ function getWeekKey(
     Math.ceil(
       (
         (
-          workingDate -
+          workingDate
+          -
           yearStart
         )
         /
@@ -748,14 +1067,15 @@ function getWeekKey(
   return (
     `${workingDate.getUTCFullYear()}`
     +
-    `-W`
+    "-W"
     +
     String(
       weekNumber
-    ).padStart(
-      2,
-      "0"
     )
+      .padStart(
+        2,
+        "0"
+      )
   );
 }
 
@@ -786,6 +1106,7 @@ function normalizeWeek() {
     saveState(
       state
     );
+
   }
 
 
@@ -794,7 +1115,7 @@ function normalizeWeek() {
 
 
 // =========================================================
-// 15. LEVEL SYSTEM
+// 17. LEVEL SYSTEM
 // =========================================================
 
 function getLevelData(
@@ -806,14 +1127,16 @@ function getLevelData(
       0,
       Number(
         xp
-      ) ||
+      )
+      ||
       0
     );
 
 
   const level =
     Math.floor(
-      safeXp /
+      safeXp
+      /
       XP_PER_LEVEL
     )
     +
@@ -821,7 +1144,8 @@ function getLevelData(
 
 
   const progress =
-    safeXp %
+    safeXp
+    %
     XP_PER_LEVEL;
 
 
@@ -835,7 +1159,7 @@ function getLevelData(
 
 
 // =========================================================
-// 16. QUEST LOOKUP
+// 18. QUEST LOOKUP
 // =========================================================
 
 function findQuest(
@@ -860,27 +1184,7 @@ function findQuest(
 
 
 // =========================================================
-// 17. CHARACTER CONFIG
-// =========================================================
-
-function getCharacterConfig() {
-
-  return (
-
-    CHARACTER_PROFILES[
-      activeProfile
-    ]
-
-    ||
-
-    CHARACTER_PROFILES.Farmer
-
-  );
-}
-
-
-// =========================================================
-// 18. MAIN RENDER
+// 19. MAIN RENDER
 // =========================================================
 
 function render() {
@@ -945,34 +1249,38 @@ function render() {
 
 
 // =========================================================
-// 19. PROFILE DISPLAY
+// 20. PROFILE DISPLAY
 // =========================================================
 
 function renderProfile(
   settings
 ) {
 
-  const name =
+  const character =
+    getCharacterConfig();
+
+
+  const displayName =
     settings.playerName
     ||
-    activeProfile;
+    character.defaultName;
 
 
   $("#profileName")
     .textContent =
-      name;
+      displayName;
 
 
   $("#profileAvatar")
     .textContent =
-      name
+      displayName
         .charAt(0)
         .toUpperCase();
 }
 
 
 // =========================================================
-// 20. WEEKLY PROGRESS
+// 21. WEEKLY PROGRESS
 // =========================================================
 
 function renderWeeklyProgress(
@@ -1021,7 +1329,8 @@ function renderWeeklyProgress(
 
 
   if (
-    completed >= goal
+    completed >=
+    goal
   ) {
 
     $("#weekStatus")
@@ -1064,7 +1373,7 @@ function renderWeeklyProgress(
 
 
 // =========================================================
-// 21. BOSS BATTLE
+// 22. BOSS BATTLE
 // =========================================================
 
 function renderBossBattle(
@@ -1115,7 +1424,7 @@ function renderBossBattle(
 
 
 // =========================================================
-// 22. QUEST CARDS
+// 23. QUEST CARDS
 // =========================================================
 
 function renderQuestCards() {
@@ -1138,15 +1447,21 @@ function renderQuestCards() {
             <div class="quest-card-content">
 
               <p class="quest-type">
-                ${quest.category}
+                ${escapeHtml(
+                  quest.category
+                )}
               </p>
 
               <h3>
-                ${quest.title}
+                ${escapeHtml(
+                  quest.title
+                )}
               </h3>
 
               <p>
-                ${quest.description}
+                ${escapeHtml(
+                  quest.description
+                )}
               </p>
 
             </div>
@@ -1155,7 +1470,9 @@ function renderQuestCards() {
             <div class="quest-card-meta">
 
               <span class="quest-duration">
-                ${quest.time}
+                ${escapeHtml(
+                  quest.time
+                )}
               </span>
 
               <span
@@ -1182,7 +1499,7 @@ function renderQuestCards() {
 
 
 // =========================================================
-// 23. QUEST CARD EVENTS
+// 24. QUEST CARD EVENTS
 // =========================================================
 
 function bindQuestCards() {
@@ -1207,12 +1524,14 @@ function bindQuestCards() {
             ) {
 
               return;
+
             }
 
 
             openQuest(
               id
             );
+
           };
 
 
@@ -1226,11 +1545,9 @@ function bindQuestCards() {
             event => {
 
               if (
-                event.key ===
-                  "Enter"
+                event.key === "Enter"
                 ||
-                event.key ===
-                  " "
+                event.key === " "
               ) {
 
                 event.preventDefault();
@@ -1239,16 +1556,20 @@ function bindQuestCards() {
                 openQuest(
                   element.dataset.questId
                 );
+
               }
+
             };
+
         }
+
       }
     );
 }
 
 
 // =========================================================
-// 24. CHARACTER STATS
+// 25. CHARACTER STATS
 // =========================================================
 
 function renderCharacterStats(
@@ -1311,21 +1632,13 @@ function renderStat(
 
 
 // =========================================================
-// 25. CHARACTER SUMMARY
+// 26. CHARACTER SUMMARY
 // =========================================================
 
 function renderCharacterSummary(
   state,
   settings
 ) {
-
-  const totalXp =
-    state.xp.strength
-    +
-    state.xp.endurance
-    +
-    state.xp.restoration;
-
 
   const character =
     getCharacterConfig();
@@ -1334,7 +1647,15 @@ function renderCharacterSummary(
   const displayName =
     settings.playerName
     ||
-    activeProfile;
+    character.defaultName;
+
+
+  const totalXp =
+    state.xp.strength
+    +
+    state.xp.endurance
+    +
+    state.xp.restoration;
 
 
   $("#characterProfileName")
@@ -1347,14 +1668,34 @@ function renderCharacterSummary(
       character.className;
 
 
-  $("#characterCardImage")
-    .src =
+  const characterImage =
+    $("#characterCardImage");
+
+
+  if (
+    characterImage
+  ) {
+
+    /*
+      IMPORTANT:
+
+      This now depends ONLY on stable profileId.
+
+      Renaming Jess to "Nightshade"
+      does not turn her into Farmer.
+
+      Renaming Farmer to "Grimfang"
+      does not change his character.
+    */
+
+    characterImage.src =
       character.card;
 
 
-  $("#characterCardImage")
-    .alt =
+    characterImage.alt =
       `${displayName} — ${character.className}`;
+
+  }
 
 
   $("#characterGold")
@@ -1379,11 +1720,15 @@ function renderCharacterSummary(
 
   document.body.dataset.characterTheme =
     character.theme;
+
+
+  document.body.dataset.profileId =
+    activeProfileId;
 }
 
 
 // =========================================================
-// 26. OPEN QUEST
+// 27. OPEN QUEST
 // =========================================================
 
 function openQuest(
@@ -1396,8 +1741,12 @@ function openQuest(
     );
 
 
-  if (!quest) {
+  if (
+    !quest
+  ) {
+
     return;
+
   }
 
 
@@ -1452,7 +1801,7 @@ function openQuest(
 
 
 // =========================================================
-// 27. EXERCISE CHECKLIST
+// 28. EXERCISE CHECKLIST
 // =========================================================
 
 function renderExerciseList(
@@ -1478,7 +1827,9 @@ function renderExerciseList(
             >
 
             <span>
-              ${exercise}
+              ${escapeHtml(
+                exercise
+              )}
             </span>
 
           </label>
@@ -1489,7 +1840,7 @@ function renderExerciseList(
 
 
 // =========================================================
-// 28. COMPLETE QUEST
+// 29. COMPLETE QUEST
 // =========================================================
 
 function completeQuest() {
@@ -1499,6 +1850,7 @@ function completeQuest() {
   ) {
 
     return;
+
   }
 
 
@@ -1577,10 +1929,6 @@ function completeQuest() {
   );
 
 
-  const completedQuest =
-    activeQuest;
-
-
   activeQuest =
     null;
 
@@ -1604,7 +1952,7 @@ function completeQuest() {
 
 
 // =========================================================
-// 29. CLOSE QUEST
+// 30. CLOSE QUEST
 // =========================================================
 
 function closeQuest() {
@@ -1629,7 +1977,7 @@ function closeQuest() {
 
 
 // =========================================================
-// 30. TIMER
+// 31. TIMER
 // =========================================================
 
 function startTimer() {
@@ -1639,6 +1987,7 @@ function startTimer() {
   ) {
 
     return;
+
   }
 
 
@@ -1675,6 +2024,7 @@ function pauseTimer() {
 
     timerInterval =
       null;
+
   }
 
 
@@ -1752,28 +2102,31 @@ function updateTimerDisplay() {
         (
           String(
             hours
-          ).padStart(
-            2,
-            "0"
           )
+            .padStart(
+              2,
+              "0"
+            )
           +
           ":"
           +
           String(
             minutes
-          ).padStart(
-            2,
-            "0"
           )
+            .padStart(
+              2,
+              "0"
+            )
           +
           ":"
           +
           String(
             seconds
-          ).padStart(
-            2,
-            "0"
           )
+            .padStart(
+              2,
+              "0"
+            )
         );
 
   }
@@ -1785,19 +2138,21 @@ function updateTimerDisplay() {
         (
           String(
             minutes
-          ).padStart(
-            2,
-            "0"
           )
+            .padStart(
+              2,
+              "0"
+            )
           +
           ":"
           +
           String(
             seconds
-          ).padStart(
-            2,
-            "0"
           )
+            .padStart(
+              2,
+              "0"
+            )
         );
 
   }
@@ -1805,7 +2160,7 @@ function updateTimerDisplay() {
 
 
 // =========================================================
-// 31. HISTORY
+// 32. HISTORY
 // =========================================================
 
 function openHistory() {
@@ -1821,7 +2176,8 @@ function openHistory() {
 
 
   if (
-    history.length === 0
+    history.length ===
+    0
   ) {
 
     $("#historyList")
@@ -1853,6 +2209,7 @@ function openHistory() {
                 date.toLocaleDateString(
                   undefined,
                   {
+
                     month:
                       "short",
 
@@ -1861,6 +2218,7 @@ function openHistory() {
 
                     year:
                       "numeric"
+
                   }
                 );
 
@@ -1893,9 +2251,11 @@ function openHistory() {
 
                 </article>
               `;
+
             }
           )
           .join("");
+
   }
 
 
@@ -1923,7 +2283,7 @@ function closeHistory() {
 
 
 // =========================================================
-// 32. VIEW NAVIGATION
+// 33. VIEW NAVIGATION
 // =========================================================
 
 const VIEW_HEADERS = {
@@ -1938,6 +2298,7 @@ const VIEW_HEADERS = {
 
   },
 
+
   character: {
 
     eyebrow:
@@ -1948,6 +2309,7 @@ const VIEW_HEADERS = {
 
   },
 
+
   party: {
 
     eyebrow:
@@ -1957,6 +2319,7 @@ const VIEW_HEADERS = {
       "Party"
 
   },
+
 
   settings: {
 
@@ -2011,6 +2374,7 @@ function setView(
           "active-view",
           isActive
         );
+
       }
     );
 
@@ -2021,9 +2385,11 @@ function setView(
 
         button.classList.toggle(
           "active",
-          button.dataset.view ===
-            activeView
+          button.dataset.view
+          ===
+          activeView
         );
+
       }
     );
 
@@ -2108,18 +2474,22 @@ function handleNavigation(
 
 
 // =========================================================
-// 33. SETTINGS RENDER
+// 34. SETTINGS RENDER
 // =========================================================
 
 function renderSettings(
   settings
 ) {
 
+  const character =
+    getCharacterConfig();
+
+
   $("#playerNameInput")
     .value =
       settings.playerName
       ||
-      activeProfile;
+      character.defaultName;
 
 
   $("#weeklyGoalSelect")
@@ -2156,7 +2526,7 @@ function renderSettings(
 
 
 // =========================================================
-// 34. SAVE PLAYER NAME
+// 35. SAVE PLAYER NAME
 // =========================================================
 
 function savePlayerName() {
@@ -2166,7 +2536,8 @@ function savePlayerName() {
 
 
   const name =
-    input.value.trim();
+    input.value
+      .trim();
 
 
   if (
@@ -2179,12 +2550,23 @@ function savePlayerName() {
 
 
     return;
+
   }
 
 
   const settings =
     getSettings();
 
+
+  /*
+    This changes ONLY display name.
+
+    It does NOT affect:
+    - character class
+    - portrait
+    - save identity
+    - party identity
+  */
 
   settings.playerName =
     name;
@@ -2205,7 +2587,7 @@ function savePlayerName() {
 
 
 // =========================================================
-// 35. WEEKLY GOAL
+// 36. WEEKLY GOAL
 // =========================================================
 
 function saveWeeklyGoal() {
@@ -2253,19 +2635,21 @@ function saveWeeklyGoal() {
 
 
 // =========================================================
-// 36. REDUCED MOTION
+// 37. REDUCED MOTION
 // =========================================================
 
 function applyMotionSetting(
   settings
 ) {
 
-  document.body.classList.toggle(
-    "reduce-motion",
-    Boolean(
-      settings.reducedMotion
-    )
-  );
+  document.body
+    .classList
+    .toggle(
+      "reduce-motion",
+      Boolean(
+        settings.reducedMotion
+      )
+    );
 }
 
 
@@ -2299,7 +2683,7 @@ function saveReducedMotion() {
 
 
 // =========================================================
-// 37. SOUND SETTING
+// 38. SOUND SETTING
 // =========================================================
 
 function saveSoundSetting() {
@@ -2327,7 +2711,7 @@ function saveSoundSetting() {
 
 
 // =========================================================
-// 38. RESET THIS WEEK
+// 39. RESET THIS WEEK
 // =========================================================
 
 function resetThisWeek() {
@@ -2374,7 +2758,7 @@ function resetThisWeek() {
 
 
 // =========================================================
-// 39. CLEAR HISTORY
+// 40. CLEAR HISTORY
 // =========================================================
 
 function clearQuestHistory() {
@@ -2417,7 +2801,7 @@ function clearQuestHistory() {
 
 
 // =========================================================
-// 40. RESET CHARACTER
+// 41. RESET CHARACTER
 // =========================================================
 
 function resetCharacter() {
@@ -2452,7 +2836,7 @@ function resetCharacter() {
 
 
 // =========================================================
-// 41. LOCAL PARTY GENERATOR
+// 42. LOCAL PARTY GENERATOR
 // =========================================================
 
 function generatePartyCode() {
@@ -2488,7 +2872,7 @@ function generatePartyCode() {
 
 
 // =========================================================
-// 42. CREATE PARTY
+// 43. CREATE PARTY
 // =========================================================
 
 function createParty() {
@@ -2497,12 +2881,21 @@ function createParty() {
     getSettings();
 
 
+  const character =
+    getCharacterConfig();
+
+
+  const partyId =
+    globalThis.crypto
+      ?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : `party-${Date.now()}`;
+
+
   const party = {
 
     id:
-      crypto.randomUUID
-        ? crypto.randomUUID()
-        : `party-${Date.now()}`,
+      partyId,
 
     name:
       "The Fellowship",
@@ -2515,17 +2908,19 @@ function createParty() {
         .toISOString(),
 
     members: [
+
       {
 
         name:
           settings.playerName
           ||
-          activeProfile,
+          character.defaultName,
 
-        profile:
-          activeProfile
+        profileId:
+          activeProfileId
 
       }
+
     ]
 
   };
@@ -2554,7 +2949,7 @@ function createParty() {
 
 
 // =========================================================
-// 43. SHOW JOIN PARTY
+// 44. SHOW JOIN PARTY
 // =========================================================
 
 function toggleJoinPartyForm() {
@@ -2579,7 +2974,7 @@ function toggleJoinPartyForm() {
 
 
 // =========================================================
-// 44. JOIN PARTY
+// 45. JOIN PARTY
 // =========================================================
 
 function joinParty() {
@@ -2592,7 +2987,8 @@ function joinParty() {
 
 
   if (
-    code.length < 4
+    code.length <
+    4
   ) {
 
     showToast(
@@ -2601,6 +2997,7 @@ function joinParty() {
 
 
     return;
+
   }
 
 
@@ -2608,11 +3005,15 @@ function joinParty() {
     getSettings();
 
 
+  const character =
+    getCharacterConfig();
+
+
   /*
     LOCAL PROTOTYPE ONLY.
 
-    Supabase will eventually replace
-    this local party lookup.
+    Supabase will replace this
+    local implementation.
   */
 
   const party = {
@@ -2631,17 +3032,19 @@ function joinParty() {
         .toISOString(),
 
     members: [
+
       {
 
         name:
           settings.playerName
           ||
-          activeProfile,
+          character.defaultName,
 
-        profile:
-          activeProfile
+        profileId:
+          activeProfileId
 
       }
+
     ]
 
   };
@@ -2680,7 +3083,7 @@ function joinParty() {
 
 
 // =========================================================
-// 45. LEAVE PARTY
+// 46. LEAVE PARTY
 // =========================================================
 
 function leaveParty() {
@@ -2721,7 +3124,7 @@ function leaveParty() {
 
 
 // =========================================================
-// 46. PARTY RENDER
+// 47. PARTY RENDER
 // =========================================================
 
 function renderParty(
@@ -2754,6 +3157,7 @@ function renderParty(
 
 
     return;
+
   }
 
 
@@ -2800,7 +3204,7 @@ function renderParty(
 
 
 // =========================================================
-// 47. PARTY MEMBERS
+// 48. PARTY MEMBERS
 // =========================================================
 
 function renderPartyMembers(
@@ -2831,9 +3235,24 @@ function renderPartyMembers(
         .map(
           member => {
 
+            const memberProfileId =
+              normalizeProfileId(
+                member.profileId
+                ||
+                member.profile
+              );
+
+
             const isCurrent =
-              member.profile ===
-              activeProfile;
+              memberProfileId
+              ===
+              activeProfileId;
+
+
+            const memberName =
+              member.name
+              ||
+              "Adventurer";
 
 
             return `
@@ -2841,9 +3260,11 @@ function renderPartyMembers(
 
                 <div class="party-member-avatar">
                   ${
-                    member.name
-                      .charAt(0)
-                      .toUpperCase()
+                    escapeHtml(
+                      memberName
+                        .charAt(0)
+                        .toUpperCase()
+                    )
                   }
                 </div>
 
@@ -2851,7 +3272,7 @@ function renderPartyMembers(
 
                   <strong>
                     ${escapeHtml(
-                      member.name
+                      memberName
                     )}
                   </strong>
 
@@ -2877,6 +3298,7 @@ function renderPartyMembers(
 
               </article>
             `;
+
           }
         )
         .join("");
@@ -2884,7 +3306,7 @@ function renderPartyMembers(
 
 
 // =========================================================
-// 48. PARTY CHALLENGE
+// 49. PARTY CHALLENGE
 // =========================================================
 
 function renderPartyChallenge(
@@ -2981,13 +3403,23 @@ function renderPartyChallenge(
 
 
 // =========================================================
-// 49. PARTY ACTIVITY
+// 50. PARTY ACTIVITY
 // =========================================================
 
 function renderPartyActivity(
   state,
   settings
 ) {
+
+  const character =
+    getCharacterConfig();
+
+
+  const displayName =
+    settings.playerName
+    ||
+    character.defaultName;
+
 
   const recent =
     state.history.slice(
@@ -2997,7 +3429,8 @@ function renderPartyActivity(
 
 
   if (
-    recent.length === 0
+    recent.length ===
+    0
   ) {
 
     $("#partyActivityList")
@@ -3010,6 +3443,7 @@ function renderPartyActivity(
 
 
     return;
+
   }
 
 
@@ -3029,11 +3463,13 @@ function renderPartyActivity(
               date.toLocaleDateString(
                 undefined,
                 {
+
                   month:
                     "short",
 
                   day:
                     "numeric"
+
                 }
               );
 
@@ -3048,13 +3484,9 @@ function renderPartyActivity(
               <article class="party-activity-item">
 
                 <strong>
-                  ${
-                    escapeHtml(
-                      settings.playerName
-                      ||
-                      activeProfile
-                    )
-                  }
+                  ${escapeHtml(
+                    displayName
+                  )}
                   completed
                   ${escapeHtml(
                     item.title
@@ -3074,6 +3506,7 @@ function renderPartyActivity(
 
               </article>
             `;
+
           }
         )
         .join("");
@@ -3081,7 +3514,7 @@ function renderPartyActivity(
 
 
 // =========================================================
-// 50. TOAST MESSAGE
+// 51. TOAST MESSAGE
 // =========================================================
 
 function showToast(
@@ -3121,7 +3554,7 @@ function showToast(
 
 
 // =========================================================
-// 51. UTILITY
+// 52. UTILITY
 // =========================================================
 
 function capitalize(
@@ -3177,7 +3610,7 @@ function escapeHtml(
 
 
 // =========================================================
-// 52. EVENT LISTENERS
+// 53. EVENT LISTENERS
 // =========================================================
 
 $("#closeQuestButton")
@@ -3233,12 +3666,13 @@ $$(".nav-item")
             button
           )
       );
+
     }
   );
 
 
 // =========================================================
-// 53. SETTINGS EVENTS
+// 54. SETTINGS EVENTS
 // =========================================================
 
 $("#savePlayerNameButton")
@@ -3291,7 +3725,7 @@ $("#resetCharacterButton")
 
 
 // =========================================================
-// 54. PARTY EVENTS
+// 55. PARTY EVENTS
 // =========================================================
 
 $("#createPartyButton")
@@ -3328,6 +3762,7 @@ $("#partyCodeInput")
         joinParty();
 
       }
+
     }
   );
 
@@ -3340,7 +3775,7 @@ $("#leavePartyButton")
 
 
 // =========================================================
-// 55. CLICK OUTSIDE DIALOG TO CLOSE
+// 56. CLICK OUTSIDE DIALOG TO CLOSE
 // =========================================================
 
 $("#questDialog")
@@ -3356,6 +3791,7 @@ $("#questDialog")
         closeQuest();
 
       }
+
     }
   );
 
@@ -3373,12 +3809,13 @@ $("#historyDialog")
         closeHistory();
 
       }
+
     }
   );
 
 
 // =========================================================
-// 56. ESCAPE KEY
+// 57. ESCAPE KEY
 // =========================================================
 
 document.addEventListener(
@@ -3402,7 +3839,9 @@ document.addEventListener(
 
       closeQuest();
 
+
       return;
+
     }
 
 
@@ -3414,17 +3853,20 @@ document.addEventListener(
       closeHistory();
 
     }
+
   }
 );
 
 
 // =========================================================
-// 57. INITIALIZE APP
+// 58. INITIALIZE APP
 // =========================================================
 
 chooseProfile();
 
+
 render();
+
 
 setView(
   activeView
