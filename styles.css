@@ -1,0 +1,1848 @@
+/* =========================================================
+   QUEST BOARD
+   styles.css
+
+   Phase 1:
+   Clean mobile-first structure.
+   Textures, illustrations, and heavier fantasy styling later.
+========================================================= */
+
+
+/* =========================================================
+   1. DESIGN TOKENS
+========================================================= */
+
+:root {
+
+  /* Backgrounds */
+  --bg: #10110f;
+  --bg-soft: #151713;
+
+  --surface: #191b17;
+  --surface-raised: #20231d;
+  --surface-hover: #262a22;
+
+  /* Borders */
+  --border: #34382f;
+  --border-light: #454a3e;
+
+  /* Text */
+  --text: #f1ede2;
+  --text-soft: #c3beb0;
+  --text-muted: #8f9187;
+
+  /* Accent */
+  --gold: #c59a5a;
+  --gold-light: #dfbd82;
+  --gold-dark: #755b36;
+
+  /* Quest categories */
+  --strength: #b06e59;
+  --endurance: #738c72;
+  --restoration: #768b91;
+  --mixed: #8d7796;
+
+  /* Special quests */
+  --emergency: #a96852;
+  --boss: #c59a5a;
+
+  /* Utility */
+  --success: #839b68;
+  --danger: #ad6258;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+
+  /* Shadows */
+  --shadow-sm:
+    0 5px 15px rgba(0, 0, 0, 0.18);
+
+  --shadow-md:
+    0 14px 35px rgba(0, 0, 0, 0.28);
+
+  --shadow-lg:
+    0 24px 60px rgba(0, 0, 0, 0.38);
+
+  /* Layout */
+  --app-width: 760px;
+  --nav-height: 76px;
+
+}
+
+
+/* =========================================================
+   2. RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      180deg,
+      #121410 0%,
+      var(--bg) 35%,
+      #0d0e0c 100%
+    );
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+
+button {
+  color: inherit;
+}
+
+
+button,
+.quest-card {
+  touch-action: manipulation;
+}
+
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+
+button:focus-visible,
+.quest-card:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   3. TYPOGRAPHY
+========================================================= */
+
+h1,
+h2,
+h3 {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-weight: 600;
+}
+
+
+h1 {
+  margin-bottom: 0;
+
+  font-size:
+    clamp(2.1rem, 8vw, 3.25rem);
+
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+
+
+h2 {
+  margin-bottom: 8px;
+
+  font-size:
+    clamp(1.45rem, 5vw, 1.9rem);
+
+  line-height: 1.1;
+}
+
+
+h3 {
+  margin-bottom: 7px;
+
+  font-size: 1.2rem;
+  line-height: 1.15;
+}
+
+
+.eyebrow,
+.quest-type {
+
+  margin-bottom: 6px;
+
+  color: var(--gold);
+
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+
+.muted {
+  color: var(--text-muted);
+}
+
+
+/* =========================================================
+   4. APP SHELL
+========================================================= */
+
+.app-shell {
+
+  width: min(
+    100%,
+    var(--app-width)
+  );
+
+  min-height: 100vh;
+
+  margin-inline: auto;
+
+  padding:
+
+    max(
+      22px,
+      env(safe-area-inset-top)
+    )
+
+    18px
+
+    calc(
+      var(--nav-height)
+      + 48px
+      + env(safe-area-inset-bottom)
+    );
+}
+
+
+main {
+  display: block;
+}
+
+
+/* =========================================================
+   5. HEADER
+========================================================= */
+
+.topbar {
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 26px;
+}
+
+
+.brand-block {
+  min-width: 0;
+}
+
+
+.profile-button {
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  min-height: 46px;
+
+  padding:
+    6px
+    13px
+    6px
+    6px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 999px;
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow-sm);
+
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+
+.profile-button:hover {
+  background: var(--surface-raised);
+  border-color: var(--border-light);
+}
+
+
+.profile-button:active {
+  transform: scale(0.97);
+}
+
+
+.profile-avatar {
+
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: var(--gold);
+
+  color: #18140e;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+
+#profileName {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   6. WEEKLY OBJECTIVE
+========================================================= */
+
+.weekly-objective {
+
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 23px;
+
+  border:
+    1px solid
+    var(--border-light);
+
+  border-radius: var(--radius-xl);
+
+  background:
+    linear-gradient(
+      145deg,
+      #20231d,
+      #171915
+    );
+
+  box-shadow: var(--shadow-md);
+}
+
+
+.weekly-objective::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 22px;
+  right: 22px;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--gold-dark),
+      transparent
+    );
+}
+
+
+.weekly-copy {
+  margin-bottom: 26px;
+}
+
+
+.weekly-copy p:last-child {
+  max-width: 500px;
+  margin-bottom: 0;
+}
+
+
+.weekly-progress {
+  display: grid;
+  gap: 10px;
+}
+
+
+.progress-meta {
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  font-size: 0.85rem;
+}
+
+
+.progress-meta strong {
+  color: var(--gold-light);
+}
+
+
+.progress-meta span {
+  color: var(--text-muted);
+  text-align: right;
+}
+
+
+.progress-track {
+
+  position: relative;
+
+  overflow: hidden;
+
+  height: 11px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 999px;
+
+  background: #0b0c0a;
+}
+
+
+.progress-fill {
+
+  width: 0%;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--gold-dark),
+      var(--gold),
+      var(--gold-light)
+    );
+
+  transition:
+    width 350ms ease;
+}
+
+
+/* =========================================================
+   7. QUICK QUESTS
+========================================================= */
+
+.quick-quests {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 12px;
+
+  margin:
+    14px 0
+    34px;
+}
+
+
+.quick-quest {
+
+  position: relative;
+
+  min-height: 145px;
+
+  padding: 17px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius-lg);
+
+  background:
+    var(--surface);
+
+  text-align: left;
+
+  box-shadow:
+    var(--shadow-sm);
+
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+
+.quick-quest:hover {
+
+  background:
+    var(--surface-raised);
+
+  border-color:
+    var(--border-light);
+
+  transform:
+    translateY(-2px);
+}
+
+
+.quick-quest:active {
+  transform: scale(0.98);
+}
+
+
+.quick-quest strong {
+
+  display: block;
+
+  margin:
+    7px 0
+    8px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 1.12rem;
+}
+
+
+.quest-time {
+
+  display: block;
+
+  color: var(--gold);
+
+  font-size: 0.67rem;
+  font-weight: 900;
+
+  letter-spacing: 0.13em;
+}
+
+
+.quest-summary {
+
+  display: block;
+
+  color: var(--text-muted);
+
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+
+/* Emergency */
+
+.emergency-quest {
+  border-color:
+    rgba(169, 104, 82, 0.5);
+}
+
+
+.emergency-quest .quest-time {
+  color: #cf8d74;
+}
+
+
+/* Boss */
+
+.boss-quest {
+  border-color:
+    rgba(197, 154, 90, 0.55);
+}
+
+
+.boss-quest::after {
+
+  content: "★";
+
+  position: absolute;
+
+  right: 16px;
+  top: 12px;
+
+  color:
+    rgba(197, 154, 90, 0.35);
+
+  font-size: 1.5rem;
+}
+
+
+.boss-quest:disabled {
+
+  opacity: 0.42;
+
+  cursor:
+    not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   8. SECTION HEADINGS
+========================================================= */
+
+.quest-section,
+.character-section {
+  margin-bottom: 36px;
+}
+
+
+.section-heading {
+
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 15px;
+}
+
+
+.section-heading h2 {
+  margin-bottom: 0;
+}
+
+
+.text-button {
+
+  padding: 7px;
+
+  border: 0;
+
+  background:
+    transparent;
+
+  color:
+    var(--gold);
+
+  font-size:
+    0.82rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+}
+
+
+/* =========================================================
+   9. QUEST CARDS
+========================================================= */
+
+.quest-grid {
+  display: grid;
+  gap: 11px;
+}
+
+
+.quest-card {
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 18px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius-lg);
+
+  background:
+    var(--surface);
+
+  box-shadow:
+    var(--shadow-sm);
+
+  cursor:
+    pointer;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+
+.quest-card:hover {
+
+  background:
+    var(--surface-raised);
+
+  border-color:
+    var(--border-light);
+
+  transform:
+    translateY(-1px);
+}
+
+
+.quest-card:active {
+  transform: scale(0.99);
+}
+
+
+.quest-card-content {
+  min-width: 0;
+}
+
+
+.quest-card-content p:last-child {
+
+  margin-bottom: 0;
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    0.84rem;
+
+  line-height:
+    1.45;
+}
+
+
+.quest-card-meta {
+
+  display: grid;
+
+  justify-items: end;
+
+  gap: 8px;
+}
+
+
+.quest-duration {
+
+  padding:
+    5px 9px;
+
+  border:
+    1px solid
+    var(--gold-dark);
+
+  border-radius:
+    999px;
+
+  color:
+    var(--gold);
+
+  font-size:
+    0.68rem;
+
+  font-weight:
+    800;
+
+  white-space:
+    nowrap;
+}
+
+
+.quest-arrow {
+
+  color:
+    var(--text-muted);
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    1.6rem;
+
+  line-height:
+    1;
+}
+
+
+/* Category accents */
+
+.quest-card[data-quest-id="there-back"]
+.quest-type,
+
+.quest-card[data-quest-id="ranger"]
+.quest-type {
+  color: var(--endurance);
+}
+
+
+.quest-card[data-quest-id="keep"]
+.quest-type,
+
+.quest-card[data-quest-id="dragonstrength"]
+.quest-type {
+  color: var(--strength);
+}
+
+
+.quest-card[data-quest-id="restoration"]
+.quest-type {
+  color: var(--restoration);
+}
+
+
+.quest-card[data-quest-id="rogue"]
+.quest-type {
+  color: var(--mixed);
+}
+
+
+/* =========================================================
+   10. CHARACTER STATS
+========================================================= */
+
+.stats-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+}
+
+
+.stat-card {
+
+  padding: 15px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius-md);
+
+  background:
+    var(--surface);
+
+  box-shadow:
+    var(--shadow-sm);
+}
+
+
+.stat-name {
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    0.72rem;
+}
+
+
+.stat-card strong {
+
+  display: block;
+
+  margin:
+    6px 0
+    12px;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    1.15rem;
+}
+
+
+.stat-card small {
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    0.7rem;
+}
+
+
+.stat-progress {
+
+  overflow:
+    hidden;
+
+  height:
+    6px;
+
+  margin-bottom:
+    7px;
+
+  border-radius:
+    999px;
+
+  background:
+    #0b0c0a;
+}
+
+
+.stat-progress-fill {
+
+  width: 0%;
+  height: 100%;
+
+  border-radius:
+    inherit;
+
+  background:
+    var(--gold);
+
+  transition:
+    width 300ms ease;
+}
+
+
+#strengthBar {
+  background:
+    var(--strength);
+}
+
+
+#enduranceBar {
+  background:
+    var(--endurance);
+}
+
+
+#restorationBar {
+  background:
+    var(--restoration);
+}
+
+
+/* =========================================================
+   11. BOTTOM NAVIGATION
+========================================================= */
+
+.bottom-nav {
+
+  position:
+    fixed;
+
+  z-index:
+    50;
+
+  left:
+    50%;
+
+  bottom:
+    max(
+      12px,
+      env(safe-area-inset-bottom)
+    );
+
+  transform:
+    translateX(-50%);
+
+  width:
+    min(
+      calc(100% - 24px),
+      720px
+    );
+
+  min-height:
+    var(--nav-height);
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap:
+    4px;
+
+  padding:
+    8px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    22px;
+
+  background:
+    rgba(24, 26, 22, 0.94);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+
+  box-shadow:
+    var(--shadow-lg);
+}
+
+
+.nav-item {
+
+  min-width:
+    0;
+
+  border:
+    0;
+
+  border-radius:
+    14px;
+
+  background:
+    transparent;
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    0.75rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+
+.nav-item.active {
+
+  background:
+    var(--surface-raised);
+
+  color:
+    var(--gold-light);
+}
+
+
+/* =========================================================
+   12. DIALOGS
+========================================================= */
+
+.quest-dialog,
+.history-dialog {
+
+  width:
+    min(
+      calc(100% - 24px),
+      640px
+    );
+
+  max-height:
+    88vh;
+
+  padding:
+    22px;
+
+  overflow-y:
+    auto;
+
+  border:
+    1px solid
+    var(--border-light);
+
+  border-radius:
+    var(--radius-xl);
+
+  background:
+    var(--surface);
+
+  color:
+    var(--text);
+
+  box-shadow:
+    var(--shadow-lg);
+}
+
+
+.quest-dialog::backdrop,
+.history-dialog::backdrop {
+
+  background:
+    rgba(0, 0, 0, 0.74);
+
+  backdrop-filter:
+    blur(6px);
+
+  -webkit-backdrop-filter:
+    blur(6px);
+}
+
+
+.dialog-header {
+
+  display:
+    flex;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+}
+
+
+.dialog-header h2 {
+  margin-bottom: 0;
+}
+
+
+.close-button {
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  width:
+    40px;
+
+  height:
+    40px;
+
+  flex-shrink:
+    0;
+
+  padding:
+    0;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    50%;
+
+  background:
+    var(--surface-raised);
+
+  color:
+    var(--text-soft);
+
+  font-size:
+    1.7rem;
+
+  line-height:
+    1;
+
+  cursor:
+    pointer;
+}
+
+
+.quest-description {
+
+  margin:
+    18px 0;
+
+  color:
+    var(--text-muted);
+
+  line-height:
+    1.55;
+}
+
+
+.quest-detail-meta {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+
+  margin-bottom:
+    20px;
+
+  padding:
+    11px 0;
+
+  border-top:
+    1px solid
+    var(--border);
+
+  border-bottom:
+    1px solid
+    var(--border);
+
+  color:
+    var(--gold);
+
+  font-size:
+    0.78rem;
+
+  font-weight:
+    800;
+}
+
+
+/* =========================================================
+   13. EXERCISE CHECKLIST
+========================================================= */
+
+.exercise-list {
+
+  display:
+    grid;
+
+  gap:
+    9px;
+}
+
+
+.exercise-row {
+
+  display:
+    flex;
+
+  align-items:
+    flex-start;
+
+  gap:
+    12px;
+
+  padding:
+    13px 14px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    14px;
+
+  background:
+    var(--surface-raised);
+
+  cursor:
+    pointer;
+}
+
+
+.exercise-row input {
+
+  flex:
+    0 0 auto;
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  margin:
+    2px 0 0;
+
+  accent-color:
+    var(--gold);
+}
+
+
+.exercise-row span {
+
+  color:
+    var(--text-soft);
+
+  font-size:
+    0.88rem;
+}
+
+
+.exercise-row:has(input:checked) {
+
+  opacity:
+    0.55;
+}
+
+
+.exercise-row:has(input:checked) span {
+
+  text-decoration:
+    line-through;
+}
+
+
+/* =========================================================
+   14. QUEST TIMER
+========================================================= */
+
+.quest-timer {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    20px;
+
+  margin:
+    20px 0;
+
+  padding:
+    16px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    var(--radius-md);
+
+  background:
+    #141612;
+}
+
+
+.quest-timer .eyebrow {
+  margin-bottom: 4px;
+}
+
+
+#timerDisplay {
+
+  display:
+    block;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    2rem;
+
+  font-variant-numeric:
+    tabular-nums;
+
+  letter-spacing:
+    0.02em;
+}
+
+
+.timer-controls {
+
+  display:
+    flex;
+
+  gap:
+    8px;
+}
+
+
+.timer-controls button {
+
+  padding:
+    9px 12px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    11px;
+
+  background:
+    var(--surface-raised);
+
+  color:
+    var(--text-soft);
+
+  font-size:
+    0.78rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+}
+
+
+/* =========================================================
+   15. COMPLETE QUEST BUTTON
+========================================================= */
+
+.complete-quest-button {
+
+  width:
+    100%;
+
+  min-height:
+    54px;
+
+  padding:
+    14px 20px;
+
+  border:
+    0;
+
+  border-radius:
+    15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--gold-light),
+      var(--gold)
+    );
+
+  color:
+    #17130d;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size:
+    1rem;
+
+  font-weight:
+    800;
+
+  cursor:
+    pointer;
+
+  box-shadow:
+    0 10px 25px
+    rgba(197, 154, 90, 0.16);
+
+  transition:
+    transform 150ms ease,
+    filter 150ms ease;
+}
+
+
+.complete-quest-button:hover {
+  filter: brightness(1.06);
+}
+
+
+.complete-quest-button:active {
+  transform: scale(0.985);
+}
+
+
+/* =========================================================
+   16. HISTORY
+========================================================= */
+
+#historyList {
+
+  display:
+    grid;
+
+  gap:
+    10px;
+
+  margin-top:
+    20px;
+}
+
+
+.history-item {
+
+  padding:
+    14px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    14px;
+
+  background:
+    var(--surface-raised);
+}
+
+
+.history-item strong {
+
+  display:
+    block;
+
+  margin-bottom:
+    4px;
+
+  font-family:
+    Georgia,
+    serif;
+}
+
+
+.history-item span {
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    0.78rem;
+}
+
+
+/* =========================================================
+   17. TOAST
+========================================================= */
+
+.toast {
+
+  position:
+    fixed;
+
+  z-index:
+    100;
+
+  left:
+    50%;
+
+  bottom:
+    calc(
+      var(--nav-height)
+      + 35px
+      + env(safe-area-inset-bottom)
+    );
+
+  transform:
+    translate(-50%, 15px);
+
+  max-width:
+    calc(100% - 40px);
+
+  padding:
+    11px 16px;
+
+  border:
+    1px solid
+    var(--gold-dark);
+
+  border-radius:
+    999px;
+
+  background:
+    var(--surface-raised);
+
+  color:
+    var(--text);
+
+  box-shadow:
+    var(--shadow-md);
+
+  opacity:
+    0;
+
+  pointer-events:
+    none;
+
+  font-size:
+    0.82rem;
+
+  font-weight:
+    700;
+
+  text-align:
+    center;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+
+.toast.show {
+
+  opacity:
+    1;
+
+  transform:
+    translate(-50%, 0);
+}
+
+
+/* =========================================================
+   18. MOBILE
+========================================================= */
+
+@media (max-width: 560px) {
+
+  .app-shell {
+    padding-inline: 15px;
+  }
+
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .stat-card {
+
+    display:
+      grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items:
+      center;
+
+    column-gap:
+      16px;
+  }
+
+
+  .stat-card strong {
+
+    margin:
+      0;
+
+    grid-column:
+      2;
+
+    grid-row:
+      1;
+  }
+
+
+  .stat-progress {
+
+    grid-column:
+      1 / -1;
+
+    width:
+      100%;
+
+    margin-top:
+      10px;
+  }
+
+
+  .stat-card small {
+
+    grid-column:
+      1 / -1;
+  }
+
+}
+
+
+/* Small phones */
+
+@media (max-width: 390px) {
+
+  .topbar {
+    gap: 12px;
+  }
+
+
+  #profileName {
+    display: none;
+  }
+
+
+  .profile-button {
+    padding-right: 6px;
+  }
+
+
+  .quick-quests {
+    grid-template-columns: 1fr;
+  }
+
+
+  .quick-quest {
+    min-height: 125px;
+  }
+
+
+  .quest-card {
+    gap: 10px;
+  }
+
+
+  .quest-duration {
+    font-size: 0.62rem;
+  }
+
+
+  .quest-timer {
+
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+
+
+  .nav-item {
+    font-size: 0.68rem;
+  }
+
+}
+
+
+/* =========================================================
+   19. DESKTOP / TABLET
+========================================================= */
+
+@media (min-width: 700px) {
+
+  .app-shell {
+    padding-inline: 26px;
+  }
+
+
+  .quest-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+
+  .quest-card {
+
+    min-height:
+      160px;
+
+    align-items:
+      start;
+  }
+
+
+  .quest-card-meta {
+
+    height:
+      100%;
+
+    align-content:
+      space-between;
+  }
+
+}
+
+
+/* =========================================================
+   20. REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+
+    scroll-behavior:
+      auto !important;
+
+    transition-duration:
+      0.01ms !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+  }
+
+}
