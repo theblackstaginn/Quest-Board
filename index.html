@@ -9,7 +9,10 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <!-- APP ICONS -->
+  <!-- =====================================
+       APP ICONS
+  ====================================== -->
+
   <link
     rel="icon"
     type="image/png"
@@ -21,6 +24,7 @@
     href="icons/app-icon.PNG"
   >
 
+
   <meta
     name="theme-color"
     content="#11100c"
@@ -31,7 +35,10 @@
     content="Quest Board — a gamified weekly fitness tracker."
   >
 
-  <title>Quest Board</title>
+
+  <title>
+    Quest Board
+  </title>
 
 
   <!-- =====================================
@@ -61,7 +68,7 @@
 
   <link
     rel="stylesheet"
-    href="styles.css?v=33"
+    href="styles.css?v=34"
   >
 
 </head>
@@ -69,12 +76,18 @@
 
 <body>
 
+
   <!-- =====================================
        FIXED WORLD BACKGROUND
   ====================================== -->
 
   <div class="world-overlay"></div>
 
+
+
+  <!-- =====================================
+       APP
+  ====================================== -->
 
   <div class="app-shell">
 
@@ -87,11 +100,14 @@
 
       <div class="brand-block">
 
-        <p class="eyebrow">
+        <p
+          class="eyebrow"
+          id="screenEyebrow"
+        >
           Training Guild
         </p>
 
-        <h1>
+        <h1 id="screenTitle">
           Quest Board
         </h1>
 
@@ -123,289 +139,956 @@
     <main>
 
 
-      <!-- =====================================
-           WEEKLY OBJECTIVE
-      ====================================== -->
+      <!-- ==================================================
+           BOARD VIEW
+      =================================================== -->
 
       <section
-        class="weekly-objective"
-        aria-labelledby="weeklyObjectiveTitle"
+        class="app-view active-view"
+        id="boardView"
+        data-app-view="board"
       >
 
-        <div class="weekly-copy">
 
-          <p class="eyebrow">
-            Weekly Objective
-          </p>
+        <!-- =====================================
+             WEEKLY OBJECTIVE
+        ====================================== -->
 
-          <h2 id="weeklyObjectiveTitle">
-            Complete 3 Quests
-          </h2>
+        <section
+          class="weekly-objective"
+          aria-labelledby="weeklyObjectiveTitle"
+        >
 
-          <p class="muted">
-            Choose your battles.
-            Three completed quests wins the week.
-          </p>
+          <div class="weekly-copy">
 
-        </div>
+            <p class="eyebrow">
+              Weekly Objective
+            </p>
+
+            <h2 id="weeklyObjectiveTitle">
+              Complete 3 Quests
+            </h2>
+
+            <p class="muted">
+              Choose your battles.
+              Three completed quests wins the week.
+            </p>
+
+          </div>
 
 
-        <div class="weekly-progress">
+          <div class="weekly-progress">
 
-          <div class="progress-meta">
+            <div class="progress-meta">
 
-            <strong id="weeklyProgressLabel">
-              0 / 3
+              <strong id="weeklyProgressLabel">
+                0 / 3
+              </strong>
+
+              <span id="weekStatus">
+                The board is open.
+              </span>
+
+            </div>
+
+
+            <div
+              class="progress-track"
+              aria-label="Weekly quest progress"
+            >
+
+              <div
+                class="progress-fill"
+                id="weeklyProgressBar"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =====================================
+             SPECIAL QUESTS
+        ====================================== -->
+
+        <section
+          class="quick-quests"
+          aria-label="Special quests"
+        >
+
+          <button
+            class="quick-quest emergency-quest"
+            type="button"
+            data-quest-id="emergency"
+          >
+
+            <span class="quest-time">
+              5 MIN
+            </span>
+
+            <strong>
+              Emergency Quest
             </strong>
 
-            <span id="weekStatus">
-              The board is open.
+            <span class="quest-summary">
+              When your brain says absolutely fucking not.
             </span>
+
+          </button>
+
+
+          <button
+            class="quick-quest boss-quest"
+            id="bossButton"
+            type="button"
+            data-quest-id="boss"
+            disabled
+          >
+
+            <span class="quest-time">
+              30–45 MIN
+            </span>
+
+            <strong>
+              Boss Battle
+            </strong>
+
+            <span
+              class="quest-summary"
+              id="bossLockText"
+            >
+              Unlock by completing 3 quests.
+            </span>
+
+          </button>
+
+        </section>
+
+
+
+        <!-- =====================================
+             QUEST BOARD
+        ====================================== -->
+
+        <section
+          class="quest-section"
+          aria-labelledby="questBoardTitle"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                Available Today
+              </p>
+
+              <h2 id="questBoardTitle">
+                Choose a Quest
+              </h2>
+
+            </div>
+
+
+            <button
+              class="text-button"
+              id="showHistoryButton"
+              type="button"
+            >
+              History
+            </button>
 
           </div>
 
 
           <div
-            class="progress-track"
-            aria-label="Weekly quest progress"
-          >
+            class="quest-grid"
+            id="questGrid"
+          ></div>
 
-            <div
-              class="progress-fill"
-              id="weeklyProgressBar"
-            ></div>
+        </section>
+
+
+      </section>
+
+
+
+      <!-- ==================================================
+           CHARACTER VIEW
+      =================================================== -->
+
+      <section
+        class="app-view"
+        id="characterView"
+        data-app-view="character"
+        hidden
+      >
+
+
+        <section
+          class="character-section"
+          aria-labelledby="characterTitle"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                Character
+              </p>
+
+              <h2 id="characterTitle">
+                Your Progress
+              </h2>
+
+            </div>
 
           </div>
 
-        </div>
-
-      </section>
 
 
+          <!-- =====================================
+               CHARACTER PANELS
+          ====================================== -->
 
-      <!-- =====================================
-           SPECIAL QUESTS
-      ====================================== -->
-
-      <section
-        class="quick-quests"
-        aria-label="Special quests"
-      >
-
-        <button
-          class="quick-quest emergency-quest"
-          type="button"
-          data-quest-id="emergency"
-        >
-
-          <span class="quest-time">
-            5 MIN
-          </span>
-
-          <strong>
-            Emergency Quest
-          </strong>
-
-          <span class="quest-summary">
-            When your brain says absolutely fucking not.
-          </span>
-
-        </button>
+          <div class="stats-grid">
 
 
-        <button
-          class="quick-quest boss-quest"
-          id="bossButton"
-          type="button"
-          data-quest-id="boss"
-          disabled
-        >
+            <!-- STRENGTH -->
 
-          <span class="quest-time">
-            30–45 MIN
-          </span>
+            <article class="stat-card">
 
-          <strong>
-            Boss Battle
-          </strong>
+              <span class="stat-name">
+                Strength
+              </span>
 
-          <span
-            class="quest-summary"
-            id="bossLockText"
-          >
-            Unlock by completing 3 quests.
-          </span>
+              <strong id="strengthLevel">
+                Lv. 1
+              </strong>
 
-        </button>
+              <div class="stat-progress">
 
-      </section>
+                <div
+                  class="stat-progress-fill"
+                  id="strengthBar"
+                ></div>
+
+              </div>
+
+              <small id="strengthXp">
+                0 XP
+              </small>
+
+            </article>
 
 
 
-      <!-- =====================================
-           QUEST BOARD
-      ====================================== -->
+            <!-- ENDURANCE -->
 
-      <section
-        class="quest-section"
-        aria-labelledby="questBoardTitle"
-      >
+            <article class="stat-card">
 
-        <div class="section-heading">
+              <span class="stat-name">
+                Endurance
+              </span>
 
-          <div>
+              <strong id="enduranceLevel">
+                Lv. 1
+              </strong>
+
+              <div class="stat-progress">
+
+                <div
+                  class="stat-progress-fill"
+                  id="enduranceBar"
+                ></div>
+
+              </div>
+
+              <small id="enduranceXp">
+                0 XP
+              </small>
+
+            </article>
+
+
+
+            <!-- RESTORATION -->
+
+            <article class="stat-card">
+
+              <span class="stat-name">
+                Restoration
+              </span>
+
+              <strong id="restorationLevel">
+                Lv. 1
+              </strong>
+
+              <div class="stat-progress">
+
+                <div
+                  class="stat-progress-fill"
+                  id="restorationBar"
+                ></div>
+
+              </div>
+
+              <small id="restorationXp">
+                0 XP
+              </small>
+
+            </article>
+
+
+          </div>
+
+
+
+          <!-- =====================================
+               CHARACTER SUMMARY
+          ====================================== -->
+
+          <section class="character-summary-panel">
 
             <p class="eyebrow">
-              Available Today
+              Adventurer Record
             </p>
 
-            <h2 id="questBoardTitle">
-              Choose a Quest
+            <h2 id="characterProfileName">
+              Farmer
             </h2>
+
+
+            <div class="character-summary-grid">
+
+
+              <div class="summary-stat">
+
+                <span>
+                  Quests This Week
+                </span>
+
+                <strong id="characterWeeklyQuests">
+                  0
+                </strong>
+
+              </div>
+
+
+              <div class="summary-stat">
+
+                <span>
+                  Total Quests
+                </span>
+
+                <strong id="characterTotalQuests">
+                  0
+                </strong>
+
+              </div>
+
+
+              <div class="summary-stat">
+
+                <span>
+                  Total XP
+                </span>
+
+                <strong id="characterTotalXp">
+                  0
+                </strong>
+
+              </div>
+
+
+            </div>
+
+          </section>
+
+
+        </section>
+
+
+      </section>
+
+
+
+      <!-- ==================================================
+           PARTY VIEW
+      =================================================== -->
+
+      <section
+        class="app-view"
+        id="partyView"
+        data-app-view="party"
+        hidden
+      >
+
+
+        <!-- =====================================
+             PARTY HEADER
+        ====================================== -->
+
+        <section class="party-hero">
+
+          <p class="eyebrow">
+            Fellowship
+          </p>
+
+          <h2>
+            Your Party
+          </h2>
+
+          <p class="muted">
+            Train separately.
+            Advance together.
+          </p>
+
+        </section>
+
+
+
+        <!-- =====================================
+             NO PARTY STATE
+        ====================================== -->
+
+        <section
+          class="party-empty-state"
+          id="partyEmptyState"
+        >
+
+          <p class="eyebrow">
+            No Party Joined
+          </p>
+
+          <h2>
+            Form a Fellowship
+          </h2>
+
+          <p>
+            Create a private party or join one using an invite code.
+          </p>
+
+
+          <div class="party-action-grid">
+
+
+            <button
+              class="fantasy-action-button"
+              id="createPartyButton"
+              type="button"
+            >
+              Create Party
+            </button>
+
+
+            <button
+              class="fantasy-action-button secondary"
+              id="showJoinPartyButton"
+              type="button"
+            >
+              Join Party
+            </button>
+
+
+          </div>
+
+
+          <div
+            class="join-party-form"
+            id="joinPartyForm"
+            hidden
+          >
+
+            <label for="partyCodeInput">
+              Party Code
+            </label>
+
+            <input
+              id="partyCodeInput"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              maxlength="12"
+              placeholder="ENTER CODE"
+            >
+
+            <button
+              class="fantasy-action-button"
+              id="joinPartyButton"
+              type="button"
+            >
+              Join Fellowship
+            </button>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- =====================================
+             ACTIVE PARTY
+        ====================================== -->
+
+        <section
+          class="party-dashboard"
+          id="partyDashboard"
+          hidden
+        >
+
+
+          <section class="party-banner">
+
+            <p class="eyebrow">
+              Party
+            </p>
+
+            <h2 id="partyName">
+              The Fellowship
+            </h2>
+
+            <div class="party-code-line">
+
+              <span>
+                Invite Code
+              </span>
+
+              <strong id="partyInviteCode">
+                ------
+              </strong>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- =====================================
+               PARTY MEMBERS
+          ====================================== -->
+
+          <section class="party-section">
+
+            <div class="section-heading">
+
+              <div>
+
+                <p class="eyebrow">
+                  Companions
+                </p>
+
+                <h2>
+                  Party Members
+                </h2>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="party-members"
+              id="partyMembers"
+            ></div>
+
+          </section>
+
+
+
+          <!-- =====================================
+               SHARED CHALLENGE
+          ====================================== -->
+
+          <section class="party-challenge">
+
+            <p class="eyebrow">
+              Shared Challenge
+            </p>
+
+            <h2>
+              Complete 6 Quests
+            </h2>
+
+            <p class="muted">
+              Your combined weekly progress.
+            </p>
+
+
+            <div class="progress-meta">
+
+              <strong id="partyChallengeProgress">
+                0 / 6
+              </strong>
+
+              <span id="partyChallengeStatus">
+                The campaign awaits.
+              </span>
+
+            </div>
+
+
+            <div class="progress-track">
+
+              <div
+                class="progress-fill"
+                id="partyChallengeBar"
+              ></div>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- =====================================
+               PARTY ACTIVITY
+          ====================================== -->
+
+          <section class="party-section">
+
+            <div class="section-heading">
+
+              <div>
+
+                <p class="eyebrow">
+                  Chronicle
+                </p>
+
+                <h2>
+                  Recent Activity
+                </h2>
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="party-activity-list"
+              id="partyActivityList"
+            >
+
+              <p class="muted">
+                No party activity yet.
+              </p>
+
+            </div>
+
+          </section>
+
+
+        </section>
+
+
+      </section>
+
+
+
+      <!-- ==================================================
+           SETTINGS VIEW
+      =================================================== -->
+
+      <section
+        class="app-view"
+        id="settingsView"
+        data-app-view="settings"
+        hidden
+      >
+
+
+        <!-- =====================================
+             SETTINGS HEADER
+        ====================================== -->
+
+        <section class="settings-hero">
+
+          <p class="eyebrow">
+            Guild Configuration
+          </p>
+
+          <h2>
+            Settings
+          </h2>
+
+          <p class="muted">
+            Shape the board to suit your campaign.
+          </p>
+
+        </section>
+
+
+
+        <!-- =====================================
+             PLAYER SETTINGS
+        ====================================== -->
+
+        <section class="settings-panel">
+
+          <p class="eyebrow">
+            Adventurer
+          </p>
+
+          <h2>
+            Player
+          </h2>
+
+
+          <div class="setting-row">
+
+            <div class="setting-copy">
+
+              <strong>
+                Player Name
+              </strong>
+
+              <span>
+                This name appears across your Quest Board.
+              </span>
+
+            </div>
+
+
+            <input
+              class="setting-input"
+              id="playerNameInput"
+              type="text"
+              maxlength="20"
+              autocomplete="off"
+            >
 
           </div>
 
 
           <button
-            class="text-button"
-            id="showHistoryButton"
+            class="fantasy-action-button"
+            id="savePlayerNameButton"
             type="button"
           >
-            History
+            Save Name
           </button>
 
-        </div>
-
-
-        <!--
-          app.js generates quest cards here
-        -->
-
-        <div
-          class="quest-grid"
-          id="questGrid"
-        ></div>
-
-      </section>
+        </section>
 
 
 
-      <!-- =====================================
-           CHARACTER STATS
-      ====================================== -->
+        <!-- =====================================
+             WEEKLY GOAL SETTINGS
+        ====================================== -->
 
-      <section
-        class="character-section"
-        aria-labelledby="characterTitle"
-      >
+        <section class="settings-panel">
 
-        <div class="section-heading">
+          <p class="eyebrow">
+            Campaign
+          </p>
 
-          <div>
+          <h2>
+            Weekly Goal
+          </h2>
 
-            <p class="eyebrow">
-              Character
-            </p>
 
-            <h2 id="characterTitle">
-              Your Progress
-            </h2>
+          <div class="setting-row">
+
+            <div class="setting-copy">
+
+              <strong>
+                Quests Per Week
+              </strong>
+
+              <span>
+                Choose how many quests are required to conquer the week.
+              </span>
+
+            </div>
+
+
+            <select
+              class="setting-input"
+              id="weeklyGoalSelect"
+            >
+
+              <option value="2">
+                2
+              </option>
+
+              <option
+                value="3"
+                selected
+              >
+                3
+              </option>
+
+              <option value="4">
+                4
+              </option>
+
+              <option value="5">
+                5
+              </option>
+
+              <option value="6">
+                6
+              </option>
+
+              <option value="7">
+                7
+              </option>
+
+            </select>
 
           </div>
 
-        </div>
-
-
-        <div class="stats-grid">
-
-
-          <!-- STRENGTH -->
-
-          <article class="stat-card">
-
-            <span class="stat-name">
-              Strength
-            </span>
-
-            <strong id="strengthLevel">
-              Lv. 1
-            </strong>
-
-            <div class="stat-progress">
-
-              <div
-                class="stat-progress-fill"
-                id="strengthBar"
-              ></div>
-
-            </div>
-
-            <small id="strengthXp">
-              0 XP
-            </small>
-
-          </article>
+        </section>
 
 
 
-          <!-- ENDURANCE -->
+        <!-- =====================================
+             INTERFACE SETTINGS
+        ====================================== -->
 
-          <article class="stat-card">
+        <section class="settings-panel">
 
-            <span class="stat-name">
-              Endurance
-            </span>
+          <p class="eyebrow">
+            Interface
+          </p>
 
-            <strong id="enduranceLevel">
-              Lv. 1
-            </strong>
+          <h2>
+            Experience
+          </h2>
 
-            <div class="stat-progress">
 
-              <div
-                class="stat-progress-fill"
-                id="enduranceBar"
-              ></div>
+          <label class="setting-toggle-row">
+
+            <div class="setting-copy">
+
+              <strong>
+                Reduced Motion
+              </strong>
+
+              <span>
+                Limit interface movement and transitions.
+              </span>
 
             </div>
 
-            <small id="enduranceXp">
-              0 XP
-            </small>
 
-          </article>
+            <input
+              id="reducedMotionToggle"
+              type="checkbox"
+            >
+
+          </label>
 
 
+          <label class="setting-toggle-row">
 
-          <!-- RESTORATION -->
+            <div class="setting-copy">
 
-          <article class="stat-card">
+              <strong>
+                Sound Effects
+              </strong>
 
-            <span class="stat-name">
-              Restoration
-            </span>
-
-            <strong id="restorationLevel">
-              Lv. 1
-            </strong>
-
-            <div class="stat-progress">
-
-              <div
-                class="stat-progress-fill"
-                id="restorationBar"
-              ></div>
+              <span>
+                Reserved for future quest and level-up sounds.
+              </span>
 
             </div>
 
-            <small id="restorationXp">
-              0 XP
-            </small>
 
-          </article>
+            <input
+              id="soundToggle"
+              type="checkbox"
+            >
+
+          </label>
+
+        </section>
 
 
-        </div>
+
+        <!-- =====================================
+             DATA CONTROLS
+        ====================================== -->
+
+        <section class="settings-panel danger-panel">
+
+          <p class="eyebrow">
+            Chronicle Management
+          </p>
+
+          <h2>
+            Quest Data
+          </h2>
+
+
+          <button
+            class="settings-danger-button"
+            id="resetWeekButton"
+            type="button"
+          >
+            Reset This Week
+          </button>
+
+
+          <button
+            class="settings-danger-button"
+            id="clearHistoryButton"
+            type="button"
+          >
+            Clear Quest History
+          </button>
+
+
+          <button
+            class="settings-danger-button severe"
+            id="resetCharacterButton"
+            type="button"
+          >
+            Reset Character
+          </button>
+
+        </section>
+
+
+
+        <!-- =====================================
+             PARTY SETTINGS
+        ====================================== -->
+
+        <section
+          class="settings-panel"
+          id="partySettingsPanel"
+        >
+
+          <p class="eyebrow">
+            Fellowship
+          </p>
+
+          <h2>
+            Party
+          </h2>
+
+
+          <p class="muted">
+            Party syncing will connect through Supabase.
+          </p>
+
+
+          <button
+            class="settings-danger-button"
+            id="leavePartyButton"
+            type="button"
+            disabled
+          >
+            Leave Party
+          </button>
+
+        </section>
+
 
       </section>
 
@@ -423,10 +1106,12 @@
       aria-label="Primary navigation"
     >
 
+
       <button
         class="nav-item active"
         type="button"
         data-view="board"
+        aria-label="Quest Board"
       >
         Board
       </button>
@@ -436,6 +1121,7 @@
         class="nav-item"
         type="button"
         data-view="character"
+        aria-label="Character"
       >
         Character
       </button>
@@ -445,6 +1131,7 @@
         class="nav-item"
         type="button"
         data-view="party"
+        aria-label="Party"
       >
         Party
       </button>
@@ -454,9 +1141,11 @@
         class="nav-item"
         type="button"
         data-view="settings"
+        aria-label="Settings"
       >
         Settings
       </button>
+
 
     </nav>
 
@@ -465,9 +1154,9 @@
 
 
 
-  <!-- =====================================
+  <!-- ==================================================
        QUEST DIALOG
-  ====================================== -->
+  =================================================== -->
 
   <dialog
     class="quest-dialog"
@@ -555,6 +1244,7 @@
           Start
         </button>
 
+
         <button
           id="timerResetButton"
           type="button"
@@ -579,9 +1269,9 @@
 
 
 
-  <!-- =====================================
+  <!-- ==================================================
        HISTORY DIALOG
-  ====================================== -->
+  =================================================== -->
 
   <dialog
     class="history-dialog"
@@ -641,10 +1331,11 @@
 
 
   <!-- =====================================
-       APP
+       APP SCRIPT
   ====================================== -->
 
-  <script src="app.js"></script>
+  <script src="app.js?v=34"></script>
+
 
 </body>
 
