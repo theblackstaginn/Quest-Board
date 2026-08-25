@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
@@ -8,10 +9,22 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-<link rel="icon" type="image/png" href="icons/app-icon.PNG">
-<link rel="apple-touch-icon" href="icons/app-icon.PNG">
-  
-  <meta name="theme-color" content="#11100c">
+  <!-- APP ICONS -->
+  <link
+    rel="icon"
+    type="image/png"
+    href="icons/app-icon.PNG"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="icons/app-icon.PNG"
+  >
+
+  <meta
+    name="theme-color"
+    content="#11100c"
+  >
 
   <meta
     name="description"
@@ -20,19 +33,56 @@
 
   <title>Quest Board</title>
 
-  <link rel="stylesheet" href="styles.css">
+
+  <!-- =====================================
+       FONTS
+  ====================================== -->
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;600;700;800&family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&display=swap"
+    rel="stylesheet"
+  >
+
+
+  <!-- =====================================
+       QUEST BOARD STYLES
+  ====================================== -->
+
+  <link
+    rel="stylesheet"
+    href="styles.css?v=33"
+  >
+
 </head>
+
 
 <body>
 
-  <!-- atmospheric dark overlay -->
+  <!-- =====================================
+       FIXED WORLD BACKGROUND
+  ====================================== -->
+
   <div class="world-overlay"></div>
 
+
   <div class="app-shell">
+
 
     <!-- =====================================
          HEADER
     ====================================== -->
+
     <header class="topbar">
 
       <div class="brand-block">
@@ -72,9 +122,11 @@
 
     <main>
 
+
       <!-- =====================================
            WEEKLY OBJECTIVE
       ====================================== -->
+
       <section
         class="weekly-objective"
         aria-labelledby="weeklyObjectiveTitle"
@@ -134,6 +186,7 @@
       <!-- =====================================
            SPECIAL QUESTS
       ====================================== -->
+
       <section
         class="quick-quests"
         aria-label="Special quests"
@@ -192,6 +245,7 @@
       <!-- =====================================
            QUEST BOARD
       ====================================== -->
+
       <section
         class="quest-section"
         aria-labelledby="questBoardTitle"
@@ -224,8 +278,9 @@
 
 
         <!--
-          app.js generates quest cards inside here.
+          app.js generates quest cards here
         -->
+
         <div
           class="quest-grid"
           id="questGrid"
@@ -238,6 +293,7 @@
       <!-- =====================================
            CHARACTER STATS
       ====================================== -->
+
       <section
         class="character-section"
         aria-labelledby="characterTitle"
@@ -262,6 +318,8 @@
 
         <div class="stats-grid">
 
+
+          <!-- STRENGTH -->
 
           <article class="stat-card">
 
@@ -290,6 +348,8 @@
 
 
 
+          <!-- ENDURANCE -->
+
           <article class="stat-card">
 
             <span class="stat-name">
@@ -316,6 +376,8 @@
           </article>
 
 
+
+          <!-- RESTORATION -->
 
           <article class="stat-card">
 
@@ -347,6 +409,7 @@
 
       </section>
 
+
     </main>
 
 
@@ -354,6 +417,7 @@
     <!-- =====================================
          BOTTOM NAVIGATION
     ====================================== -->
+
     <nav
       class="bottom-nav"
       aria-label="Primary navigation"
@@ -367,6 +431,7 @@
         Board
       </button>
 
+
       <button
         class="nav-item"
         type="button"
@@ -375,6 +440,7 @@
         Character
       </button>
 
+
       <button
         class="nav-item"
         type="button"
@@ -382,6 +448,7 @@
       >
         Party
       </button>
+
 
       <button
         class="nav-item"
@@ -393,6 +460,7 @@
 
     </nav>
 
+
   </div>
 
 
@@ -400,6 +468,7 @@
   <!-- =====================================
        QUEST DIALOG
   ====================================== -->
+
   <dialog
     class="quest-dialog"
     id="questDialog"
@@ -513,6 +582,7 @@
   <!-- =====================================
        HISTORY DIALOG
   ====================================== -->
+
   <dialog
     class="history-dialog"
     id="historyDialog"
@@ -557,7 +627,10 @@
 
 
 
-  <!-- notification -->
+  <!-- =====================================
+       NOTIFICATION
+  ====================================== -->
+
   <div
     class="toast"
     id="toast"
@@ -566,7 +639,13 @@
   ></div>
 
 
+
+  <!-- =====================================
+       APP
+  ====================================== -->
+
   <script src="app.js"></script>
 
 </body>
+
 </html>
