@@ -5155,3 +5155,72 @@ body.reduce-motion *::after {
     none !important;
 
 }
+
+/* =========================================================
+   CHARACTER CURRENCY — CLEAN ICON HUD
+========================================================= */
+
+.character-identity-panel .currency-purse {
+
+  min-width:
+    0;
+
+  padding:
+    4px 6px;
+
+  gap:
+    8px;
+
+  background:
+    transparent;
+
+  box-shadow:
+    none;
+
+}
+
+
+.character-identity-panel .currency-icon {
+
+  width:
+    50px;
+
+  height:
+    50px;
+
+  flex:
+    0 0 50px;
+
+}
+
+
+.character-identity-panel .currency-purse strong {
+
+  margin:
+    0;
+
+  color:
+    var(--cream);
+
+  font-family:
+    var(--font-display);
+
+  font-size:
+    1.7rem;
+
+  line-height:
+    1;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.75);
+
+}
+
+
+.character-identity-panel .currency-purse:nth-child(2) strong {
+
+  color:
+    #d7b8ed;
+
+}
