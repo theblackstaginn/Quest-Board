@@ -1,50 +1,71 @@
 /* =========================================================
    QUEST BOARD
-   FANTASY ASSET PASS
+   FULL FANTASY UI PASS
 ========================================================= */
 
 
 /* =========================================================
-   1. VARIABLES
+   1. ROOT VARIABLES
 ========================================================= */
 
 :root {
 
-  --bg-dark: #0b0c09;
+  --bg:
+    #0a0b08;
 
-  --ink: #211a12;
-  --ink-soft: #463827;
-  --ink-muted: #6a5841;
+  --cream:
+    #eee3c5;
 
-  --cream: #eee1bf;
+  --cream-soft:
+    #d4c7a7;
 
-  --gold: #c89c56;
-  --gold-light: #e5be78;
-  --gold-dark: #6d4b25;
+  --gold:
+    #c99a50;
 
-  --strength: #9e4935;
-  --endurance: #58754b;
-  --restoration: #526d79;
-  --mixed: #675278;
+  --gold-light:
+    #e6bd73;
 
-  --surface-dark:
-    rgba(17, 18, 14, 0.88);
+  --gold-dark:
+    #725025;
 
-  --surface-mid:
-    rgba(26, 27, 21, 0.92);
+  --ink:
+    #261b10;
 
-  --border-dark:
-    rgba(52, 42, 29, 0.9);
+  --ink-soft:
+    #4c3a27;
+
+  --ink-muted:
+    #695541;
+
+  --strength:
+    #954735;
+
+  --endurance:
+    #58724d;
+
+  --restoration:
+    #55737b;
+
+  --mixed:
+    #675578;
+
+  --stone-border:
+    rgba(202, 157, 82, 0.34);
 
   --shadow:
-    0 18px 40px
-    rgba(0, 0, 0, 0.55);
+    0 18px 45px
+    rgba(0, 0, 0, 0.58);
+
+  --shadow-heavy:
+    0 26px 70px
+    rgba(0, 0, 0, 0.78);
 
   --app-width:
     760px;
 
   --nav-height:
-    76px;
+    82px;
+
 }
 
 
@@ -60,17 +81,34 @@
 
 
 html {
+
   min-height: 100%;
-  background: var(--bg-dark);
-  color-scheme: dark;
+
+  background:
+    var(--bg);
+
+  color-scheme:
+    dark;
+
 }
 
 
 body {
 
-  margin: 0;
+  position:
+    relative;
 
-  min-height: 100vh;
+  min-height:
+    100vh;
+
+  margin:
+    0;
+
+  overflow-x:
+    hidden;
+
+  background:
+    var(--bg);
 
   color:
     var(--cream);
@@ -80,34 +118,23 @@ body {
     "Times New Roman",
     serif;
 
-  background-image:
-    url("qb-bg.webp");
-
-  background-size:
-    cover;
-
-  background-position:
-    center top;
-
-  background-repeat:
-    no-repeat;
-
-  background-attachment:
-    fixed;
-
   -webkit-font-smoothing:
     antialiased;
 
   -webkit-tap-highlight-color:
     transparent;
+
 }
 
 
 button,
 input,
-select,
-textarea {
-  font: inherit;
+textarea,
+select {
+
+  font:
+    inherit;
+
 }
 
 
@@ -116,19 +143,37 @@ button {
 }
 
 
+img {
+
+  display:
+    block;
+
+  max-width:
+    100%;
+
+}
+
+
 h1,
 h2,
 h3,
 p {
-  margin-top: 0;
+
+  margin-top:
+    0;
+
 }
 
 
 /* =========================================================
-   3. WORLD OVERLAY
+   3. TRUE FIXED BACKGROUND
+   iPhone / Safari friendly
 ========================================================= */
 
-.world-overlay {
+body::before {
+
+  content:
+    "";
 
   position:
     fixed;
@@ -137,7 +182,50 @@ p {
     0;
 
   z-index:
-    -1;
+    -3;
+
+  width:
+    100vw;
+
+  height:
+    100vh;
+
+  background-image:
+    url("qb-bg.webp");
+
+  background-size:
+    cover;
+
+  background-position:
+    center center;
+
+  background-repeat:
+    no-repeat;
+
+  pointer-events:
+    none;
+
+  transform:
+    translateZ(0);
+
+}
+
+
+/* dark atmospheric veil */
+
+body::after {
+
+  content:
+    "";
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  z-index:
+    -2;
 
   pointer-events:
     none;
@@ -145,10 +233,18 @@ p {
   background:
     linear-gradient(
       180deg,
-      rgba(5, 6, 4, 0.16) 0%,
-      rgba(5, 6, 4, 0.34) 38%,
-      rgba(5, 6, 4, 0.58) 100%
+      rgba(7, 7, 5, 0.08) 0%,
+      rgba(7, 7, 5, 0.18) 40%,
+      rgba(5, 5, 4, 0.40) 100%
     );
+
+}
+
+
+/* old extra overlay can remain harmless */
+
+.world-overlay {
+  display: none;
 }
 
 
@@ -157,6 +253,12 @@ p {
 ========================================================= */
 
 .app-shell {
+
+  position:
+    relative;
+
+  z-index:
+    1;
 
   width:
     min(
@@ -181,9 +283,10 @@ p {
 
     calc(
       var(--nav-height)
-      + 48px
+      + 58px
       + env(safe-area-inset-bottom)
     );
+
 }
 
 
@@ -199,8 +302,9 @@ h3 {
     700;
 
   text-shadow:
-    0 2px 5px
-    rgba(0, 0, 0, 0.55);
+    0 2px 6px
+    rgba(0, 0, 0, 0.68);
+
 }
 
 
@@ -213,14 +317,15 @@ h1 {
     clamp(
       2.25rem,
       8vw,
-      3.3rem
+      3.4rem
     );
 
   line-height:
     0.94;
 
   letter-spacing:
-    -0.035em;
+    -0.04em;
+
 }
 
 
@@ -233,11 +338,12 @@ h2 {
     clamp(
       1.5rem,
       5vw,
-      1.95rem
+      2rem
     );
 
   line-height:
     1.08;
+
 }
 
 
@@ -247,7 +353,8 @@ h3 {
     7px;
 
   font-size:
-    1.22rem;
+    1.23rem;
+
 }
 
 
@@ -277,13 +384,14 @@ h3 {
     uppercase;
 
   text-shadow:
-    0 1px 3px
-    #000;
+    0 1px 4px
+    rgba(0, 0, 0, 0.75);
+
 }
 
 
 .muted {
-  color: #b5ad9f;
+  color: var(--cream-soft);
 }
 
 
@@ -303,10 +411,11 @@ h3 {
     space-between;
 
   gap:
-    20px;
+    18px;
 
   margin-bottom:
-    27px;
+    28px;
+
 }
 
 
@@ -340,32 +449,32 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      213,
-      173,
-      100,
-      0.32
-    );
+    rgba(207, 161, 87, 0.42);
 
   border-radius:
     999px;
 
-  background:
-    rgba(
-      13,
-      14,
-      11,
-      0.78
-    );
+  background-image:
+
+    linear-gradient(
+      rgba(9, 10, 7, 0.45),
+      rgba(9, 10, 7, 0.45)
+    ),
+
+    url("mossy-stone.webp");
+
+  background-size:
+    cover;
+
+  background-position:
+    center;
 
   box-shadow:
     var(--shadow);
 
-  backdrop-filter:
-    blur(7px);
-
   cursor:
     default;
+
 }
 
 
@@ -392,13 +501,13 @@ h3 {
 
   background:
     radial-gradient(
-      circle at 40% 35%,
-      var(--gold-light),
-      var(--gold)
+      circle at 38% 30%,
+      #e7bd70,
+      #b47c32
     );
 
   color:
-    #21170c;
+    #23170c;
 
   font-size:
     1rem;
@@ -407,9 +516,14 @@ h3 {
     900;
 
   box-shadow:
+
     inset
-    0 0 9px
-    rgba(255, 235, 180, 0.35);
+    0 0 8px
+    rgba(255, 238, 190, 0.32),
+
+    0 2px 5px
+    rgba(0, 0, 0, 0.4);
+
 }
 
 
@@ -420,18 +534,20 @@ h3 {
     sans-serif;
 
   font-size:
-    0.85rem;
+    0.84rem;
 
   font-weight:
     800;
+
 }
 
 
 /* =========================================================
-   7. WEEKLY OBJECTIVE
+   7. MOSSY STONE SHARED SURFACE
 ========================================================= */
 
-.weekly-objective {
+.weekly-objective,
+.stat-card {
 
   position:
     relative;
@@ -439,63 +555,77 @@ h3 {
   overflow:
     hidden;
 
-  padding:
-    24px;
-
   border:
     1px solid
-    rgba(
-      201,
-      157,
-      86,
-      0.35
-    );
+    var(--stone-border);
 
-  border-radius:
-    26px;
+  background-image:
 
-  background:
     linear-gradient(
-      rgba(17, 18, 14, 0.89),
-      rgba(12, 13, 10, 0.93)
-    );
+      rgba(9, 10, 7, 0.52),
+      rgba(9, 10, 7, 0.58)
+    ),
+
+    url("mossy-stone.webp");
+
+  background-size:
+    cover;
+
+  background-position:
+    center;
 
   box-shadow:
     var(--shadow);
 
-  backdrop-filter:
-    blur(4px);
+}
+
+
+/* =========================================================
+   8. WEEKLY OBJECTIVE
+========================================================= */
+
+.weekly-objective {
+
+  padding:
+    24px;
+
+  border-radius:
+    26px;
+
 }
 
 
 .weekly-objective::before {
 
-  content: "";
+  content:
+    "";
 
   position:
     absolute;
 
   inset:
-    5px;
+    6px;
 
   pointer-events:
     none;
 
   border:
     1px solid
-    rgba(
-      216,
-      171,
-      91,
-      0.14
-    );
+    rgba(227, 183, 101, 0.14);
 
   border-radius:
-    21px;
+    19px;
+
+  box-shadow:
+    inset
+    0 0 22px
+    rgba(0, 0, 0, 0.22);
+
 }
 
 
-.weekly-copy {
+.weekly-copy,
+.weekly-progress {
 
   position:
     relative;
@@ -503,8 +633,14 @@ h3 {
   z-index:
     1;
 
+}
+
+
+.weekly-copy {
+
   margin-bottom:
     26px;
+
 }
 
 
@@ -514,7 +650,7 @@ h3 {
     0;
 
   color:
-    #b5afa4;
+    #c0b8aa;
 
   font-family:
     Arial,
@@ -525,22 +661,18 @@ h3 {
 
   line-height:
     1.55;
+
 }
 
 
 .weekly-progress {
-
-  position:
-    relative;
-
-  z-index:
-    1;
 
   display:
     grid;
 
   gap:
     10px;
+
 }
 
 
@@ -548,6 +680,9 @@ h3 {
 
   display:
     flex;
+
+  align-items:
+    center;
 
   justify-content:
     space-between;
@@ -561,6 +696,7 @@ h3 {
 
   font-size:
     0.82rem;
+
 }
 
 
@@ -568,16 +704,18 @@ h3 {
 
   color:
     var(--gold-light);
+
 }
 
 
 .progress-meta span {
 
   color:
-    #aaa498;
+    #b6afa2;
 
   text-align:
     right;
+
 }
 
 
@@ -591,23 +729,19 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      205,
-      158,
-      83,
-      0.32
-    );
+    rgba(208, 159, 80, 0.34);
 
   border-radius:
     999px;
 
   background:
-    rgba(
-      0,
-      0,
-      0,
-      0.65
-    );
+    rgba(0, 0, 0, 0.68);
+
+  box-shadow:
+    inset
+    0 2px 5px
+    rgba(0, 0, 0, 0.8);
+
 }
 
 
@@ -625,27 +759,23 @@ h3 {
   background:
     linear-gradient(
       90deg,
-      #705127,
-      #c99e58,
-      #efd08b
+      #705026,
+      #c79447,
+      #edc87c
     );
 
   box-shadow:
-    0 0 12px
-    rgba(
-      222,
-      173,
-      86,
-      0.3
-    );
+    0 0 13px
+    rgba(220, 168, 77, 0.34);
 
   transition:
     width 350ms ease;
+
 }
 
 
 /* =========================================================
-   8. SPECIAL QUESTS
+   9. SPECIAL QUEST CARDS
 ========================================================= */
 
 .quick-quests {
@@ -662,6 +792,7 @@ h3 {
   margin:
     14px 0
     35px;
+
 }
 
 
@@ -681,23 +812,12 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      112,
-      79,
-      43,
-      0.78
-    );
+    rgba(84, 55, 27, 0.82);
 
   border-radius:
-    20px;
+    19px;
 
   background-image:
-
-    linear-gradient(
-      rgba(65, 44, 23, 0.22),
-      rgba(65, 44, 23, 0.28)
-    ),
-
     url("body-bg.webp");
 
   background-size:
@@ -721,12 +841,14 @@ h3 {
   transition:
     transform 150ms ease,
     filter 150ms ease;
+
 }
 
 
 .quick-quest::after {
 
-  content: "";
+  content:
+    "";
 
   position:
     absolute;
@@ -734,20 +856,16 @@ h3 {
   inset:
     5px;
 
-  border:
-    1px solid
-    rgba(
-      49,
-      31,
-      16,
-      0.28
-    );
-
-  border-radius:
-    15px;
-
   pointer-events:
     none;
+
+  border:
+    1px solid
+    rgba(58, 37, 19, 0.28);
+
+  border-radius:
+    14px;
+
 }
 
 
@@ -771,13 +889,14 @@ h3 {
     8px 0;
 
   color:
-    #2d2015;
+    #2b1f14;
 
   font-size:
     1.15rem;
 
   text-shadow:
     none;
+
 }
 
 
@@ -793,7 +912,7 @@ h3 {
     block;
 
   color:
-    #7b391f;
+    #803d25;
 
   font-family:
     Arial,
@@ -807,6 +926,7 @@ h3 {
 
   letter-spacing:
     0.14em;
+
 }
 
 
@@ -822,7 +942,7 @@ h3 {
     block;
 
   color:
-    #574632;
+    #554331;
 
   font-family:
     Arial,
@@ -836,20 +956,23 @@ h3 {
 
   line-height:
     1.42;
+
 }
 
 
 .boss-quest {
 
   filter:
-    sepia(0.35)
+    sepia(0.25)
     brightness(0.72);
+
 }
 
 
 .boss-quest::before {
 
-  content: "★";
+  content:
+    "★";
 
   position:
     absolute;
@@ -858,34 +981,36 @@ h3 {
     15px;
 
   top:
-    10px;
+    9px;
 
   z-index:
     2;
 
   color:
-    #735326;
+    #6c4a23;
 
   font-size:
-    1.4rem;
+    1.45rem;
+
 }
 
 
 .boss-quest:disabled {
 
   opacity:
-    0.65;
+    0.58;
 
   cursor:
     not-allowed;
 
   transform:
     none;
+
 }
 
 
 /* =========================================================
-   9. SECTION HEADINGS
+   10. SECTION HEADINGS
 ========================================================= */
 
 .quest-section,
@@ -893,6 +1018,7 @@ h3 {
 
   margin-bottom:
     36px;
+
 }
 
 
@@ -908,10 +1034,11 @@ h3 {
     space-between;
 
   gap:
-    20px;
+    18px;
 
   margin-bottom:
     15px;
+
 }
 
 
@@ -946,15 +1073,16 @@ h3 {
 
   text-shadow:
     0 2px 4px
-    #000;
+    rgba(0, 0, 0, 0.8);
 
   cursor:
     pointer;
+
 }
 
 
 /* =========================================================
-   10. QUEST CARDS
+   11. QUEST GRID
 ========================================================= */
 
 .quest-grid {
@@ -964,8 +1092,13 @@ h3 {
 
   gap:
     13px;
+
 }
 
+
+/* =========================================================
+   12. QUEST CARDS
+========================================================= */
 
 .quest-card {
 
@@ -997,15 +1130,10 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      70,
-      46,
-      24,
-      0.78
-    );
+    rgba(70, 45, 22, 0.82);
 
   border-radius:
-    20px;
+    19px;
 
   background-image:
     url("body-bg.webp");
@@ -1028,14 +1156,30 @@ h3 {
   transition:
     transform 150ms ease,
     filter 150ms ease;
+
 }
 
 
-/* inner parchment frame */
+.quest-card:hover {
+
+  filter:
+    brightness(1.04);
+
+}
+
+
+.quest-card:active {
+
+  transform:
+    scale(0.99);
+
+}
+
 
 .quest-card::after {
 
-  content: "";
+  content:
+    "";
 
   position:
     absolute;
@@ -1048,25 +1192,22 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      71,
-      42,
-      18,
-      0.25
-    );
+    rgba(68, 42, 18, 0.26);
 
   border-radius:
-    15px;
+    14px;
+
 }
 
 
 /* =========================================================
-   11. QUEST ICONS
+   13. QUEST ICONS
 ========================================================= */
 
 .quest-card::before {
 
-  content: "";
+  content:
+    "";
 
   position:
     relative;
@@ -1100,9 +1241,10 @@ h3 {
 
   filter:
     drop-shadow(
-      0 5px 5px
-      rgba(38, 22, 9, 0.42)
+      0 5px 7px
+      rgba(38, 22, 9, 0.45)
     );
+
 }
 
 
@@ -1110,6 +1252,7 @@ h3 {
 
   background-image:
     url("icons/there-and-back.webp");
+
 }
 
 
@@ -1117,6 +1260,7 @@ h3 {
 
   background-image:
     url("icons/the-keep.webp");
+
 }
 
 
@@ -1124,6 +1268,7 @@ h3 {
 
   background-image:
     url("icons/dragonstrength.webp");
+
 }
 
 
@@ -1131,6 +1276,7 @@ h3 {
 
   background-image:
     url("icons/rogue-mode.webp");
+
 }
 
 
@@ -1138,6 +1284,7 @@ h3 {
 
   background-image:
     url("icons/restoration.webp");
+
 }
 
 
@@ -1145,11 +1292,12 @@ h3 {
 
   background-image:
     url("icons/ranger-training.webp");
+
 }
 
 
 /* =========================================================
-   12. QUEST CARD CONTENT
+   14. QUEST CARD CONTENT
 ========================================================= */
 
 .quest-card-content {
@@ -1168,6 +1316,7 @@ h3 {
 
   min-width:
     0;
+
 }
 
 
@@ -1184,6 +1333,7 @@ h3 {
 
   text-shadow:
     none;
+
 }
 
 
@@ -1207,6 +1357,7 @@ h3 {
 
   line-height:
     1.42;
+
 }
 
 
@@ -1217,6 +1368,7 @@ h3 {
 
   text-shadow:
     none;
+
 }
 
 
@@ -1242,6 +1394,7 @@ h3 {
 
   gap:
     8px;
+
 }
 
 
@@ -1252,26 +1405,16 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      81,
-      56,
-      31,
-      0.45
-    );
+    rgba(80, 54, 29, 0.44);
 
   border-radius:
     999px;
 
-  color:
-    #5c4227;
-
   background:
-    rgba(
-      255,
-      235,
-      190,
-      0.22
-    );
+    rgba(255, 234, 188, 0.24);
+
+  color:
+    #594025;
 
   font-family:
     Arial,
@@ -1285,19 +1428,21 @@ h3 {
 
   white-space:
     nowrap;
+
 }
 
 
 .quest-arrow {
 
   color:
-    #61472b;
+    #66492a;
 
   font-size:
     1.7rem;
 
   line-height:
     1;
+
 }
 
 
@@ -1311,6 +1456,7 @@ h3 {
 
   color:
     var(--endurance);
+
 }
 
 
@@ -1322,6 +1468,7 @@ h3 {
 
   color:
     var(--strength);
+
 }
 
 
@@ -1330,6 +1477,7 @@ h3 {
 
   color:
     var(--restoration);
+
 }
 
 
@@ -1338,11 +1486,12 @@ h3 {
 
   color:
     var(--mixed);
+
 }
 
 
 /* =========================================================
-   13. CHARACTER STATS
+   15. CHARACTER STATS
 ========================================================= */
 
 .stats-grid {
@@ -1355,6 +1504,7 @@ h3 {
 
   gap:
     10px;
+
 }
 
 
@@ -1363,38 +1513,46 @@ h3 {
   padding:
     15px;
 
-  border:
-    1px solid
-    rgba(
-      207,
-      166,
-      94,
-      0.25
-    );
-
   border-radius:
     16px;
 
-  background:
-    rgba(
-      14,
-      15,
-      12,
-      0.88
-    );
+}
 
-  box-shadow:
-    var(--shadow);
 
-  backdrop-filter:
-    blur(4px);
+.stat-card::after {
+
+  content:
+    "";
+
+  position:
+    absolute;
+
+  inset:
+    5px;
+
+  pointer-events:
+    none;
+
+  border:
+    1px solid
+    rgba(230, 185, 103, 0.12);
+
+  border-radius:
+    11px;
+
 }
 
 
 .stat-name {
 
+  position:
+    relative;
+
+  z-index:
+    1;
+
   color:
-    #aaa396;
+    #bbb3a6;
 
   font-family:
     Arial,
@@ -1402,10 +1560,17 @@ h3 {
 
   font-size:
     0.72rem;
+
 }
 
 
 .stat-card strong {
+
+  position:
+    relative;
+
+  z-index:
+    1;
 
   display:
     block;
@@ -1419,13 +1584,20 @@ h3 {
 
   font-size:
     1.13rem;
+
 }
 
 
 .stat-card small {
 
+  position:
+    relative;
+
+  z-index:
+    1;
+
   color:
-    #a49c8d;
+    #aca497;
 
   font-family:
     Arial,
@@ -1433,10 +1605,17 @@ h3 {
 
   font-size:
     0.7rem;
+
 }
 
 
 .stat-progress {
+
+  position:
+    relative;
+
+  z-index:
+    1;
 
   overflow:
     hidden;
@@ -1451,7 +1630,13 @@ h3 {
     999px;
 
   background:
-    #080905;
+    rgba(0, 0, 0, 0.68);
+
+  box-shadow:
+    inset
+    0 2px 4px
+    rgba(0, 0, 0, 0.8);
+
 }
 
 
@@ -1468,26 +1653,27 @@ h3 {
 
   transition:
     width 300ms ease;
+
 }
 
 
 #strengthBar {
-  background: #9e4935;
+  background: var(--strength);
 }
 
 
 #enduranceBar {
-  background: #617d50;
+  background: #678353;
 }
 
 
 #restorationBar {
-  background: #56717c;
+  background: #5d7a84;
 }
 
 
 /* =========================================================
-   14. BOTTOM NAVIGATION
+   16. CUSTOM BOTTOM NAV
 ========================================================= */
 
 .bottom-nav {
@@ -1503,7 +1689,7 @@ h3 {
 
   bottom:
     max(
-      12px,
+      8px,
       env(safe-area-inset-bottom)
     );
 
@@ -1512,12 +1698,12 @@ h3 {
 
   width:
     min(
-      calc(100% - 24px),
+      calc(100% - 16px),
       720px
     );
 
   min-height:
-    var(--nav-height);
+    auto;
 
   display:
     grid;
@@ -1529,107 +1715,150 @@ h3 {
     4px;
 
   padding:
-    8px;
-
-  border:
-    1px solid
-    rgba(
-      198,
-      150,
-      76,
-      0.28
-    );
-
-  border-radius:
-    22px;
-
-  background:
-    rgba(
-      10,
-      11,
-      8,
-      0.92
-    );
-
-  backdrop-filter:
-    blur(18px);
-
-  -webkit-backdrop-filter:
-    blur(18px);
-
-  box-shadow:
-    0 18px 45px
-    rgba(0, 0, 0, 0.75);
-}
-
-
-.nav-item {
-
-  min-width:
     0;
 
   border:
     0;
-
-  border-radius:
-    14px;
 
   background:
     transparent;
 
-  color:
-    #9c9587;
+  box-shadow:
+    none;
 
-  font-family:
-    Arial,
-    sans-serif;
+  backdrop-filter:
+    none;
+
+  -webkit-backdrop-filter:
+    none;
+
+}
+
+
+/* actual button shell */
+
+.nav-item {
+
+  position:
+    relative;
+
+  width:
+    100%;
+
+  aspect-ratio:
+    3.3 / 1;
+
+  min-width:
+    0;
+
+  padding:
+    0;
+
+  border:
+    0;
+
+  border-radius:
+    0;
+
+  background-color:
+    transparent;
+
+  background-repeat:
+    no-repeat;
+
+  background-position:
+    center;
+
+  background-size:
+    contain;
+
+  color:
+    transparent;
 
   font-size:
-    0.74rem;
-
-  font-weight:
-    800;
+    0;
 
   cursor:
     pointer;
+
+  filter:
+    brightness(0.78)
+    saturate(0.88);
+
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+
+}
+
+
+.nav-item:hover {
+
+  filter:
+    brightness(1.02)
+    saturate(1.05);
+
+}
+
+
+.nav-item:active {
+
+  transform:
+    translateY(1px)
+    scale(0.97);
+
 }
 
 
 .nav-item.active {
 
-  color:
-    var(--gold-light);
-
-  background:
-    linear-gradient(
-      rgba(
-        117,
-        77,
-        36,
-        0.28
-      ),
-      rgba(
-        78,
-        51,
-        24,
-        0.16
-      )
+  filter:
+    brightness(1.12)
+    saturate(1.08)
+    drop-shadow(
+      0 0 7px
+      rgba(221, 170, 83, 0.28)
     );
 
-  box-shadow:
-    inset
-    0 0 12px
-    rgba(
-      202,
-      157,
-      83,
-      0.1
-    );
+}
+
+
+/* each image */
+
+.nav-item[data-view="board"] {
+
+  background-image:
+    url("buttons/board-btn.webp");
+
+}
+
+
+.nav-item[data-view="character"] {
+
+  background-image:
+    url("buttons/character-btn.webp");
+
+}
+
+
+.nav-item[data-view="party"] {
+
+  background-image:
+    url("buttons/party-btn.webp");
+
+}
+
+
+.nav-item[data-view="settings"] {
+
+  background-image:
+    url("buttons/settings-btn.webp");
+
 }
 
 
 /* =========================================================
-   15. DIALOGS
+   17. DIALOGS
 ========================================================= */
 
 .quest-dialog,
@@ -1637,7 +1866,7 @@ h3 {
 
   width:
     min(
-      calc(100% - 24px),
+      calc(100% - 22px),
       640px
     );
 
@@ -1651,29 +1880,13 @@ h3 {
     22px;
 
   border:
-    1px solid
-    #684a2d;
+    2px solid
+    rgba(98, 68, 34, 0.92);
 
   border-radius:
-    22px;
+    19px;
 
   background-image:
-
-    linear-gradient(
-      rgba(
-        255,
-        236,
-        196,
-        0.05
-      ),
-      rgba(
-        84,
-        49,
-        21,
-        0.08
-      )
-    ),
-
     url("body-bg.webp");
 
   background-size:
@@ -1686,8 +1899,8 @@ h3 {
     var(--ink);
 
   box-shadow:
-    0 30px 70px
-    rgba(0, 0, 0, 0.75);
+    var(--shadow-heavy);
+
 }
 
 
@@ -1695,15 +1908,14 @@ h3 {
 .history-dialog::backdrop {
 
   background:
-    rgba(
-      0,
-      0,
-      0,
-      0.78
-    );
+    rgba(0, 0, 0, 0.80);
 
   backdrop-filter:
     blur(6px);
+
+  -webkit-backdrop-filter:
+    blur(6px);
+
 }
 
 
@@ -1719,7 +1931,8 @@ h3 {
     space-between;
 
   gap:
-    20px;
+    18px;
+
 }
 
 
@@ -1729,63 +1942,98 @@ h3 {
     0;
 
   color:
-    #291b10;
+    #2b1d11;
 
   text-shadow:
     none;
+
 }
 
 
+/* =========================================================
+   18. X BUTTON ASSET
+========================================================= */
+
 .close-button {
 
-  display:
-    grid;
-
-  place-items:
-    center;
-
   width:
-    40px;
+    42px;
 
   height:
-    40px;
+    42px;
 
-  flex-shrink:
-    0;
+  flex:
+    0 0 42px;
 
   padding:
     0;
 
   border:
-    1px solid
-    rgba(
-      68,
-      42,
-      23,
-      0.45
-    );
+    0;
 
   border-radius:
-    50%;
+    0;
 
-  background:
-    rgba(
-      71,
-      42,
-      20,
-      0.12
-    );
+  background-color:
+    transparent;
+
+  background-image:
+    url("x-button.PNG");
+
+  background-size:
+    contain;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
 
   color:
-    #4f321d;
+    transparent;
 
   font-size:
-    1.7rem;
+    0;
 
   cursor:
     pointer;
+
+  filter:
+    drop-shadow(
+      0 3px 4px
+      rgba(0, 0, 0, 0.35)
+    );
+
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+
 }
 
+
+.close-button:hover {
+
+  filter:
+    brightness(1.08)
+    drop-shadow(
+      0 3px 5px
+      rgba(0, 0, 0, 0.4)
+    );
+
+}
+
+
+.close-button:active {
+
+  transform:
+    scale(0.94);
+
+}
+
+
+/* =========================================================
+   19. QUEST DIALOG CONTENT
+========================================================= */
 
 .quest-description {
 
@@ -1793,7 +2041,7 @@ h3 {
     18px 0;
 
   color:
-    #534230;
+    #52412f;
 
   font-family:
     Arial,
@@ -1801,6 +2049,7 @@ h3 {
 
   line-height:
     1.55;
+
 }
 
 
@@ -1808,6 +2057,9 @@ h3 {
 
   display:
     flex;
+
+  align-items:
+    center;
 
   justify-content:
     space-between;
@@ -1823,21 +2075,11 @@ h3 {
 
   border-top:
     1px solid
-    rgba(
-      71,
-      42,
-      20,
-      0.32
-    );
+    rgba(71, 42, 20, 0.32);
 
   border-bottom:
     1px solid
-    rgba(
-      71,
-      42,
-      20,
-      0.32
-    );
+    rgba(71, 42, 20, 0.32);
 
   color:
     #70451f;
@@ -1851,11 +2093,12 @@ h3 {
 
   font-weight:
     900;
+
 }
 
 
 /* =========================================================
-   16. CHECKLIST
+   20. CHECKLIST
 ========================================================= */
 
 .exercise-list {
@@ -1865,6 +2108,7 @@ h3 {
 
   gap:
     9px;
+
 }
 
 
@@ -1884,26 +2128,17 @@ h3 {
 
   border:
     1px solid
-    rgba(
-      73,
-      45,
-      25,
-      0.3
-    );
+    rgba(73, 45, 25, 0.30);
 
   border-radius:
     12px;
 
   background:
-    rgba(
-      78,
-      52,
-      26,
-      0.08
-    );
+    rgba(87, 59, 32, 0.08);
 
   cursor:
     pointer;
+
 }
 
 
@@ -1923,6 +2158,7 @@ h3 {
 
   accent-color:
     #8d5f2c;
+
 }
 
 
@@ -1940,6 +2176,7 @@ h3 {
 
   font-weight:
     650;
+
 }
 
 
@@ -1947,6 +2184,7 @@ h3 {
 
   opacity:
     0.52;
+
 }
 
 
@@ -1955,11 +2193,12 @@ span {
 
   text-decoration:
     line-through;
+
 }
 
 
 /* =========================================================
-   17. TIMER
+   21. TIMER
 ========================================================= */
 
 .quest-timer {
@@ -1984,23 +2223,14 @@ span {
 
   border:
     1px solid
-    rgba(
-      70,
-      43,
-      20,
-      0.33
-    );
+    rgba(70, 43, 20, 0.33);
 
   border-radius:
     14px;
 
   background:
-    rgba(
-      79,
-      51,
-      24,
-      0.08
-    );
+    rgba(79, 51, 24, 0.08);
+
 }
 
 
@@ -2017,6 +2247,7 @@ span {
 
   font-variant-numeric:
     tabular-nums;
+
 }
 
 
@@ -2027,6 +2258,7 @@ span {
 
   gap:
     8px;
+
 }
 
 
@@ -2037,23 +2269,13 @@ span {
 
   border:
     1px solid
-    rgba(
-      66,
-      42,
-      22,
-      0.45
-    );
+    rgba(66, 42, 22, 0.45);
 
   border-radius:
     10px;
 
   background:
-    rgba(
-      70,
-      43,
-      20,
-      0.12
-    );
+    rgba(70, 43, 20, 0.12);
 
   color:
     #50351e;
@@ -2070,11 +2292,12 @@ span {
 
   cursor:
     pointer;
+
 }
 
 
 /* =========================================================
-   18. COMPLETE QUEST BUTTON
+   22. COMPLETE QUEST BUTTON
 ========================================================= */
 
 .complete-quest-button {
@@ -2087,15 +2310,15 @@ span {
 
   border:
     1px solid
-    #6e4722;
+    #714c25;
 
   border-radius:
     13px;
 
   background:
     linear-gradient(
-      #be8b48,
-      #8f602c
+      #c08e4c,
+      #8f612d
     );
 
   color:
@@ -2111,26 +2334,19 @@ span {
     pointer;
 
   box-shadow:
+
     inset
     0 1px 0
-    rgba(
-      255,
-      232,
-      177,
-      0.4
-    ),
+    rgba(255, 233, 180, 0.42),
+
     0 7px 17px
-    rgba(
-      57,
-      30,
-      9,
-      0.32
-    );
+    rgba(57, 30, 9, 0.32);
+
 }
 
 
 /* =========================================================
-   19. HISTORY
+   23. HISTORY
 ========================================================= */
 
 #historyList {
@@ -2143,6 +2359,7 @@ span {
 
   margin-top:
     20px;
+
 }
 
 
@@ -2153,23 +2370,14 @@ span {
 
   border:
     1px solid
-    rgba(
-      70,
-      43,
-      20,
-      0.3
-    );
+    rgba(70, 43, 20, 0.30);
 
   border-radius:
     12px;
 
   background:
-    rgba(
-      80,
-      51,
-      25,
-      0.08
-    );
+    rgba(80, 51, 25, 0.08);
+
 }
 
 
@@ -2183,6 +2391,7 @@ span {
 
   color:
     #302012;
+
 }
 
 
@@ -2197,11 +2406,12 @@ span {
 
   font-size:
     0.77rem;
+
 }
 
 
 /* =========================================================
-   20. TOAST
+   24. TOAST
 ========================================================= */
 
 .toast {
@@ -2218,7 +2428,7 @@ span {
   bottom:
     calc(
       var(--nav-height)
-      + 35px
+      + 30px
       + env(safe-area-inset-bottom)
     );
 
@@ -2229,9 +2439,7 @@ span {
     );
 
   max-width:
-    calc(
-      100% - 40px
-    );
+    calc(100% - 40px);
 
   padding:
     11px 16px;
@@ -2243,13 +2451,17 @@ span {
   border-radius:
     999px;
 
-  background:
-    rgba(
-      12,
-      13,
-      10,
-      0.95
-    );
+  background-image:
+
+    linear-gradient(
+      rgba(7, 8, 5, 0.54),
+      rgba(7, 8, 5, 0.54)
+    ),
+
+    url("mossy-stone.webp");
+
+  background-size:
+    cover;
 
   color:
     var(--cream);
@@ -2279,6 +2491,7 @@ span {
   transition:
     opacity 180ms ease,
     transform 180ms ease;
+
 }
 
 
@@ -2292,19 +2505,29 @@ span {
       -50%,
       0
     );
+
 }
 
 
 /* =========================================================
-   21. MOBILE
+   25. MOBILE
 ========================================================= */
 
 @media (max-width: 560px) {
+
+  body::before {
+
+    background-position:
+      58% center;
+
+  }
+
 
   .app-shell {
 
     padding-inline:
       15px;
+
   }
 
 
@@ -2316,6 +2539,7 @@ span {
 
     padding:
       15px;
+
   }
 
 
@@ -2326,6 +2550,7 @@ span {
 
     height:
       64px;
+
   }
 
 
@@ -2348,11 +2573,15 @@ span {
 
     width:
       100%;
+
   }
 
 
   .stats-grid {
-    grid-template-columns: 1fr;
+
+    grid-template-columns:
+      1fr;
+
   }
 
 
@@ -2369,6 +2598,7 @@ span {
 
     gap:
       8px 16px;
+
   }
 
 
@@ -2382,6 +2612,7 @@ span {
 
     margin:
       0;
+
   }
 
 
@@ -2395,6 +2626,7 @@ span {
 
     margin:
       6px 0 0;
+
   }
 
 
@@ -2402,13 +2634,36 @@ span {
 
     grid-column:
       1 / -1;
+
+  }
+
+
+  .bottom-nav {
+
+    width:
+      calc(100% - 10px);
+
+    gap:
+      1px;
+
+  }
+
+
+  .nav-item {
+
+    aspect-ratio:
+      2.9 / 1;
+
+    background-size:
+      contain;
+
   }
 
 }
 
 
 /* =========================================================
-   22. SMALL PHONE
+   26. SMALL PHONES
 ========================================================= */
 
 @media (max-width: 390px) {
@@ -2429,12 +2684,18 @@ span {
 
 
   .quick-quests {
-    grid-template-columns: 1fr;
+
+    grid-template-columns:
+      1fr;
+
   }
 
 
   .quick-quest {
-    min-height: 120px;
+
+    min-height:
+      120px;
+
   }
 
 
@@ -2443,6 +2704,7 @@ span {
     grid-template-columns:
       64px
       minmax(0, 1fr);
+
   }
 
 
@@ -2453,6 +2715,7 @@ span {
 
     height:
       58px;
+
   }
 
 
@@ -2463,24 +2726,42 @@ span {
 
     flex-direction:
       column;
+
+  }
+
+
+  .bottom-nav {
+
+    width:
+      calc(100% - 4px);
+
+    gap:
+      0;
+
   }
 
 
   .nav-item {
-    font-size: 0.67rem;
+
+    aspect-ratio:
+      2.7 / 1;
+
   }
 
 }
 
 
 /* =========================================================
-   23. TABLET / DESKTOP
+   27. TABLET / DESKTOP
 ========================================================= */
 
 @media (min-width: 700px) {
 
   .app-shell {
-    padding-inline: 26px;
+
+    padding-inline:
+      26px;
+
   }
 
 
@@ -2488,6 +2769,7 @@ span {
 
     grid-template-columns:
       repeat(2, 1fr);
+
   }
 
 
@@ -2502,6 +2784,7 @@ span {
 
     align-content:
       center;
+
   }
 
 
@@ -2521,13 +2804,14 @@ span {
 
     width:
       100%;
+
   }
 
 }
 
 
 /* =========================================================
-   24. REDUCED MOTION
+   28. REDUCED MOTION
 ========================================================= */
 
 @media (
@@ -2547,6 +2831,7 @@ span {
 
     animation-duration:
       0.01ms !important;
+
   }
 
 }
