@@ -2,6 +2,7 @@
    QUEST BOARD
    FULL FANTASY UI PASS
    Artwork-Driven Panels
+   Fantasy Typography System
 ========================================================= */
 
 
@@ -62,6 +63,24 @@
   --nav-height:
     82px;
 
+
+  /* TYPOGRAPHY */
+
+  --font-display:
+    "Cinzel Decorative",
+    "Times New Roman",
+    serif;
+
+  --font-heading:
+    "Cinzel",
+    Georgia,
+    serif;
+
+  --font-body:
+    "Alegreya Sans",
+    Arial,
+    sans-serif;
+
 }
 
 
@@ -110,9 +129,10 @@ body {
     var(--cream);
 
   font-family:
-    Georgia,
-    "Times New Roman",
-    serif;
+    var(--font-body);
+
+  font-weight:
+    500;
 
   -webkit-font-smoothing:
     antialiased;
@@ -256,6 +276,9 @@ h1,
 h2,
 h3 {
 
+  font-family:
+    var(--font-heading);
+
   font-weight:
     700;
 
@@ -271,18 +294,24 @@ h1 {
   margin-bottom:
     0;
 
+  font-family:
+    var(--font-display);
+
   font-size:
     clamp(
-      2.25rem,
-      8vw,
-      3.4rem
+      2rem,
+      7.4vw,
+      3.25rem
     );
 
+  font-weight:
+    700;
+
   line-height:
-    0.94;
+    0.98;
 
   letter-spacing:
-    -0.04em;
+    -0.025em;
 
 }
 
@@ -294,13 +323,19 @@ h2 {
 
   font-size:
     clamp(
-      1.5rem,
-      5vw,
-      2rem
+      1.4rem,
+      4.8vw,
+      1.9rem
     );
 
+  font-weight:
+    700;
+
   line-height:
-    1.08;
+    1.1;
+
+  letter-spacing:
+    -0.015em;
 
 }
 
@@ -311,7 +346,18 @@ h3 {
     7px;
 
   font-size:
-    1.23rem;
+    1.16rem;
+
+  line-height:
+    1.15;
+
+}
+
+
+p {
+
+  font-family:
+    var(--font-body);
 
 }
 
@@ -326,17 +372,19 @@ h3 {
     var(--gold-light);
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.67rem;
+    0.62rem;
 
   font-weight:
-    900;
+    700;
 
   letter-spacing:
-    0.18em;
+    0.13em;
+
+  line-height:
+    1.25;
 
   text-transform:
     uppercase;
@@ -459,11 +507,14 @@ h3 {
   color:
     #23170c;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    1rem;
+    0.95rem;
 
   font-weight:
-    900;
+    800;
 
   box-shadow:
 
@@ -480,14 +531,16 @@ h3 {
 #profileName {
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.84rem;
+    0.76rem;
 
   font-weight:
-    800;
+    700;
+
+  letter-spacing:
+    0.025em;
 
 }
 
@@ -553,6 +606,14 @@ h3 {
 }
 
 
+.weekly-copy h2 {
+
+  font-family:
+    var(--font-heading);
+
+}
+
+
 .weekly-copy p:last-child {
 
   margin-bottom:
@@ -562,14 +623,16 @@ h3 {
     #ded5c2;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.92rem;
+    1rem;
+
+  font-weight:
+    500;
 
   line-height:
-    1.55;
+    1.45;
 
   text-shadow:
     0 1px 3px
@@ -604,17 +667,34 @@ h3 {
     15px;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.82rem;
+    0.9rem;
+
+  font-weight:
+    600;
 
 }
 
 
 .progress-meta strong {
-  color: var(--gold-light);
+
+  color:
+    var(--gold-light);
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.75rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.04em;
+
 }
 
 
@@ -787,8 +867,20 @@ h3 {
   color:
     #2b1f14;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    1.15rem;
+    1.02rem;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.2;
+
+  letter-spacing:
+    -0.015em;
 
   text-shadow:
     none;
@@ -811,17 +903,16 @@ h3 {
     #803d25;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.67rem;
+    0.58rem;
 
   font-weight:
-    900;
+    800;
 
   letter-spacing:
-    0.14em;
+    0.1em;
 
 }
 
@@ -841,17 +932,16 @@ h3 {
     #554331;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.82rem;
+    0.91rem;
 
   font-weight:
-    650;
+    600;
 
   line-height:
-    1.42;
+    1.35;
 
 }
 
@@ -955,14 +1045,16 @@ h3 {
     var(--gold-light);
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.83rem;
+    0.7rem;
 
   font-weight:
-    800;
+    700;
+
+  letter-spacing:
+    0.04em;
 
   text-shadow:
     0 2px 4px
@@ -1180,8 +1272,20 @@ h3 {
   color:
     #281b10;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    1.25rem;
+    1.08rem;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.17;
+
+  letter-spacing:
+    -0.02em;
 
   text-shadow:
     none;
@@ -1198,17 +1302,16 @@ h3 {
     #584734;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.8rem;
+    0.9rem;
 
   font-weight:
     600;
 
   line-height:
-    1.42;
+    1.35;
 
 }
 
@@ -1217,6 +1320,18 @@ h3 {
 
   margin-bottom:
     5px;
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.57rem;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.1em;
 
   text-shadow:
     none;
@@ -1269,14 +1384,16 @@ h3 {
     #594025;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.64rem;
+    0.55rem;
 
   font-weight:
-    900;
+    800;
+
+  letter-spacing:
+    0.035em;
 
   white-space:
     nowrap;
@@ -1288,6 +1405,9 @@ h3 {
 
   color:
     #66492a;
+
+  font-family:
+    var(--font-heading);
 
   font-size:
     1.7rem;
@@ -1420,11 +1540,16 @@ h3 {
     #eee3c5;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.72rem;
+    0.65rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.04em;
 
   text-shadow:
     0 2px 3px
@@ -1450,8 +1575,14 @@ h3 {
   color:
     #f3e6c7;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    1.13rem;
+    1rem;
+
+  font-weight:
+    700;
 
   text-shadow:
     0 2px 4px
@@ -1472,11 +1603,13 @@ h3 {
     #e0d5bd;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.7rem;
+    0.79rem;
+
+  font-weight:
+    600;
 
   text-shadow:
     0 2px 3px
@@ -1757,6 +1890,9 @@ h3 {
   color:
     var(--ink);
 
+  font-family:
+    var(--font-body);
+
   box-shadow:
     var(--shadow-heavy);
 
@@ -1802,6 +1938,9 @@ h3 {
 
   color:
     #2b1d11;
+
+  font-family:
+    var(--font-heading);
 
   text-shadow:
     none;
@@ -1900,11 +2039,16 @@ h3 {
     #52412f;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
+
+  font-size:
+    1rem;
+
+  font-weight:
+    500;
 
   line-height:
-    1.55;
+    1.5;
 
 }
 
@@ -1941,14 +2085,16 @@ h3 {
     #70451f;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.78rem;
+    0.68rem;
 
   font-weight:
-    900;
+    800;
+
+  letter-spacing:
+    0.04em;
 
 }
 
@@ -2024,14 +2170,16 @@ h3 {
     #463625;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.87rem;
+    0.96rem;
 
   font-weight:
-    650;
+    600;
+
+  line-height:
+    1.3;
 
 }
 
@@ -2091,8 +2239,14 @@ h3 {
   color:
     #332313;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    2rem;
+    1.8rem;
+
+  font-weight:
+    700;
 
   font-variant-numeric:
     tabular-nums;
@@ -2130,14 +2284,16 @@ h3 {
     #50351e;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.77rem;
+    0.64rem;
 
   font-weight:
-    800;
+    700;
+
+  letter-spacing:
+    0.03em;
 
   cursor:
     pointer;
@@ -2173,11 +2329,20 @@ h3 {
   color:
     #24170d;
 
+  font-family:
+    var(--font-heading);
+
   font-size:
-    1rem;
+    0.83rem;
 
   font-weight:
-    900;
+    800;
+
+  letter-spacing:
+    0.035em;
+
+  text-transform:
+    uppercase;
 
   cursor:
     pointer;
@@ -2241,6 +2406,15 @@ h3 {
   color:
     #302012;
 
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.82rem;
+
+  font-weight:
+    700;
+
 }
 
 
@@ -2250,11 +2424,13 @@ h3 {
     #64503a;
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-body);
 
   font-size:
-    0.77rem;
+    0.86rem;
+
+  font-weight:
+    500;
 
 }
 
@@ -2312,14 +2488,16 @@ h3 {
     var(--cream);
 
   font-family:
-    Arial,
-    sans-serif;
+    var(--font-heading);
 
   font-size:
-    0.82rem;
+    0.68rem;
 
   font-weight:
-    800;
+    700;
+
+  letter-spacing:
+    0.025em;
 
   text-align:
     center;
@@ -2512,6 +2690,18 @@ h3 {
 
   .topbar {
     gap: 10px;
+  }
+
+
+  h1 {
+
+    font-size:
+      clamp(
+        1.75rem,
+        8vw,
+        2.3rem
+      );
+
   }
 
 
