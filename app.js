@@ -488,6 +488,16 @@ let currentParty =
 let partyRefreshTimer =
   null;
 
+let giftRecipient =
+  null;
+
+
+let giftSending =
+  false;
+
+
+let checkingIncomingGifts =
+  false;
 
 // =========================================================
 // 7. DOM HELPERS
