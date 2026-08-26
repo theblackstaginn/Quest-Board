@@ -818,6 +818,9 @@ function createFreshState() {
 
     history:
       [],
+      
+    claimedGiftIds:
+      [],
 
 
     /*
