@@ -66,7 +66,7 @@
 
   <link
     rel="stylesheet"
-    href="styles.css?v=42"
+    href="styles.css?v=45"
   >
 
 </head>
@@ -372,53 +372,53 @@
             </div>
 
 
-           <div class="currency-wallet">
+            <div class="currency-wallet">
 
 
-  <!-- GOLD -->
+              <!-- GOLD -->
 
-  <div
-    class="currency-purse"
-    aria-label="Gold"
-  >
+              <div
+                class="currency-purse"
+                aria-label="Gold"
+              >
 
-    <img
-      class="currency-icon"
-      src="icons/gold-icon.webp"
-      alt=""
-      aria-hidden="true"
-    >
+                <img
+                  class="currency-icon"
+                  src="icons/gold-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
 
-    <strong id="characterGold">
-      0
-    </strong>
+                <strong id="characterGold">
+                  0
+                </strong>
 
-  </div>
-
-
-
-  <!-- CRYSTALS -->
-
-  <div
-    class="currency-purse"
-    aria-label="Crystals"
-  >
-
-    <img
-      class="currency-icon"
-      src="icons/crystal-icon.webp"
-      alt=""
-      aria-hidden="true"
-    >
-
-    <strong id="characterCrystals">
-      0
-    </strong>
-
-  </div>
+              </div>
 
 
-</div>
+
+              <!-- CRYSTALS -->
+
+              <div
+                class="currency-purse"
+                aria-label="Crystals"
+              >
+
+                <img
+                  class="currency-icon"
+                  src="icons/crystal-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <strong id="characterCrystals">
+                  0
+                </strong>
+
+              </div>
+
+
+            </div>
 
           </section>
 
@@ -1200,7 +1200,6 @@
       aria-label="Primary navigation"
     >
 
-
       <button
         class="nav-item active"
         type="button"
@@ -1239,7 +1238,6 @@
       >
         Settings
       </button>
-
 
     </nav>
 
@@ -1475,165 +1473,178 @@
 
   </dialog>
 
-<!-- ==================================================
-     PARTY GIFT DIALOG
-=================================================== -->
 
-<dialog
-  class="gift-dialog"
-  id="giftDialog"
->
 
-  <div class="dialog-header">
+  <!-- ==================================================
+       PARTY GIFT DIALOG
+  =================================================== -->
 
-    <div>
+  <dialog
+    class="gift-dialog"
+    id="giftDialog"
+  >
 
-      <p class="eyebrow">
-        Fellowship Gift
-      </p>
+    <div class="dialog-header">
 
-      <h2>
-        Send Treasure
-      </h2>
+      <div>
+
+        <p class="eyebrow">
+          Fellowship Gift
+        </p>
+
+        <h2>
+          Send Treasure
+        </h2>
+
+      </div>
+
+
+      <button
+        class="close-button"
+        id="closeGiftButton"
+        type="button"
+        aria-label="Close gift window"
+      >
+        ×
+      </button>
 
     </div>
+
+
+    <p class="gift-recipient-line">
+      Send a gift to
+      <strong id="giftRecipientName">
+        Adventurer
+      </strong>
+    </p>
+
+
+    <div class="gift-wallet-preview">
+
+
+      <!-- GOLD -->
+
+      <div>
+
+        <img
+          src="icons/gold-icon.webp"
+          alt=""
+          aria-hidden="true"
+        >
+
+        <span>
+          Your Gold
+        </span>
+
+        <strong id="giftGoldBalance">
+          0
+        </strong>
+
+      </div>
+
+
+
+      <!-- CRYSTALS -->
+
+      <div>
+
+        <img
+          src="icons/crystal-icon.webp"
+          alt=""
+          aria-hidden="true"
+        >
+
+        <span>
+          Your Crystals
+        </span>
+
+        <strong id="giftCrystalBalance">
+          0
+        </strong>
+
+      </div>
+
+
+    </div>
+
+
+    <label
+      class="gift-field"
+      for="giftCurrencySelect"
+    >
+
+      <span>
+        Treasure
+      </span>
+
+
+      <select
+        id="giftCurrencySelect"
+        class="gift-input"
+      >
+
+        <option value="gold">
+          Gold
+        </option>
+
+        <option value="crystals">
+          Crystals
+        </option>
+
+      </select>
+
+    </label>
+
+
+    <label
+      class="gift-field"
+      for="giftAmountInput"
+    >
+
+      <span>
+        Amount
+      </span>
+
+
+      <input
+        id="giftAmountInput"
+        class="gift-input"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        step="1"
+        placeholder="Enter amount"
+      >
+
+    </label>
+
+
+    <p
+      class="gift-available"
+      id="giftAvailableText"
+    >
+      Available: 0 Gold
+    </p>
+
+
+    <p
+      class="gift-error"
+      id="giftError"
+      aria-live="polite"
+    ></p>
 
 
     <button
-      class="close-button"
-      id="closeGiftButton"
+      class="gift-send-button"
+      id="sendGiftButton"
       type="button"
-      aria-label="Close gift window"
     >
-      ×
+      Send Gift
     </button>
 
-  </div>
+  </dialog>
 
 
-  <p class="gift-recipient-line">
-    Send a gift to
-    <strong id="giftRecipientName">
-      Adventurer
-    </strong>
-  </p>
-
-
-  <div class="gift-wallet-preview">
-
-    <div>
-
-      <img
-        src="icons/gold-icon.webp"
-        alt=""
-        aria-hidden="true"
-      >
-
-      <span>
-        Your Gold
-      </span>
-
-      <strong id="giftGoldBalance">
-        0
-      </strong>
-
-    </div>
-
-
-    <div>
-
-      <img
-        src="icons/crystal-icon.webp"
-        alt=""
-        aria-hidden="true"
-      >
-
-      <span>
-        Your Crystals
-      </span>
-
-      <strong id="giftCrystalBalance">
-        0
-      </strong>
-
-    </div>
-
-  </div>
-
-
-  <label
-    class="gift-field"
-    for="giftCurrencySelect"
-  >
-
-    <span>
-      Treasure
-    </span>
-
-    <select
-      id="giftCurrencySelect"
-      class="gift-input"
-    >
-
-      <option value="gold">
-        Gold
-      </option>
-
-      <option value="crystals">
-        Crystals
-      </option>
-
-    </select>
-
-  </label>
-
-
-  <label
-    class="gift-field"
-    for="giftAmountInput"
-  >
-
-    <span>
-      Amount
-    </span>
-
-    <input
-      id="giftAmountInput"
-      class="gift-input"
-      type="number"
-      inputmode="numeric"
-      min="1"
-      step="1"
-      placeholder="Enter amount"
-    >
-
-  </label>
-
-
-  <p
-    class="gift-available"
-    id="giftAvailableText"
-  >
-    Available: 0 Gold
-  </p>
-
-
-  <p
-    class="gift-error"
-    id="giftError"
-    aria-live="polite"
-  ></p>
-
-
-  <button
-    class="gift-send-button"
-    id="sendGiftButton"
-    type="button"
-  >
-    Send Gift
-  </button>
-
-</dialog>
 
   <!-- =====================================
        NOTIFICATION
@@ -1662,7 +1673,7 @@
        APP
   ====================================== -->
 
-  <script src="app.js?v=42"></script>
+  <script src="app.js?v=45"></script>
 
 
 </body>
