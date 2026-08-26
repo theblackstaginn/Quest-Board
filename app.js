@@ -820,7 +820,11 @@ function createFreshState() {
       [],
       
     claimedGiftIds:
-      [],
+      Array.isArray(
+        parsed?.claimedGiftIds
+      )
+        ? parsed.claimedGiftIds
+        : [],
 
 
     /*
