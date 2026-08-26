@@ -1475,7 +1475,165 @@
 
   </dialog>
 
+<!-- ==================================================
+     PARTY GIFT DIALOG
+=================================================== -->
 
+<dialog
+  class="gift-dialog"
+  id="giftDialog"
+>
+
+  <div class="dialog-header">
+
+    <div>
+
+      <p class="eyebrow">
+        Fellowship Gift
+      </p>
+
+      <h2>
+        Send Treasure
+      </h2>
+
+    </div>
+
+
+    <button
+      class="close-button"
+      id="closeGiftButton"
+      type="button"
+      aria-label="Close gift window"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <p class="gift-recipient-line">
+    Send a gift to
+    <strong id="giftRecipientName">
+      Adventurer
+    </strong>
+  </p>
+
+
+  <div class="gift-wallet-preview">
+
+    <div>
+
+      <img
+        src="icons/gold-icon.webp"
+        alt=""
+        aria-hidden="true"
+      >
+
+      <span>
+        Your Gold
+      </span>
+
+      <strong id="giftGoldBalance">
+        0
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <img
+        src="icons/crystal-icon.webp"
+        alt=""
+        aria-hidden="true"
+      >
+
+      <span>
+        Your Crystals
+      </span>
+
+      <strong id="giftCrystalBalance">
+        0
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <label
+    class="gift-field"
+    for="giftCurrencySelect"
+  >
+
+    <span>
+      Treasure
+    </span>
+
+    <select
+      id="giftCurrencySelect"
+      class="gift-input"
+    >
+
+      <option value="gold">
+        Gold
+      </option>
+
+      <option value="crystals">
+        Crystals
+      </option>
+
+    </select>
+
+  </label>
+
+
+  <label
+    class="gift-field"
+    for="giftAmountInput"
+  >
+
+    <span>
+      Amount
+    </span>
+
+    <input
+      id="giftAmountInput"
+      class="gift-input"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      step="1"
+      placeholder="Enter amount"
+    >
+
+  </label>
+
+
+  <p
+    class="gift-available"
+    id="giftAvailableText"
+  >
+    Available: 0 Gold
+  </p>
+
+
+  <p
+    class="gift-error"
+    id="giftError"
+    aria-live="polite"
+  ></p>
+
+
+  <button
+    class="gift-send-button"
+    id="sendGiftButton"
+    type="button"
+  >
+    Send Gift
+  </button>
+
+</dialog>
 
   <!-- =====================================
        NOTIFICATION
