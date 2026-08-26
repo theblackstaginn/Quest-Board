@@ -22,6 +22,7 @@
 // - Supabase-backed fellowship data
 // - Party Gold / Crystal gifting
 // - Cross-device gift notifications
+// - Safe local boot if Supabase fails
 // =========================================================
 
 
@@ -32,14 +33,37 @@
 const SUPABASE_URL =
   "https://pqifpislzljilqatmtly.supabase.co";
 
+
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_16wAhIyuMsClbOYoAZt6aQ_unXWTJ_n";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
+
+let supabaseClient =
+  null;
+
+
+if (
+  window.supabase
+  &&
+  typeof window.supabase.createClient ===
+    "function"
+) {
+
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+}
+
+else {
+
+  console.warn(
+    "Supabase library did not load. Quest Board will continue in local mode."
   );
+
+}
 
 
 // =========================================================
@@ -49,13 +73,26 @@ const supabaseClient =
 const QUESTS = [
 
   {
-    id: "there-back",
-    title: "There and Back",
-    category: "Endurance",
-    time: "15–25 min",
-    xpType: "endurance",
-    xp: 20,
-    gold: 12,
+    id:
+      "there-back",
+
+    title:
+      "There and Back",
+
+    category:
+      "Endurance",
+
+    time:
+      "15–25 min",
+
+    xpType:
+      "endurance",
+
+    xp:
+      20,
+
+    gold:
+      12,
 
     description:
       "Walk the full 1-mile road route at a comfortable, steady pace.",
@@ -67,13 +104,26 @@ const QUESTS = [
 
 
   {
-    id: "keep",
-    title: "The Keep",
-    category: "Strength",
-    time: "10–20 min",
-    xpType: "strength",
-    xp: 25,
-    gold: 15,
+    id:
+      "keep",
+
+    title:
+      "The Keep",
+
+    category:
+      "Strength",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      25,
+
+    gold:
+      15,
 
     description:
       "A simple dumbbell and kettlebell strength quest. Complete two rounds for a short session or three to four rounds for the full quest.",
@@ -89,13 +139,26 @@ const QUESTS = [
 
 
   {
-    id: "dragonstrength",
-    title: "DragonStrength",
-    category: "Strength",
-    time: "10–20 min",
-    xpType: "strength",
-    xp: 30,
-    gold: 20,
+    id:
+      "dragonstrength",
+
+    title:
+      "DragonStrength",
+
+    category:
+      "Strength",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      30,
+
+    gold:
+      20,
 
     description:
       "Barbell and rack training. Keep the movement controlled and leave a little strength in reserve.",
@@ -111,13 +174,26 @@ const QUESTS = [
 
 
   {
-    id: "rogue",
-    title: "Rogue Mode",
-    category: "Mixed",
-    time: "10 min",
-    xpType: "strength",
-    xp: 20,
-    gold: 15,
+    id:
+      "rogue",
+
+    title:
+      "Rogue Mode",
+
+    category:
+      "Mixed",
+
+    time:
+      "10 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      20,
+
+    gold:
+      15,
 
     description:
       "Set the timer for ten minutes and move continuously through the circuit at your own pace.",
@@ -133,13 +209,26 @@ const QUESTS = [
 
 
   {
-    id: "restoration",
-    title: "Restoration",
-    category: "Recovery",
-    time: "10–20 min",
-    xpType: "restoration",
-    xp: 20,
-    gold: 10,
+    id:
+      "restoration",
+
+    title:
+      "Restoration",
+
+    category:
+      "Recovery",
+
+    time:
+      "10–20 min",
+
+    xpType:
+      "restoration",
+
+    xp:
+      20,
+
+    gold:
+      10,
 
     description:
       "A mobility and recovery quest for keeping the body loose, capable, and ready for the next battle.",
@@ -156,13 +245,26 @@ const QUESTS = [
 
 
   {
-    id: "ranger",
-    title: "Ranger Training",
-    category: "Endurance",
-    time: "20–30 min",
-    xpType: "endurance",
-    xp: 30,
-    gold: 20,
+    id:
+      "ranger",
+
+    title:
+      "Ranger Training",
+
+    category:
+      "Endurance",
+
+    time:
+      "20–30 min",
+
+    xpType:
+      "endurance",
+
+    xp:
+      30,
+
+    gold:
+      20,
 
     description:
       "Walk the mile. After a five-minute warm-up, alternate one minute fast with two minutes at your normal pace.",
@@ -187,13 +289,26 @@ const SPECIAL_QUESTS = {
 
   emergency: {
 
-    id: "emergency",
-    title: "Emergency Quest",
-    category: "Emergency",
-    time: "5 min",
-    xpType: "strength",
-    xp: 10,
-    gold: 5,
+    id:
+      "emergency",
+
+    title:
+      "Emergency Quest",
+
+    category:
+      "Emergency",
+
+    time:
+      "5 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      10,
+
+    gold:
+      5,
 
     description:
       "Five minutes counts. This exists for the days when doing anything feels harder than it should.",
@@ -210,13 +325,26 @@ const SPECIAL_QUESTS = {
 
   boss: {
 
-    id: "boss",
-    title: "Boss Battle",
-    category: "Boss",
-    time: "30–45 min",
-    xpType: "strength",
-    xp: 0,
-    gold: 0,
+    id:
+      "boss",
+
+    title:
+      "Boss Battle",
+
+    category:
+      "Boss",
+
+    time:
+      "30–45 min",
+
+    xpType:
+      "strength",
+
+    xp:
+      0,
+
+    gold:
+      0,
 
     description:
       "The weekly challenge. Walk the mile, then complete twenty minutes of strength training.",
@@ -239,34 +367,46 @@ const CHARACTER_PROFILES = {
 
   farmer: {
 
-    profileId: "farmer",
+    profileId:
+      "farmer",
 
-    legacyName: "Farmer",
+    legacyName:
+      "Farmer",
 
-    defaultName: "Farmer",
+    defaultName:
+      "Farmer",
 
-    className: "Half-Orc Wizard",
+    className:
+      "Half-Orc Wizard",
 
-    card: "farmer-card.webp",
+    card:
+      "farmer-card.webp",
 
-    theme: "ember"
+    theme:
+      "ember"
 
   },
 
 
   jess: {
 
-    profileId: "jess",
+    profileId:
+      "jess",
 
-    legacyName: "Jess",
+    legacyName:
+      "Jess",
 
-    defaultName: "Jess",
+    defaultName:
+      "Jess",
 
-    className: "Rogue Witch Assassin",
+    className:
+      "Rogue Witch Assassin",
 
-    card: "jess-card.webp",
+    card:
+      "jess-card.webp",
 
-    theme: "amethyst"
+    theme:
+      "amethyst"
 
   }
 
@@ -1033,6 +1173,34 @@ async function initializeSupabase() {
   );
 
 
+  /*
+    IMPORTANT:
+
+    Supabase is optional for the personal app.
+
+    If the CDN fails or the Supabase client does not
+    initialize, Quest Board continues using local data.
+  */
+
+  if (
+    !supabaseClient
+  ) {
+
+    supabaseReady =
+      false;
+
+
+    setPartySyncStatus(
+      "Party sync unavailable. Personal progress still works.",
+      "error"
+    );
+
+
+    return;
+
+  }
+
+
   try {
 
     const {
@@ -1143,6 +1311,8 @@ async function syncProfileToSupabase() {
     !supabaseReady
     ||
     !supabaseUser
+    ||
+    !supabaseClient
   ) {
 
     return;
@@ -1216,6 +1386,8 @@ async function loadCurrentParty() {
     !supabaseReady
     ||
     !supabaseUser
+    ||
+    !supabaseClient
   ) {
 
     return null;
@@ -1320,9 +1492,7 @@ async function loadCurrentParty() {
   );
 
 
-  return (
-    currentParty
-  );
+  return currentParty;
 }
 
 
@@ -1338,6 +1508,19 @@ function render() {
 
   const settings =
     getSettings();
+
+
+  /*
+    Render the personal board first.
+
+    This makes the quest board independent from
+    Supabase / party functionality.
+  */
+
+  renderQuestCards();
+
+
+  bindQuestCards();
 
 
   renderProfile(
@@ -1357,9 +1540,6 @@ function render() {
   );
 
 
-  renderQuestCards();
-
-
   renderCharacterStats(
     state
   );
@@ -1376,15 +1556,9 @@ function render() {
   );
 
 
-  void renderParty();
-
-
   applyMotionSetting(
     settings
   );
-
-
-  bindQuestCards();
 }
 
 
@@ -1406,18 +1580,36 @@ function renderProfile(
     character.defaultName;
 
 
-  $("#profileName")
-    .textContent =
+  const profileName =
+    $("#profileName");
+
+
+  const profileAvatar =
+    $("#profileAvatar");
+
+
+  if (
+    profileName
+  ) {
+
+    profileName.textContent =
       name;
 
+  }
 
-  $("#profileAvatar")
-    .textContent =
+
+  if (
+    profileAvatar
+  ) {
+
+    profileAvatar.textContent =
       name
         .charAt(
           0
         )
         .toUpperCase();
+
+  }
 }
 
 
@@ -1551,6 +1743,15 @@ function renderBossBattle(
     $("#bossButton");
 
 
+  if (
+    !bossButton
+  ) {
+
+    return;
+
+  }
+
+
   bossButton.disabled =
     !weekConquered
     ||
@@ -1593,76 +1794,93 @@ function renderBossBattle(
 
 function renderQuestCards() {
 
-  $("#questGrid")
-    .innerHTML =
-      QUESTS
-        .map(
-          quest => `
-            <article
-              class="quest-card"
-              data-quest-id="${quest.id}"
-              tabindex="0"
-              role="button"
-            >
-
-              <div class="quest-card-content">
-
-                <p class="quest-type">
-                  ${escapeHtml(
-                    quest.category
-                  )}
-                </p>
-
-                <h3>
-                  ${escapeHtml(
-                    quest.title
-                  )}
-                </h3>
-
-                <p>
-                  ${escapeHtml(
-                    quest.description
-                  )}
-                </p>
-
-              </div>
+  const questGrid =
+    $("#questGrid");
 
 
-              <div class="quest-card-meta">
+  if (
+    !questGrid
+  ) {
 
-                <span class="quest-duration">
-                  ${escapeHtml(
-                    quest.time
-                  )}
-                </span>
-
-
-                <span class="quest-gold-reward">
-
-                  <img
-                    src="icons/gold-icon.webp"
-                    alt=""
-                    aria-hidden="true"
-                  >
-
-                  ${quest.gold}
-
-                </span>
+    console.error(
+      "Quest grid element was not found."
+    );
 
 
-                <span
-                  class="quest-arrow"
+    return;
+
+  }
+
+
+  questGrid.innerHTML =
+    QUESTS
+      .map(
+        quest => `
+          <article
+            class="quest-card"
+            data-quest-id="${quest.id}"
+            tabindex="0"
+            role="button"
+          >
+
+            <div class="quest-card-content">
+
+              <p class="quest-type">
+                ${escapeHtml(
+                  quest.category
+                )}
+              </p>
+
+              <h3>
+                ${escapeHtml(
+                  quest.title
+                )}
+              </h3>
+
+              <p>
+                ${escapeHtml(
+                  quest.description
+                )}
+              </p>
+
+            </div>
+
+
+            <div class="quest-card-meta">
+
+              <span class="quest-duration">
+                ${escapeHtml(
+                  quest.time
+                )}
+              </span>
+
+
+              <span class="quest-gold-reward">
+
+                <img
+                  src="icons/gold-icon.webp"
+                  alt=""
                   aria-hidden="true"
                 >
-                  ›
-                </span>
 
-              </div>
+                ${quest.gold}
 
-            </article>
-          `
-        )
-        .join("");
+              </span>
+
+
+              <span
+                class="quest-arrow"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+
+            </div>
+
+          </article>
+        `
+      )
+      .join("");
 }
 
 
@@ -1773,25 +1991,52 @@ function renderStat(
     );
 
 
-  $(
-    `#${type}Level`
-  )
-    .textContent =
+  const levelElement =
+    $(
+      `#${type}Level`
+    );
+
+
+  const xpElement =
+    $(
+      `#${type}Xp`
+    );
+
+
+  const barElement =
+    $(
+      `#${type}Bar`
+    );
+
+
+  if (
+    levelElement
+  ) {
+
+    levelElement.textContent =
       `Lv. ${level}`;
 
+  }
 
-  $(
-    `#${type}Xp`
-  )
-    .textContent =
+
+  if (
+    xpElement
+  ) {
+
+    xpElement.textContent =
       `${xp} XP`;
 
+  }
 
-  $(
-    `#${type}Bar`
-  )
-    .style.width =
+
+  if (
+    barElement
+  ) {
+
+    barElement.style.width =
       `${progress}%`;
+
+  }
 }
 
 
@@ -2675,6 +2920,19 @@ async function syncQuestActivityToParty(
   completedAt
 ) {
 
+  if (
+    !supabaseClient
+    ||
+    !supabaseUser
+    ||
+    !currentParty
+  ) {
+
+    return false;
+
+  }
+
+
   try {
 
     const settings =
@@ -2767,6 +3025,19 @@ async function syncQuestActivityToParty(
 async function syncBossActivityToParty(
   completedAt
 ) {
+
+  if (
+    !supabaseClient
+    ||
+    !supabaseUser
+    ||
+    !currentParty
+  ) {
+
+    return false;
+
+  }
+
 
   try {
 
@@ -2930,9 +3201,18 @@ function pauseTimer() {
   }
 
 
-  $("#timerToggleButton")
-    .textContent =
+  const timerButton =
+    $("#timerToggleButton");
+
+
+  if (
+    timerButton
+  ) {
+
+    timerButton.textContent =
       "Start";
+
+  }
 }
 
 
@@ -2969,6 +3249,19 @@ function toggleTimer() {
 
 function updateTimerDisplay() {
 
+  const display =
+    $("#timerDisplay");
+
+
+  if (
+    !display
+  ) {
+
+    return;
+
+  }
+
+
   const hours =
     Math.floor(
       timerSeconds
@@ -2999,63 +3292,61 @@ function updateTimerDisplay() {
     hours > 0
   ) {
 
-    $("#timerDisplay")
-      .textContent =
-        (
-          String(
-            hours
+    display.textContent =
+      (
+        String(
+          hours
+        )
+          .padStart(
+            2,
+            "0"
           )
-            .padStart(
-              2,
-              "0"
-            )
-          +
-          ":"
-          +
-          String(
-            minutes
+        +
+        ":"
+        +
+        String(
+          minutes
+        )
+          .padStart(
+            2,
+            "0"
           )
-            .padStart(
-              2,
-              "0"
-            )
-          +
-          ":"
-          +
-          String(
-            seconds
+        +
+        ":"
+        +
+        String(
+          seconds
+        )
+          .padStart(
+            2,
+            "0"
           )
-            .padStart(
-              2,
-              "0"
-            )
-        );
+      );
 
   }
 
   else {
 
-    $("#timerDisplay")
-      .textContent =
-        (
-          String(
-            minutes
+    display.textContent =
+      (
+        String(
+          minutes
+        )
+          .padStart(
+            2,
+            "0"
           )
-            .padStart(
-              2,
-              "0"
-            )
-          +
-          ":"
-          +
-          String(
-            seconds
+        +
+        ":"
+        +
+        String(
+          seconds
+        )
+          .padStart(
+            2,
+            "0"
           )
-            .padStart(
-              2,
-              "0"
-            )
-        );
+      );
 
   }
 }
@@ -3137,7 +3428,7 @@ function openHistory() {
 
               const xpTypeText =
                 item.xpType ===
-                "mixed"
+                  "mixed"
                   ? "Mixed"
                   : capitalize(
                       item.xpType
@@ -3396,49 +3687,106 @@ function renderSettings(
   settings
 ) {
 
-  $("#playerNameInput")
-    .value =
+  const playerNameInput =
+    $("#playerNameInput");
+
+
+  const weeklyGoalSelect =
+    $("#weeklyGoalSelect");
+
+
+  const reducedMotionToggle =
+    $("#reducedMotionToggle");
+
+
+  const soundToggle =
+    $("#soundToggle");
+
+
+  const leavePartyButton =
+    $("#leavePartyButton");
+
+
+  const partySettingsStatus =
+    $("#partySettingsStatus");
+
+
+  if (
+    playerNameInput
+  ) {
+
+    playerNameInput.value =
       settings.playerName
       ||
       getCharacterConfig()
         .defaultName;
 
+  }
 
-  $("#weeklyGoalSelect")
-    .value =
+
+  if (
+    weeklyGoalSelect
+  ) {
+
+    weeklyGoalSelect.value =
       String(
         settings.weeklyGoal
         ||
         DEFAULT_WEEKLY_GOAL
       );
 
+  }
 
-  $("#reducedMotionToggle")
-    .checked =
+
+  if (
+    reducedMotionToggle
+  ) {
+
+    reducedMotionToggle.checked =
       Boolean(
         settings.reducedMotion
       );
 
+  }
 
-  $("#soundToggle")
-    .checked =
+
+  if (
+    soundToggle
+  ) {
+
+    soundToggle.checked =
       Boolean(
         settings.soundEnabled
       );
 
+  }
 
-  $("#leavePartyButton")
-    .disabled =
+
+  if (
+    leavePartyButton
+  ) {
+
+    leavePartyButton.disabled =
       !currentParty;
+
+  }
+
+
+  if (
+    !partySettingsStatus
+  ) {
+
+    return;
+
+  }
 
 
   if (
     currentParty
   ) {
 
-    $("#partySettingsStatus")
-      .textContent =
-        `Member of ${currentParty.name}.`;
+    partySettingsStatus.textContent =
+      `Member of ${currentParty.name}.`;
 
   }
 
@@ -3446,17 +3794,15 @@ function renderSettings(
     supabaseReady
   ) {
 
-    $("#partySettingsStatus")
-      .textContent =
-        "No fellowship joined.";
+    partySettingsStatus.textContent =
+      "No fellowship joined.";
 
   }
 
   else {
 
-    $("#partySettingsStatus")
-      .textContent =
-        "Party sync is unavailable.";
+    partySettingsStatus.textContent =
+      "Party sync is unavailable.";
 
   }
 }
@@ -3468,9 +3814,21 @@ function renderSettings(
 
 async function savePlayerName() {
 
+  const input =
+    $("#playerNameInput");
+
+
+  if (
+    !input
+  ) {
+
+    return;
+
+  }
+
+
   const name =
-    $("#playerNameInput")
-      .value
+    input.value
       .trim();
 
 
@@ -3547,10 +3905,22 @@ async function savePlayerName() {
 
 function saveWeeklyGoal() {
 
+  const select =
+    $("#weeklyGoalSelect");
+
+
+  if (
+    !select
+  ) {
+
+    return;
+
+  }
+
+
   const goal =
     Number(
-      $("#weeklyGoalSelect")
-        .value
+      select.value
     );
 
 
@@ -3610,13 +3980,25 @@ function applyMotionSetting(
 
 function saveReducedMotion() {
 
+  const toggle =
+    $("#reducedMotionToggle");
+
+
+  if (
+    !toggle
+  ) {
+
+    return;
+
+  }
+
+
   const settings =
     getSettings();
 
 
   settings.reducedMotion =
-    $("#reducedMotionToggle")
-      .checked;
+    toggle.checked;
 
 
   saveSettings(
@@ -3643,13 +4025,25 @@ function saveReducedMotion() {
 
 function saveSoundSetting() {
 
+  const toggle =
+    $("#soundToggle");
+
+
+  if (
+    !toggle
+  ) {
+
+    return;
+
+  }
+
+
   const settings =
     getSettings();
 
 
   settings.soundEnabled =
-    $("#soundToggle")
-      .checked;
+    toggle.checked;
 
 
   saveSettings(
@@ -3822,6 +4216,8 @@ async function createParty() {
 
   if (
     !supabaseReady
+    ||
+    !supabaseClient
   ) {
 
     showToast(
@@ -3917,6 +4313,15 @@ function toggleJoinPartyForm() {
     $("#joinPartyForm");
 
 
+  if (
+    !form
+  ) {
+
+    return;
+
+  }
+
+
   form.hidden =
     !form.hidden;
 
@@ -3926,7 +4331,7 @@ function toggleJoinPartyForm() {
   ) {
 
     $("#partyCodeInput")
-      .focus();
+      ?.focus();
 
   }
 }
@@ -3940,6 +4345,8 @@ async function joinParty() {
 
   if (
     !supabaseReady
+    ||
+    !supabaseClient
   ) {
 
     showToast(
@@ -3966,9 +4373,21 @@ async function joinParty() {
   }
 
 
+  const input =
+    $("#partyCodeInput");
+
+
+  if (
+    !input
+  ) {
+
+    return;
+
+  }
+
+
   const code =
-    $("#partyCodeInput")
-      .value
+    input.value
       .trim()
       .toUpperCase();
 
@@ -4013,9 +4432,8 @@ async function joinParty() {
     }
 
 
-    $("#partyCodeInput")
-      .value =
-        "";
+    input.value =
+      "";
 
 
     $("#joinPartyForm")
@@ -4060,6 +4478,8 @@ async function leaveParty() {
     !currentParty
     ||
     !supabaseUser
+    ||
+    !supabaseClient
   ) {
 
     return;
@@ -4151,6 +4571,8 @@ async function refreshParty() {
 
   if (
     !supabaseReady
+    ||
+    !supabaseClient
   ) {
 
     await renderParty();
@@ -4338,6 +4760,8 @@ async function fetchPartyMembers() {
 
   if (
     !currentParty
+    ||
+    !supabaseClient
   ) {
 
     return [];
@@ -4380,12 +4804,17 @@ async function fetchPartyMembers() {
   }
 
 
-  const userIds =
+  const safeMemberships =
     memberships
-      .map(
-        item =>
-          item.user_id
-      );
+    ||
+    [];
+
+
+  const userIds =
+    safeMemberships.map(
+      item =>
+        item.user_id
+    );
 
 
   if (
@@ -4426,12 +4855,18 @@ async function fetchPartyMembers() {
   }
 
 
+  const safeProfiles =
+    profiles
+    ||
+    [];
+
+
   return (
-    memberships.map(
+    safeMemberships.map(
       membership => {
 
         const profile =
-          profiles.find(
+          safeProfiles.find(
             item =>
               item.user_id
               ===
@@ -4478,6 +4913,8 @@ async function fetchPartyActivity() {
 
   if (
     !currentParty
+    ||
+    !supabaseClient
   ) {
 
     return [];
@@ -4538,18 +4975,30 @@ function renderPartyMembers(
   activity
 ) {
 
+  const partyMembers =
+    $("#partyMembers");
+
+
+  if (
+    !partyMembers
+  ) {
+
+    return;
+
+  }
+
+
   if (
     members.length ===
     0
   ) {
 
-    $("#partyMembers")
-      .innerHTML =
-        `
-          <p class="muted">
-            No companions found.
-          </p>
-        `;
+    partyMembers.innerHTML =
+      `
+        <p class="muted">
+          No companions found.
+        </p>
+      `;
 
 
     return;
@@ -4561,183 +5010,186 @@ function renderPartyMembers(
     getWeekKey();
 
 
-  $("#partyMembers")
-    .innerHTML =
-      members
-        .map(
-          member => {
+  partyMembers.innerHTML =
+    members
+      .map(
+        member => {
 
-            const weeklyQuestActivity =
-              activity.filter(
-                item =>
-                  item.user_id
-                    ===
-                    member.user_id
-                  &&
-                  item.week_key
-                    ===
-                    currentWeek
-                  &&
-                  item.quest_id
-                    !==
-                    "boss"
-              );
-
-
-            const weeklyGoldActivity =
-              activity.filter(
-                item =>
-                  item.user_id
-                    ===
-                    member.user_id
-                  &&
-                  item.week_key
-                    ===
-                    currentWeek
-              );
-
-
-            const weeklyGold =
-              weeklyGoldActivity.reduce(
-                (
-                  total,
-                  item
-                ) =>
-                  total
-                  +
-                  (
-                    Number(
-                      item.gold
-                    )
-                    ||
-                    0
-                  ),
-                0
-              );
-
-
-            const character =
-              member.profile_id
-                ? getCharacterConfig(
-                    member.profile_id
-                  )
-                : null;
-
-
-            const cardImage =
-              character?.card
-              ||
-              "";
-
-
-            const isCurrentPlayer =
-              Boolean(
-                supabaseUser
-                &&
-                member.user_id
+          const weeklyQuestActivity =
+            activity.filter(
+              item =>
+                item.user_id
                   ===
-                  supabaseUser.id
-              );
+                  member.user_id
+                &&
+                item.week_key
+                  ===
+                  currentWeek
+                &&
+                item.quest_id
+                  !==
+                  "boss"
+            );
 
 
-            return `
-              <article class="party-member-card">
+          const weeklyGoldActivity =
+            activity.filter(
+              item =>
+                item.user_id
+                  ===
+                  member.user_id
+                &&
+                item.week_key
+                  ===
+                  currentWeek
+            );
+
+
+          const weeklyGold =
+            weeklyGoldActivity.reduce(
+              (
+                total,
+                item
+              ) =>
+                total
+                +
+                (
+                  Number(
+                    item.gold
+                  )
+                  ||
+                  0
+                ),
+              0
+            );
+
+
+          const character =
+            member.profile_id
+              ? getCharacterConfig(
+                  member.profile_id
+                )
+              : null;
+
+
+          const cardImage =
+            character?.card
+            ||
+            "";
+
+
+          const isCurrentPlayer =
+            Boolean(
+              supabaseUser
+              &&
+              member.user_id
+                ===
+                supabaseUser.id
+            );
+
+
+          return `
+            <article class="party-member-card">
+
+              ${
+                cardImage
+                  ? `
+                    <img
+                      class="party-member-portrait"
+                      src="${escapeHtml(
+                        cardImage
+                      )}"
+                      alt="${escapeHtml(
+                        member.display_name
+                      )}"
+                    >
+                  `
+                  : `
+                    <div class="party-member-avatar">
+                      ${escapeHtml(
+                        member.display_name
+                          .charAt(
+                            0
+                          )
+                          .toUpperCase()
+                      )}
+                    </div>
+                  `
+              }
+
+
+              <div class="party-member-info">
+
+                <strong>
+                  ${escapeHtml(
+                    member.display_name
+                  )}
+                </strong>
+
+                <span>
+                  ${escapeHtml(
+                    member.class_name
+                  )}
+                </span>
+
+                <small>
+                  ${weeklyQuestActivity.length}
+                  quest${
+                    weeklyQuestActivity.length ===
+                    1
+                      ? ""
+                      : "s"
+                  }
+                  this week
+                </small>
+
+              </div>
+
+
+              <div class="party-member-score">
+
+                <strong>
+                  ${weeklyGold}g
+                </strong>
+
+                <span>
+                  earned
+                </span>
+
 
                 ${
-                  cardImage
+                  isCurrentPlayer
+
                     ? `
-                      <img
-                        class="party-member-portrait"
-                        src="${cardImage}"
-                        alt="${escapeHtml(
+                      <small class="party-self-label">
+                        You
+                      </small>
+                    `
+
+                    : `
+                      <button
+                        class="party-gift-button"
+                        type="button"
+                        data-gift-user-id="${escapeHtml(
+                          member.user_id
+                        )}"
+                        data-gift-name="${escapeHtml(
                           member.display_name
                         )}"
                       >
-                    `
-                    : `
-                      <div class="party-member-avatar">
-                        ${escapeHtml(
-                          member.display_name
-                            .charAt(0)
-                            .toUpperCase()
-                        )}
-                      </div>
+                        Gift
+                      </button>
                     `
                 }
 
+              </div>
 
-                <div class="party-member-info">
+            </article>
+          `;
 
-                  <strong>
-                    ${escapeHtml(
-                      member.display_name
-                    )}
-                  </strong>
-
-                  <span>
-                    ${escapeHtml(
-                      member.class_name
-                    )}
-                  </span>
-
-                  <small>
-                    ${weeklyQuestActivity.length}
-                    quest${
-                      weeklyQuestActivity.length ===
-                      1
-                        ? ""
-                        : "s"
-                    }
-                    this week
-                  </small>
-
-                </div>
-
-
-                <div class="party-member-score">
-
-                  <strong>
-                    ${weeklyGold}g
-                  </strong>
-
-                  <span>
-                    earned
-                  </span>
-
-
-                  ${
-                    isCurrentPlayer
-
-                      ? `
-                        <small class="party-self-label">
-                          You
-                        </small>
-                      `
-
-                      : `
-                        <button
-                          class="party-gift-button"
-                          type="button"
-                          data-gift-user-id="${escapeHtml(
-                            member.user_id
-                          )}"
-                          data-gift-name="${escapeHtml(
-                            member.display_name
-                          )}"
-                        >
-                          Gift
-                        </button>
-                      `
-                  }
-
-                </div>
-
-              </article>
-            `;
-
-          }
-        )
-        .join("");
+        }
+      )
+      .join("");
 }
 
 
@@ -4863,35 +5315,44 @@ function closeGiftDialog() {
     false;
 
 
+  const button =
+    $("#sendGiftButton");
+
+
   if (
-    $("#sendGiftButton")
+    button
   ) {
 
-    $("#sendGiftButton")
-      .disabled =
-        false;
+    button.disabled =
+      false;
 
   }
 
 
+  const amountInput =
+    $("#giftAmountInput");
+
+
   if (
-    $("#giftAmountInput")
+    amountInput
   ) {
 
-    $("#giftAmountInput")
-      .value =
-        "";
+    amountInput.value =
+      "";
 
   }
 
 
+  const errorElement =
+    $("#giftError");
+
+
   if (
-    $("#giftError")
+    errorElement
   ) {
 
-    $("#giftError")
-      .textContent =
-        "";
+    errorElement.textContent =
+      "";
 
   }
 }
@@ -4924,9 +5385,18 @@ function updateGiftAvailableText() {
       : "Gold";
 
 
-  $("#giftAvailableText")
-    .textContent =
+  const element =
+    $("#giftAvailableText");
+
+
+  if (
+    element
+  ) {
+
+    element.textContent =
       `Available: ${balance} ${label}`;
+
+  }
 }
 
 
@@ -4950,14 +5420,25 @@ async function sendPartyGift() {
     ||
     !supabaseUser
     ||
+    !supabaseClient
+    ||
     !currentParty
     ||
     !giftRecipient
   ) {
 
-    $("#giftError")
-      .textContent =
+    const errorElement =
+      $("#giftError");
+
+
+    if (
+      errorElement
+    ) {
+
+      errorElement.textContent =
         "The fellowship connection is unavailable.";
+
+    }
 
 
     return;
@@ -5189,6 +5670,8 @@ async function checkIncomingGifts() {
     !supabaseReady
     ||
     !supabaseUser
+    ||
+    !supabaseClient
   ) {
 
     return;
@@ -6409,21 +6892,68 @@ function restorePendingVictory() {
 
 async function initializeApp() {
 
+  /*
+    PERSONAL APP FIRST.
+
+    Nothing involving Supabase is allowed to prevent
+    existing local Quest Board data from rendering.
+  */
+
   chooseProfile();
 
 
-  render();
+  try {
+
+    render();
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Local Quest Board render failed:",
+      error
+    );
+
+  }
 
 
-  await setView(
-    activeView
-  );
+  try {
 
+    await setView(
+      activeView
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "View restoration failed:",
+      error
+    );
+
+  }
+
+
+  /*
+    ONLINE FEATURES SECOND.
+  */
 
   await initializeSupabase();
 
 
-  await checkIncomingGifts();
+  if (
+    supabaseReady
+  ) {
+
+    await checkIncomingGifts();
+
+  }
 
 
   renderSettings(
@@ -6433,7 +6963,9 @@ async function initializeApp() {
 
   if (
     activeView ===
-    "party"
+      "party"
+    &&
+    supabaseReady
   ) {
 
     await refreshParty();
@@ -6445,4 +6977,14 @@ async function initializeApp() {
 }
 
 
-initializeApp();
+initializeApp()
+  .catch(
+    error => {
+
+      console.error(
+        "Quest Board initialization failed:",
+        error
+      );
+
+    }
+  );
