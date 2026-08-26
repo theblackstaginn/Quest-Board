@@ -2,7 +2,7 @@
 // QUEST BOARD
 // app.js
 //
-// Phase 5:
+// Phase 6:
 // - Stable Farmer / Jess profile identities
 // - Character tarot cards
 // - XP + levels
@@ -20,6 +20,8 @@
 // - Combined weekly party challenge
 // - Local personal progression
 // - Supabase-backed fellowship data
+// - Party Gold / Crystal gifting
+// - Cross-device gift notifications
 // =========================================================
 
 
@@ -30,10 +32,8 @@
 const SUPABASE_URL =
   "https://pqifpislzljilqatmtly.supabase.co";
 
-
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_16wAhIyuMsClbOYoAZt6aQ_unXWTJ_n";
-
 
 const supabaseClient =
   window.supabase.createClient(
@@ -49,26 +49,13 @@ const supabaseClient =
 const QUESTS = [
 
   {
-    id:
-      "there-back",
-
-    title:
-      "There and Back",
-
-    category:
-      "Endurance",
-
-    time:
-      "15–25 min",
-
-    xpType:
-      "endurance",
-
-    xp:
-      20,
-
-    gold:
-      12,
+    id: "there-back",
+    title: "There and Back",
+    category: "Endurance",
+    time: "15–25 min",
+    xpType: "endurance",
+    xp: 20,
+    gold: 12,
 
     description:
       "Walk the full 1-mile road route at a comfortable, steady pace.",
@@ -80,26 +67,13 @@ const QUESTS = [
 
 
   {
-    id:
-      "keep",
-
-    title:
-      "The Keep",
-
-    category:
-      "Strength",
-
-    time:
-      "10–20 min",
-
-    xpType:
-      "strength",
-
-    xp:
-      25,
-
-    gold:
-      15,
+    id: "keep",
+    title: "The Keep",
+    category: "Strength",
+    time: "10–20 min",
+    xpType: "strength",
+    xp: 25,
+    gold: 15,
 
     description:
       "A simple dumbbell and kettlebell strength quest. Complete two rounds for a short session or three to four rounds for the full quest.",
@@ -115,26 +89,13 @@ const QUESTS = [
 
 
   {
-    id:
-      "dragonstrength",
-
-    title:
-      "DragonStrength",
-
-    category:
-      "Strength",
-
-    time:
-      "10–20 min",
-
-    xpType:
-      "strength",
-
-    xp:
-      30,
-
-    gold:
-      20,
+    id: "dragonstrength",
+    title: "DragonStrength",
+    category: "Strength",
+    time: "10–20 min",
+    xpType: "strength",
+    xp: 30,
+    gold: 20,
 
     description:
       "Barbell and rack training. Keep the movement controlled and leave a little strength in reserve.",
@@ -150,26 +111,13 @@ const QUESTS = [
 
 
   {
-    id:
-      "rogue",
-
-    title:
-      "Rogue Mode",
-
-    category:
-      "Mixed",
-
-    time:
-      "10 min",
-
-    xpType:
-      "strength",
-
-    xp:
-      20,
-
-    gold:
-      15,
+    id: "rogue",
+    title: "Rogue Mode",
+    category: "Mixed",
+    time: "10 min",
+    xpType: "strength",
+    xp: 20,
+    gold: 15,
 
     description:
       "Set the timer for ten minutes and move continuously through the circuit at your own pace.",
@@ -185,26 +133,13 @@ const QUESTS = [
 
 
   {
-    id:
-      "restoration",
-
-    title:
-      "Restoration",
-
-    category:
-      "Recovery",
-
-    time:
-      "10–20 min",
-
-    xpType:
-      "restoration",
-
-    xp:
-      20,
-
-    gold:
-      10,
+    id: "restoration",
+    title: "Restoration",
+    category: "Recovery",
+    time: "10–20 min",
+    xpType: "restoration",
+    xp: 20,
+    gold: 10,
 
     description:
       "A mobility and recovery quest for keeping the body loose, capable, and ready for the next battle.",
@@ -221,26 +156,13 @@ const QUESTS = [
 
 
   {
-    id:
-      "ranger",
-
-    title:
-      "Ranger Training",
-
-    category:
-      "Endurance",
-
-    time:
-      "20–30 min",
-
-    xpType:
-      "endurance",
-
-    xp:
-      30,
-
-    gold:
-      20,
+    id: "ranger",
+    title: "Ranger Training",
+    category: "Endurance",
+    time: "20–30 min",
+    xpType: "endurance",
+    xp: 30,
+    gold: 20,
 
     description:
       "Walk the mile. After a five-minute warm-up, alternate one minute fast with two minutes at your normal pace.",
@@ -265,26 +187,13 @@ const SPECIAL_QUESTS = {
 
   emergency: {
 
-    id:
-      "emergency",
-
-    title:
-      "Emergency Quest",
-
-    category:
-      "Emergency",
-
-    time:
-      "5 min",
-
-    xpType:
-      "strength",
-
-    xp:
-      10,
-
-    gold:
-      5,
+    id: "emergency",
+    title: "Emergency Quest",
+    category: "Emergency",
+    time: "5 min",
+    xpType: "strength",
+    xp: 10,
+    gold: 5,
 
     description:
       "Five minutes counts. This exists for the days when doing anything feels harder than it should.",
@@ -301,34 +210,13 @@ const SPECIAL_QUESTS = {
 
   boss: {
 
-    id:
-      "boss",
-
-    title:
-      "Boss Battle",
-
-    category:
-      "Boss",
-
-    time:
-      "30–45 min",
-
-    /*
-      Boss rewards are handled separately.
-
-      These values are deliberately zero so the
-      normal quest completion pathway cannot
-      accidentally award an extra Boss payout.
-    */
-
-    xpType:
-      "strength",
-
-    xp:
-      0,
-
-    gold:
-      0,
+    id: "boss",
+    title: "Boss Battle",
+    category: "Boss",
+    time: "30–45 min",
+    xpType: "strength",
+    xp: 0,
+    gold: 0,
 
     description:
       "The weekly challenge. Walk the mile, then complete twenty minutes of strength training.",
@@ -351,46 +239,34 @@ const CHARACTER_PROFILES = {
 
   farmer: {
 
-    profileId:
-      "farmer",
+    profileId: "farmer",
 
-    legacyName:
-      "Farmer",
+    legacyName: "Farmer",
 
-    defaultName:
-      "Farmer",
+    defaultName: "Farmer",
 
-    className:
-      "Half-Orc Wizard",
+    className: "Half-Orc Wizard",
 
-    card:
-      "farmer-card.webp",
+    card: "farmer-card.webp",
 
-    theme:
-      "ember"
+    theme: "ember"
 
   },
 
 
   jess: {
 
-    profileId:
-      "jess",
+    profileId: "jess",
 
-    legacyName:
-      "Jess",
+    legacyName: "Jess",
 
-    defaultName:
-      "Jess",
+    defaultName: "Jess",
 
-    className:
-      "Rogue Witch Assassin",
+    className: "Rogue Witch Assassin",
 
-    card:
-      "jess-card.webp",
+    card: "jess-card.webp",
 
-    theme:
-      "amethyst"
+    theme: "amethyst"
 
   }
 
@@ -409,21 +285,13 @@ const XP_PER_LEVEL =
   100;
 
 
-const PARTY_GOAL_MULTIPLIER =
-  2;
-
-
 const PARTY_REFRESH_INTERVAL =
   15000;
 
 
-// WEEK CONQUERED REWARD
-
 const WEEK_CONQUERED_GOLD =
   25;
 
-
-// BOSS REWARDS
 
 const BOSS_STRENGTH_XP =
   50;
@@ -488,6 +356,7 @@ let currentParty =
 let partyRefreshTimer =
   null;
 
+
 let giftRecipient =
   null;
 
@@ -498,6 +367,7 @@ let giftSending =
 
 let checkingIncomingGifts =
   false;
+
 
 // =========================================================
 // 7. DOM HELPERS
@@ -818,19 +688,9 @@ function createFreshState() {
 
     history:
       [],
-      
+
     claimedGiftIds:
-      Array.isArray(
-        parsed?.claimedGiftIds
-      )
-        ? parsed.claimedGiftIds
-        : [],
-
-
-    /*
-      These hold the exact week key in which
-      each one-time reward/event happened.
-    */
+      [],
 
     weekConqueredRewardWeek:
       null,
@@ -897,6 +757,13 @@ function migrateState(
         parsed?.history
       )
         ? parsed.history
+        : [],
+
+    claimedGiftIds:
+      Array.isArray(
+        parsed?.claimedGiftIds
+      )
+        ? parsed.claimedGiftIds
         : [],
 
     weekConqueredRewardWeek:
@@ -1078,15 +945,6 @@ function normalizeWeek() {
 
     state.weeklyCompleted =
       [];
-
-
-    /*
-      The reward flags intentionally remain.
-
-      Because they store explicit week keys,
-      last week's flags naturally stop matching
-      without destroying historical state.
-    */
 
 
     saveState(
@@ -1408,7 +1266,7 @@ async function loadCurrentParty() {
     !membership
   ) {
 
-    renderParty();
+    await renderParty();
 
 
     renderSettings(
@@ -1518,7 +1376,7 @@ function render() {
   );
 
 
-  renderParty();
+  void renderParty();
 
 
   applyMotionSetting(
@@ -2236,10 +2094,6 @@ async function completeQuest() {
     activeQuest;
 
 
-  /*
-    Boss Battles use the separate victory path.
-  */
-
   if (
     completedQuest.id ===
     "boss"
@@ -2354,15 +2208,6 @@ async function completeQuest() {
     state.weeklyCompleted.length;
 
 
-  /*
-    WEEK CONQUERED
-
-    This only fires when an actual quest
-    completion crosses the weekly threshold.
-
-    It cannot award twice during the same week.
-  */
-
   const conqueredWeekNow =
     completedBefore
       <
@@ -2435,11 +2280,6 @@ async function completeQuest() {
 
   }
 
-
-  /*
-    The Week Conquered modal takes priority
-    over the ordinary completion toast.
-  */
 
   if (
     conqueredWeekNow
@@ -2549,12 +2389,6 @@ async function completeBossBattle() {
     getWeekKey();
 
 
-  /*
-    Defensive check:
-    the Boss cannot be completed before
-    the weekly campaign is conquered.
-  */
-
   if (
     state.weeklyCompleted.length
     <
@@ -2578,12 +2412,6 @@ async function completeBossBattle() {
   }
 
 
-  /*
-    Defensive check:
-    the same Boss cannot be defeated twice
-    during a single week.
-  */
-
   if (
     state.bossDefeatedWeek
     ===
@@ -2606,13 +2434,6 @@ async function completeBossBattle() {
 
   }
 
-
-  /*
-    The Boss is now defeated.
-
-    Rewards are deliberately NOT granted yet.
-    The player must press Claim Rewards.
-  */
 
   state.bossDefeatedWeek =
     weekKey;
@@ -2638,7 +2459,7 @@ async function completeBossBattle() {
 
 
 // =========================================================
-// 32. BOSS DEFEATED / CRYSTAL REVEAL
+// 32. BOSS DEFEATED
 // =========================================================
 
 function openBossDefeated() {
@@ -2673,11 +2494,6 @@ async function claimBossRewards() {
     getWeekKey();
 
 
-  /*
-    Rewards can only be claimed after
-    this week's Boss has actually fallen.
-  */
-
   if (
     state.bossDefeatedWeek
     !==
@@ -2693,13 +2509,6 @@ async function claimBossRewards() {
 
   }
 
-
-  /*
-    Idempotency guard.
-
-    Repeated taps, reloads, or reopened dialogs
-    cannot duplicate the treasure.
-  */
 
   if (
     state.bossRewardsClaimedWeek
@@ -2725,8 +2534,6 @@ async function claimBossRewards() {
       .toISOString();
 
 
-  // XP
-
   state.xp.strength +=
     BOSS_STRENGTH_XP;
 
@@ -2734,8 +2541,6 @@ async function claimBossRewards() {
   state.xp.endurance +=
     BOSS_ENDURANCE_XP;
 
-
-  // CURRENCY
 
   state.gold +=
     BOSS_GOLD;
@@ -2745,20 +2550,9 @@ async function claimBossRewards() {
     BOSS_CRYSTALS;
 
 
-  // LOCK REWARD
-
   state.bossRewardsClaimedWeek =
     weekKey;
 
-
-  /*
-    Record the Boss as a personal character
-    achievement.
-
-    It does not enter weeklyCompleted because
-    the weekly goal was conquered before
-    the Boss became available.
-  */
 
   state.history.unshift(
     {
@@ -2796,15 +2590,6 @@ async function claimBossRewards() {
     state
   );
 
-
-  /*
-    Fellowship activity currently stores XP
-    and Gold.
-
-    Crystals remain personal character inventory
-    until we intentionally add crystal support
-    to the Supabase schema later.
-  */
 
   let partySynced =
     false;
@@ -3909,19 +3694,6 @@ function resetThisWeek() {
     [];
 
 
-  /*
-    IMPORTANT:
-
-    We do NOT clear:
-    - weekConqueredRewardWeek
-    - bossDefeatedWeek
-    - bossRewardsClaimedWeek
-
-    Therefore Reset This Week cannot be used
-    to farm repeated weekly or Boss rewards.
-  */
-
-
   saveState(
     state
   );
@@ -4083,8 +3855,6 @@ async function createParty() {
   try {
 
     const {
-      data:
-        partyId,
       error
     } =
       await supabaseClient.rpc(
@@ -4341,7 +4111,7 @@ async function leaveParty() {
       null;
 
 
-    renderParty();
+    await renderParty();
 
 
     renderSettings(
@@ -4383,7 +4153,7 @@ async function refreshParty() {
     !supabaseReady
   ) {
 
-    renderParty();
+    await renderParty();
 
 
     return;
@@ -4797,12 +4567,6 @@ function renderPartyMembers(
         .map(
           member => {
 
-            /*
-              Boss Battles appear in the activity
-              feed but are not counted as normal
-              weekly quest completions.
-            */
-
             const weeklyQuestActivity =
               activity.filter(
                 item =>
@@ -4864,6 +4628,16 @@ function renderPartyMembers(
               character?.card
               ||
               "";
+
+
+            const isCurrentPlayer =
+              Boolean(
+                supabaseUser
+                &&
+                member.user_id
+                  ===
+                  supabaseUser.id
+              );
 
 
             return `
@@ -4930,6 +4704,32 @@ function renderPartyMembers(
                     earned
                   </span>
 
+
+                  ${
+                    isCurrentPlayer
+
+                      ? `
+                        <small class="party-self-label">
+                          You
+                        </small>
+                      `
+
+                      : `
+                        <button
+                          class="party-gift-button"
+                          type="button"
+                          data-gift-user-id="${escapeHtml(
+                            member.user_id
+                          )}"
+                          data-gift-name="${escapeHtml(
+                            member.display_name
+                          )}"
+                        >
+                          Gift
+                        </button>
+                      `
+                  }
+
                 </div>
 
               </article>
@@ -4942,7 +4742,828 @@ function renderPartyMembers(
 
 
 // =========================================================
-// 59. PARTY CHALLENGE
+// 59. PARTY GIFTING
+// =========================================================
+
+function openGiftDialog(
+  userId,
+  displayName
+) {
+
+  if (
+    !currentParty
+    ||
+    !supabaseUser
+    ||
+    userId ===
+      supabaseUser.id
+  ) {
+
+    return;
+
+  }
+
+
+  giftRecipient = {
+
+    userId,
+
+    displayName:
+      displayName
+      ||
+      "Adventurer"
+
+  };
+
+
+  const state =
+    getState();
+
+
+  $("#giftRecipientName")
+    .textContent =
+      giftRecipient.displayName;
+
+
+  $("#giftGoldBalance")
+    .textContent =
+      state.gold;
+
+
+  $("#giftCrystalBalance")
+    .textContent =
+      state.crystals;
+
+
+  $("#giftCurrencySelect")
+    .value =
+      "gold";
+
+
+  $("#giftAmountInput")
+    .value =
+      "";
+
+
+  $("#giftError")
+    .textContent =
+      "";
+
+
+  updateGiftAvailableText();
+
+
+  const dialog =
+    $("#giftDialog");
+
+
+  if (
+    dialog
+    &&
+    !dialog.open
+  ) {
+
+    dialog.showModal();
+
+
+    setTimeout(
+      () => {
+
+        $("#giftAmountInput")
+          ?.focus();
+
+      },
+      100
+    );
+
+  }
+}
+
+
+function closeGiftDialog() {
+
+  const dialog =
+    $("#giftDialog");
+
+
+  if (
+    dialog?.open
+  ) {
+
+    dialog.close();
+
+  }
+
+
+  giftRecipient =
+    null;
+
+
+  giftSending =
+    false;
+
+
+  if (
+    $("#sendGiftButton")
+  ) {
+
+    $("#sendGiftButton")
+      .disabled =
+        false;
+
+  }
+
+
+  if (
+    $("#giftAmountInput")
+  ) {
+
+    $("#giftAmountInput")
+      .value =
+        "";
+
+  }
+
+
+  if (
+    $("#giftError")
+  ) {
+
+    $("#giftError")
+      .textContent =
+        "";
+
+  }
+}
+
+
+function updateGiftAvailableText() {
+
+  const state =
+    getState();
+
+
+  const currency =
+    $("#giftCurrencySelect")
+      ?.value
+    ||
+    "gold";
+
+
+  const balance =
+    currency ===
+      "crystals"
+      ? state.crystals
+      : state.gold;
+
+
+  const label =
+    currency ===
+      "crystals"
+      ? "Crystals"
+      : "Gold";
+
+
+  $("#giftAvailableText")
+    .textContent =
+      `Available: ${balance} ${label}`;
+}
+
+
+// =========================================================
+// 60. SEND PARTY GIFT
+// =========================================================
+
+async function sendPartyGift() {
+
+  if (
+    giftSending
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    !supabaseReady
+    ||
+    !supabaseUser
+    ||
+    !currentParty
+    ||
+    !giftRecipient
+  ) {
+
+    $("#giftError")
+      .textContent =
+        "The fellowship connection is unavailable.";
+
+
+    return;
+
+  }
+
+
+  const currency =
+    $("#giftCurrencySelect")
+      .value;
+
+
+  const rawAmount =
+    Number(
+      $("#giftAmountInput")
+        .value
+    );
+
+
+  const amount =
+    Math.floor(
+      rawAmount
+    );
+
+
+  if (
+    !Number.isFinite(
+      amount
+    )
+    ||
+    amount < 1
+  ) {
+
+    $("#giftError")
+      .textContent =
+        "Enter a valid gift amount.";
+
+
+    return;
+
+  }
+
+
+  if (
+    ![
+      "gold",
+      "crystals"
+    ].includes(
+      currency
+    )
+  ) {
+
+    $("#giftError")
+      .textContent =
+        "Choose Gold or Crystals.";
+
+
+    return;
+
+  }
+
+
+  const state =
+    getState();
+
+
+  const balance =
+    Number(
+      state[
+        currency
+      ]
+    )
+    ||
+    0;
+
+
+  if (
+    amount >
+    balance
+  ) {
+
+    $("#giftError")
+      .textContent =
+        `You only have ${balance} ${capitalize(
+          currency
+        )}.`;
+
+
+    return;
+
+  }
+
+
+  const settings =
+    getSettings();
+
+
+  const character =
+    getCharacterConfig();
+
+
+  giftSending =
+    true;
+
+
+  $("#sendGiftButton")
+    .disabled =
+      true;
+
+
+  $("#giftError")
+    .textContent =
+      "";
+
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .insert(
+          {
+
+            party_id:
+              currentParty.id,
+
+            sender_user_id:
+              supabaseUser.id,
+
+            recipient_user_id:
+              giftRecipient.userId,
+
+            sender_profile_id:
+              activeProfileId,
+
+            sender_display_name:
+              settings.playerName
+              ||
+              character.defaultName,
+
+            currency,
+
+            amount
+
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    state[
+      currency
+    ] =
+      balance
+      -
+      amount;
+
+
+    saveState(
+      state
+    );
+
+
+    const recipientName =
+      giftRecipient.displayName;
+
+
+    closeGiftDialog();
+
+
+    render();
+
+
+    showToast(
+      `Gift Sent · ${recipientName} received ${amount} ${capitalize(
+        currency
+      )}`
+    );
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Gift could not be sent:",
+      error
+    );
+
+
+    giftSending =
+      false;
+
+
+    $("#sendGiftButton")
+      .disabled =
+        false;
+
+
+    $("#giftError")
+      .textContent =
+        "The gift could not be sent.";
+
+  }
+}
+
+
+// =========================================================
+// 61. RECEIVE PARTY GIFTS
+// =========================================================
+
+async function checkIncomingGifts() {
+
+  if (
+    checkingIncomingGifts
+    ||
+    !supabaseReady
+    ||
+    !supabaseUser
+  ) {
+
+    return;
+
+  }
+
+
+  checkingIncomingGifts =
+    true;
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .select(
+          "id, sender_display_name, currency, amount, created_at"
+        )
+        .eq(
+          "recipient_user_id",
+          supabaseUser.id
+        )
+        .is(
+          "claimed_at",
+          null
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              true
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    const gifts =
+      data
+      ||
+      [];
+
+
+    if (
+      gifts.length ===
+      0
+    ) {
+
+      return;
+
+    }
+
+
+    const state =
+      getState();
+
+
+    const claimedIds =
+      new Set(
+        state.claimedGiftIds
+        ||
+        []
+      );
+
+
+    const newlyReceived =
+      [];
+
+
+    for (
+      const gift
+      of gifts
+    ) {
+
+      if (
+        claimedIds.has(
+          gift.id
+        )
+      ) {
+
+        continue;
+
+      }
+
+
+      const amount =
+        Math.floor(
+          Number(
+            gift.amount
+          )
+        );
+
+
+      const currency =
+        gift.currency;
+
+
+      if (
+        amount < 1
+        ||
+        ![
+          "gold",
+          "crystals"
+        ].includes(
+          currency
+        )
+      ) {
+
+        continue;
+
+      }
+
+
+      state[
+        currency
+      ] =
+        (
+          Number(
+            state[
+              currency
+            ]
+          )
+          ||
+          0
+        )
+        +
+        amount;
+
+
+      claimedIds.add(
+        gift.id
+      );
+
+
+      newlyReceived.push(
+        gift
+      );
+
+    }
+
+
+    state.claimedGiftIds =
+      Array.from(
+        claimedIds
+      )
+        .slice(
+          -500
+        );
+
+
+    if (
+      newlyReceived.length >
+      0
+    ) {
+
+      saveState(
+        state
+      );
+
+    }
+
+
+    const giftIds =
+      gifts.map(
+        gift =>
+          gift.id
+      );
+
+
+    const {
+      error:
+        claimError
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .update(
+          {
+
+            claimed_at:
+              new Date()
+                .toISOString()
+
+          }
+        )
+        .in(
+          "id",
+          giftIds
+        )
+        .eq(
+          "recipient_user_id",
+          supabaseUser.id
+        )
+        .is(
+          "claimed_at",
+          null
+        );
+
+
+    if (
+      claimError
+    ) {
+
+      console.error(
+        "Gift receipt could not be acknowledged:",
+        claimError
+      );
+
+    }
+
+
+    if (
+      newlyReceived.length >
+      0
+    ) {
+
+      render();
+
+
+      showGiftReceivedNotification(
+        newlyReceived
+      );
+
+    }
+
+  }
+
+  catch (
+    error
+  ) {
+
+    console.error(
+      "Could not check incoming gifts:",
+      error
+    );
+
+  }
+
+  finally {
+
+    checkingIncomingGifts =
+      false;
+
+  }
+}
+
+
+// =========================================================
+// 62. GIFT RECEIVED NOTIFICATION
+// =========================================================
+
+function showGiftReceivedNotification(
+  gifts
+) {
+
+  if (
+    gifts.length ===
+    1
+  ) {
+
+    const gift =
+      gifts[
+        0
+      ];
+
+
+    const currencyName =
+      gift.currency ===
+        "crystals"
+        ? "Crystals"
+        : "Gold";
+
+
+    showToast(
+      `Gift Received · ${gift.sender_display_name} sent you ${gift.amount} ${currencyName}!`
+    );
+
+
+    return;
+
+  }
+
+
+  const gold =
+    gifts
+      .filter(
+        gift =>
+          gift.currency ===
+          "gold"
+      )
+      .reduce(
+        (
+          total,
+          gift
+        ) =>
+          total
+          +
+          Number(
+            gift.amount
+          ),
+        0
+      );
+
+
+  const crystals =
+    gifts
+      .filter(
+        gift =>
+          gift.currency ===
+          "crystals"
+      )
+      .reduce(
+        (
+          total,
+          gift
+        ) =>
+          total
+          +
+          Number(
+            gift.amount
+          ),
+        0
+      );
+
+
+  const parts =
+    [];
+
+
+  if (
+    gold > 0
+  ) {
+
+    parts.push(
+      `${gold} Gold`
+    );
+
+  }
+
+
+  if (
+    crystals > 0
+  ) {
+
+    parts.push(
+      `${crystals} Crystals`
+    );
+
+  }
+
+
+  showToast(
+    `Gifts Received · ${parts.join(
+      " · "
+    )}`
+  );
+}
+
+
+// =========================================================
+// 63. PARTY CHALLENGE
 // =========================================================
 
 function renderPartyChallenge(
@@ -4978,13 +5599,6 @@ function renderPartyChallenge(
     *
     safeMemberCount;
 
-
-  /*
-    Boss Battles are bonus victories.
-
-    They do not inflate the Fellowship's
-    ordinary weekly quest goal.
-  */
 
   const weeklyActivity =
     activity.filter(
@@ -5063,7 +5677,7 @@ function renderPartyChallenge(
 
 
 // =========================================================
-// 60. PARTY ACTIVITY
+// 64. PARTY ACTIVITY
 // =========================================================
 
 function renderPartyActivity(
@@ -5161,7 +5775,7 @@ function renderPartyActivity(
 
 
 // =========================================================
-// 61. PARTY STATUS
+// 65. PARTY STATUS
 // =========================================================
 
 function setPartySyncStatus(
@@ -5192,7 +5806,7 @@ function setPartySyncStatus(
 
 
 // =========================================================
-// 62. PARTY REFRESH LOOP
+// 66. PARTY REFRESH LOOP
 // =========================================================
 
 function startPartyRefreshLoop() {
@@ -5205,6 +5819,9 @@ function startPartyRefreshLoop() {
   partyRefreshTimer =
     setInterval(
       async () => {
+
+        await checkIncomingGifts();
+
 
         if (
           activeView ===
@@ -5222,7 +5839,7 @@ function startPartyRefreshLoop() {
 
 
 // =========================================================
-// 63. TOAST
+// 67. TOAST
 // =========================================================
 
 function showToast(
@@ -5231,6 +5848,15 @@ function showToast(
 
   const toast =
     $("#toast");
+
+
+  if (
+    !toast
+  ) {
+
+    return;
+
+  }
 
 
   toast.textContent =
@@ -5262,7 +5888,7 @@ function showToast(
 
 
 // =========================================================
-// 64. UTILITIES
+// 68. UTILITIES
 // =========================================================
 
 function capitalize(
@@ -5323,7 +5949,7 @@ function escapeHtml(
 
 
 // =========================================================
-// 65. MAIN EVENTS
+// 69. MAIN EVENTS
 // =========================================================
 
 $("#closeQuestButton")
@@ -5399,7 +6025,7 @@ $$(".nav-item")
 
 
 // =========================================================
-// 66. SETTINGS EVENTS
+// 70. SETTINGS EVENTS
 // =========================================================
 
 $("#savePlayerNameButton")
@@ -5452,7 +6078,7 @@ $("#resetCharacterButton")
 
 
 // =========================================================
-// 67. PARTY EVENTS
+// 71. PARTY EVENTS
 // =========================================================
 
 $("#createPartyButton")
@@ -5508,8 +6134,76 @@ $("#refreshPartyButton")
   );
 
 
+$("#partyMembers")
+  ?.addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.target.closest(
+          "[data-gift-user-id]"
+        );
+
+
+      if (
+        !button
+      ) {
+
+        return;
+
+      }
+
+
+      openGiftDialog(
+        button.dataset.giftUserId,
+        button.dataset.giftName
+      );
+
+    }
+  );
+
+
+$("#closeGiftButton")
+  ?.addEventListener(
+    "click",
+    closeGiftDialog
+  );
+
+
+$("#sendGiftButton")
+  ?.addEventListener(
+    "click",
+    sendPartyGift
+  );
+
+
+$("#giftCurrencySelect")
+  ?.addEventListener(
+    "change",
+    updateGiftAvailableText
+  );
+
+
+$("#giftAmountInput")
+  ?.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key ===
+        "Enter"
+      ) {
+
+        sendPartyGift();
+
+      }
+
+    }
+  );
+
+
 // =========================================================
-// 68. DIALOG OUTSIDE CLICK
+// 72. DIALOG OUTSIDE CLICK
 // =========================================================
 
 $("#questDialog")
@@ -5548,19 +6242,41 @@ $("#historyDialog")
   );
 
 
+$("#giftDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        $("#giftDialog")
+      ) {
+
+        closeGiftDialog();
+
+      }
+
+    }
+  );
+
+
+$("#giftDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+
+      event.preventDefault();
+
+
+      closeGiftDialog();
+
+    }
+  );
+
+
 // =========================================================
-// 69. LOCK VICTORY DIALOGS
+// 73. LOCK VICTORY DIALOGS
 // =========================================================
-
-/*
-  These screens require the intended action.
-
-  WEEK CONQUERED:
-  Continue
-
-  BOSS DEFEATED:
-  Claim Rewards
-*/
 
 $("#weekConqueredDialog")
   ?.addEventListener(
@@ -5585,7 +6301,7 @@ $("#bossDefeatedDialog")
 
 
 // =========================================================
-// 70. ESCAPE KEY
+// 74. ESCAPE KEY
 // =========================================================
 
 document.addEventListener(
@@ -5601,10 +6317,6 @@ document.addEventListener(
 
     }
 
-
-    /*
-      Victory dialogs deliberately ignore Escape.
-    */
 
     if (
       $("#weekConqueredDialog")
@@ -5636,6 +6348,19 @@ document.addEventListener(
 
 
     if (
+      $("#giftDialog")
+        ?.open
+    ) {
+
+      closeGiftDialog();
+
+
+      return;
+
+    }
+
+
+    if (
       $("#historyDialog")
         ?.open
     ) {
@@ -5649,7 +6374,7 @@ document.addEventListener(
 
 
 // =========================================================
-// 71. RESTORE PENDING BOSS REWARD
+// 75. RESTORE PENDING BOSS REWARD
 // =========================================================
 
 function restorePendingVictory() {
@@ -5661,14 +6386,6 @@ function restorePendingVictory() {
   const weekKey =
     getWeekKey();
 
-
-  /*
-    If the browser reloads after the Boss falls
-    but before Claim Rewards is pressed, the
-    crystal cluster returns.
-
-    The treasure cannot be lost by refreshing.
-  */
 
   if (
     state.bossDefeatedWeek
@@ -5687,7 +6404,7 @@ function restorePendingVictory() {
 
 
 // =========================================================
-// 72. INITIALIZE
+// 76. INITIALIZE
 // =========================================================
 
 async function initializeApp() {
@@ -5704,6 +6421,9 @@ async function initializeApp() {
 
 
   await initializeSupabase();
+
+
+  await checkIncomingGifts();
 
 
   renderSettings(
