@@ -1997,3 +1997,1002 @@ async function syncBossActivityToParty(
         });
 
     if (error) {
+          throw error;
+    }
+
+    return true;
+  }
+
+  catch (error) {
+    console.error(
+      "Could not sync Boss victory to party:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+// =========================================================
+// 36. CLOSE QUEST
+// =========================================================
+
+function closeQuest() {
+  pauseTimer();
+
+  const dialog =
+    $("#questDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+
+// =========================================================
+// 37. TIMER
+// =========================================================
+
+function startTimer() {
+  if (timerInterval) {
+    return;
+  }
+
+  $("#timerToggleButton")
+    .textContent =
+      "Pause";
+
+  timerInterval =
+    setInterval(
+      () => {
+        timerSeconds++;
+        updateTimerDisplay();
+      },
+      1000
+    );
+}
+
+
+function pauseTimer() {
+  if (timerInterval) {
+    clearInterval(
+      timerInterval
+    );
+
+    timerInterval =
+      null;
+  }
+
+  $("#timerToggleButton")
+    .textContent =
+      "Start";
+}
+
+
+function resetTimer() {
+  pauseTimer();
+
+  timerSeconds =
+    0;
+
+  updateTimerDisplay();
+}
+
+
+function toggleTimer() {
+  if (timerInterval) {
+    pauseTimer();
+  }
+
+  else {
+    startTimer();
+  }
+}
+
+
+function updateTimerDisplay() {
+  const hours =
+    Math.floor(
+      timerSeconds / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (
+        timerSeconds % 3600
+      ) / 60
+    );
+
+  const seconds =
+    timerSeconds % 60;
+
+  if (hours > 0) {
+    $("#timerDisplay")
+      .textContent =
+        (
+          String(hours)
+            .padStart(2, "0")
+          + ":"
+          + String(minutes)
+            .padStart(2, "0")
+          + ":"
+          + String(seconds)
+            .padStart(2, "0")
+        );
+  }
+
+  else {
+    $("#timerDisplay")
+      .textContent =
+        (
+          String(minutes)
+            .padStart(2, "0")
+          + ":"
+          + String(seconds)
+            .padStart(2, "0")
+        );
+  }
+}
+
+
+// =========================================================
+// 38. HISTORY
+// =========================================================
+
+function openHistory() {
+  const state =
+    normalizeWeek();
+
+  if (
+    state.history.length === 0
+  ) {
+    $("#historyList")
+      .innerHTML =
+        `
+          <p class="muted">
+            No quests completed yet.
+            The chronicle awaits.
+          </p>
+        `;
+  }
+
+  else {
+    $("#historyList")
+      .innerHTML =
+        state.history
+          .map(
+            item => {
+              const date =
+                new Date(
+                  item.completedAt
+                );
+
+              const dateText =
+                date.toLocaleDateString(
+                  undefined,
+                  {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  }
+                );
+
+              const gold =
+                Number(item.gold)
+                || 0;
+
+              const crystals =
+                Number(item.crystals)
+                || 0;
+
+              const xpTypeText =
+                item.xpType === "mixed"
+                  ? "Mixed"
+                  : capitalize(
+                      item.xpType
+                    );
+
+              return `
+                <article class="history-item">
+
+                  <strong>
+                    ${escapeHtml(
+                      item.title
+                    )}
+                  </strong>
+
+                  <span>
+
+                    ${dateText}
+                    · +${item.xp}
+                    ${xpTypeText} XP
+
+                    ${
+                      gold
+                        ? `
+                          ·
+                          <img
+                            class="currency-icon-small"
+                            src="icons/gold-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${gold}
+                        `
+                        : ""
+                    }
+
+                    ${
+                      crystals
+                        ? `
+                          ·
+                          <img
+                            class="currency-icon-small"
+                            src="icons/crystal-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${crystals}
+                        `
+                        : ""
+                    }
+
+                  </span>
+
+                </article>
+              `;
+            }
+          )
+          .join("");
+  }
+
+  $("#historyDialog")
+    .showModal();
+}
+
+
+function closeHistory() {
+  if (
+    $("#historyDialog")?.open
+  ) {
+    $("#historyDialog")
+      .close();
+  }
+}
+
+
+// =========================================================
+// 39. VIEW HEADERS
+// =========================================================
+
+const VIEW_HEADERS = {
+  board: {
+    eyebrow: "Training Guild",
+    title: "Quest Board"
+  },
+
+  character: {
+    eyebrow: "Adventurer",
+    title: "Character"
+  },
+
+  party: {
+    eyebrow: "Fellowship",
+    title: "Party"
+  },
+
+  settings: {
+    eyebrow: "Guild Configuration",
+    title: "Settings"
+  }
+};
+
+
+// =========================================================
+// 40. VIEW NAVIGATION
+// =========================================================
+
+async function setView(view) {
+  activeView =
+    VIEW_HEADERS[view]
+      ? view
+      : "board";
+
+  localStorage.setItem(
+    "questBoardActiveView",
+    activeView
+  );
+
+  $$(".app-view")
+    .forEach(
+      section => {
+        const active =
+          section.dataset.appView
+          === activeView;
+
+        section.hidden =
+          !active;
+
+        section.classList.toggle(
+          "active-view",
+          active
+        );
+      }
+    );
+
+  $$(".nav-item")
+    .forEach(
+      button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.view
+          === activeView
+        );
+      }
+    );
+
+  $("#screenEyebrow")
+    .textContent =
+      VIEW_HEADERS[
+        activeView
+      ].eyebrow;
+
+  $("#screenTitle")
+    .textContent =
+      VIEW_HEADERS[
+        activeView
+      ].title;
+
+  window.scrollTo({
+    top: 0,
+
+    behavior:
+      getSettings()
+        .reducedMotion
+        ? "auto"
+        : "smooth"
+  });
+
+  if (
+    activeView === "party"
+  ) {
+    await refreshParty();
+  }
+
+  if (
+    activeView === "settings"
+  ) {
+    renderSettings(
+      getSettings()
+    );
+  }
+}
+
+
+// =========================================================
+// 41. SETTINGS RENDER
+// =========================================================
+
+function renderSettings(settings) {
+  $("#playerNameInput")
+    .value =
+      settings.playerName
+      || getCharacterConfig()
+        .defaultName;
+
+  $("#weeklyGoalSelect")
+    .value =
+      String(
+        settings.weeklyGoal
+        || DEFAULT_WEEKLY_GOAL
+      );
+
+  $("#reducedMotionToggle")
+    .checked =
+      Boolean(
+        settings.reducedMotion
+      );
+
+  $("#soundToggle")
+    .checked =
+      Boolean(
+        settings.soundEnabled
+      );
+
+  $("#leavePartyButton")
+    .disabled =
+      !currentParty;
+
+  if (currentParty) {
+    $("#partySettingsStatus")
+      .textContent =
+        `Member of ${currentParty.name}.`;
+  }
+
+  else if (supabaseReady) {
+    $("#partySettingsStatus")
+      .textContent =
+        "No fellowship joined.";
+  }
+
+  else {
+    $("#partySettingsStatus")
+      .textContent =
+        "Party sync is unavailable.";
+  }
+}
+
+
+// =========================================================
+// 42. SAVE PLAYER NAME
+// =========================================================
+
+async function savePlayerName() {
+  const name =
+    $("#playerNameInput")
+      .value
+      .trim();
+
+  if (!name) {
+    showToast(
+      "Enter a player name."
+    );
+
+    return;
+  }
+
+  const settings =
+    getSettings();
+
+  settings.playerName =
+    name;
+
+  saveSettings(settings);
+  render();
+
+  if (supabaseReady) {
+    try {
+      await syncProfileToSupabase();
+    }
+
+    catch (error) {
+      console.error(error);
+
+      showToast(
+        "Name saved locally. Party profile sync failed."
+      );
+
+      return;
+    }
+  }
+
+  showToast(
+    "Adventurer name saved."
+  );
+}
+
+
+// =========================================================
+// 43. WEEKLY GOAL
+// =========================================================
+
+function saveWeeklyGoal() {
+  const goal =
+    Number(
+      $("#weeklyGoalSelect")
+        .value
+    );
+
+  if (
+    !Number.isFinite(goal)
+    || goal < 1
+  ) {
+    return;
+  }
+
+  const settings =
+    getSettings();
+
+  settings.weeklyGoal =
+    goal;
+
+  saveSettings(settings);
+  render();
+
+  showToast(
+    `Weekly goal set to ${goal}.`
+  );
+}
+
+
+// =========================================================
+// 44. REDUCED MOTION
+// =========================================================
+
+function applyMotionSetting(
+  settings
+) {
+  document.body
+    .classList
+    .toggle(
+      "reduce-motion",
+      Boolean(
+        settings.reducedMotion
+      )
+    );
+}
+
+
+function saveReducedMotion() {
+  const settings =
+    getSettings();
+
+  settings.reducedMotion =
+    $("#reducedMotionToggle")
+      .checked;
+
+  saveSettings(settings);
+  applyMotionSetting(settings);
+
+  showToast(
+    settings.reducedMotion
+      ? "Reduced motion enabled."
+      : "Reduced motion disabled."
+  );
+}
+
+
+// =========================================================
+// 45. SOUND
+// =========================================================
+
+function saveSoundSetting() {
+  const settings =
+    getSettings();
+
+  settings.soundEnabled =
+    $("#soundToggle")
+      .checked;
+
+  saveSettings(settings);
+
+  showToast(
+    settings.soundEnabled
+      ? "Sound effects enabled."
+      : "Sound effects disabled."
+  );
+}
+
+
+// =========================================================
+// 46. RESET WEEK
+// =========================================================
+
+function resetThisWeek() {
+  if (
+    !confirm(
+      "Reset this week's personal progress?\n\nXP, gold, crystals, history, and rewards already earned will remain."
+    )
+  ) {
+    return;
+  }
+
+  const state =
+    getState();
+
+  state.weekKey =
+    getWeekKey();
+
+  state.weeklyCompleted =
+    [];
+
+  saveState(state);
+  render();
+
+  showToast(
+    "Weekly quest progress reset."
+  );
+}
+
+
+// =========================================================
+// 47. CLEAR HISTORY
+// =========================================================
+
+function clearQuestHistory() {
+  if (
+    !confirm(
+      "Clear the personal quest chronicle?\n\nXP, levels, gold, and crystals will remain."
+    )
+  ) {
+    return;
+  }
+
+  const state =
+    getState();
+
+  state.history =
+    [];
+
+  saveState(state);
+  render();
+
+  showToast(
+    "Quest history cleared."
+  );
+}
+
+
+// =========================================================
+// 48. RESET CHARACTER
+// =========================================================
+
+function resetCharacter() {
+  if (
+    !confirm(
+      "Reset this character completely?\n\nThis erases local XP, gold, crystals, levels, weekly progress, Boss victories, rewards, and personal quest history."
+    )
+  ) {
+    return;
+  }
+
+  saveState(
+    createFreshState()
+  );
+
+  render();
+
+  showToast(
+    "Character reset."
+  );
+}
+
+
+// =========================================================
+// 49. PARTY CODE
+// =========================================================
+
+function generatePartyCode() {
+  const characters =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  let code =
+    "";
+
+  for (
+    let index = 0;
+    index < 6;
+    index++
+  ) {
+    code +=
+      characters.charAt(
+        Math.floor(
+          Math.random()
+          * characters.length
+        )
+      );
+  }
+
+  return code;
+}
+
+
+// =========================================================
+// 50. CREATE PARTY
+// =========================================================
+
+async function createParty() {
+  if (!supabaseReady) {
+    showToast(
+      "Guild connection is not ready."
+    );
+
+    return;
+  }
+
+  if (currentParty) {
+    showToast(
+      "You already belong to a fellowship."
+    );
+
+    return;
+  }
+
+  const inviteCode =
+    generatePartyCode();
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient.rpc(
+        "create_party",
+        {
+          supplied_name:
+            "The Fellowship",
+
+          supplied_invite_code:
+            inviteCode
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    await loadCurrentParty();
+
+    showToast(
+      `Fellowship created · ${inviteCode}`
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Party creation failed:",
+      error
+    );
+
+    showToast(
+      "Could not create the fellowship."
+    );
+  }
+}
+
+
+// =========================================================
+// 51. JOIN PARTY FORM
+// =========================================================
+
+function toggleJoinPartyForm() {
+  const form =
+    $("#joinPartyForm");
+
+  form.hidden =
+    !form.hidden;
+
+  if (!form.hidden) {
+    $("#partyCodeInput")
+      .focus();
+  }
+}
+
+
+// =========================================================
+// 52. JOIN PARTY
+// =========================================================
+
+async function joinParty() {
+  if (!supabaseReady) {
+    showToast(
+      "Guild connection is not ready."
+    );
+
+    return;
+  }
+
+  if (currentParty) {
+    showToast(
+      "Leave your current fellowship first."
+    );
+
+    return;
+  }
+
+  const code =
+    $("#partyCodeInput")
+      .value
+      .trim()
+      .toUpperCase();
+
+  if (code.length < 4) {
+    showToast(
+      "Enter a valid party code."
+    );
+
+    return;
+  }
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient.rpc(
+        "join_party_by_code",
+        {
+          supplied_code:
+            code
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    $("#partyCodeInput")
+      .value =
+        "";
+
+    $("#joinPartyForm")
+      .hidden =
+        true;
+
+    await loadCurrentParty();
+
+    showToast(
+      "Fellowship joined."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Party join failed:",
+      error
+    );
+
+    showToast(
+      "That party code could not be joined."
+    );
+  }
+}
+
+
+// =========================================================
+// 53. LEAVE PARTY
+// =========================================================
+
+async function leaveParty() {
+  if (
+    !currentParty
+    || !supabaseUser
+  ) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "Leave this fellowship?"
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("party_members")
+        .delete()
+        .eq(
+          "party_id",
+          currentParty.id
+        )
+        .eq(
+          "user_id",
+          supabaseUser.id
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    currentParty =
+      null;
+
+    await renderParty();
+
+    renderSettings(
+      getSettings()
+    );
+
+    showToast(
+      "You left the fellowship."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not leave party:",
+      error
+    );
+
+    showToast(
+      "Could not leave the fellowship."
+    );
+  }
+}
+
+
+// =========================================================
+// 54. REFRESH PARTY
+// =========================================================
+
+async function refreshParty() {
+  if (!supabaseReady) {
+    await renderParty();
+    return;
+  }
+
+  try {
+    await loadCurrentParty();
+  }
+
+  catch (error) {
+    console.error(
+      "Party refresh failed:",
+      error
+    );
+
+    setPartySyncStatus(
+      "Could not refresh fellowship data.",
+      "error"
+    );
+  }
+}
+
+
+// =========================================================
+// 55. RENDER PARTY
+// =========================================================
+
+async function renderParty() {
+  const emptyState =
+    $("#partyEmptyState");
+
+  const dashboard =
+    $("#partyDashboard");
+
+  if (
+    !emptyState
+    || !dashboard
+  ) {
+    return;
+  }
+
+  if (!supabaseReady) {
+    emptyState.hidden =
+      false;
+
+    dashboard.hidden =
+      true;
+
+    return;
+  }
+
+  if (!currentParty) {
+    emptyState.hidden =
+      false;
+
+    dashboard.hidden =
+      true;
+
+    setPartySyncStatus(
+      "Connected · No fellowship joined.",
+      "connected"
+    );
+
+    return;
+  }
+
+  emptyState.hidden =
+    true;
+
+  dashboard.hidden =
+    false;
+
+  $("#partyName")
+    .textContent =
+      currentParty.name
+      || "The Fellowship";
+
+  $("#partyInviteCode")
+    .textContent =
+      currentParty.invite_code
+      || "------";
+
+  setPartySyncStatus(
+    "Fellowship synchronized.",
+    "connected"
+  );
