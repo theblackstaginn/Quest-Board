@@ -256,8 +256,12 @@ let activeView =
   || "board";
 
 let activeQuest = null;
-let timerSeconds = 0;
+
+// The interval only refreshes the visible clock.
+// Timestamp math is the source of truth.
 let timerInterval = null;
+let timerDisplayMs = 0;
+
 let toastTimeout = null;
 
 let supabaseUser = null;
@@ -1370,7 +1374,9 @@ function openQuest(id) {
   activeQuest =
     quest;
 
-  resetTimer();
+  restoreTimerForQuest(
+    quest.id
+  );
 
   $("#dialogCategory")
     .textContent =
@@ -1579,6 +1585,10 @@ async function completeQuest() {
 
   saveState(state);
 
+  clearTimerForQuest(
+    completedQuest.id
+  );
+
   activeQuest =
     null;
 
@@ -1683,6 +1693,10 @@ async function completeBossBattle() {
     state.weeklyCompleted.length
     < goal
   ) {
+    clearTimerForQuest(
+      "boss"
+    );
+
     closeQuest();
 
     activeQuest =
@@ -1699,6 +1713,10 @@ async function completeBossBattle() {
     state.bossDefeatedWeek
     === weekKey
   ) {
+    clearTimerForQuest(
+      "boss"
+    );
+
     closeQuest();
 
     activeQuest =
@@ -1715,6 +1733,10 @@ async function completeBossBattle() {
     weekKey;
 
   saveState(state);
+
+  clearTimerForQuest(
+    "boss"
+  );
 
   activeQuest =
     null;
@@ -2020,7 +2042,9 @@ async function syncBossActivityToParty(
 // =========================================================
 
 function closeQuest() {
-  pauseTimer();
+  // Stop only the visible refresh loop.
+  // The persisted timestamp keeps running.
+  stopTimerUiInterval();
 
   const dialog =
     $("#questDialog");
@@ -2035,54 +2059,399 @@ function closeQuest() {
 // 37. TIMER
 // =========================================================
 
-function startTimer() {
-  if (timerInterval) {
-    return;
+function getTimerStorageKey() {
+  return (
+    "questBoardTimerState-"
+    + activeProfileId
+  );
+}
+
+function timerNumberOrNull(value) {
+  if (
+    value === null
+    || value === undefined
+    || value === ""
+  ) {
+    return null;
   }
 
-  $("#timerToggleButton")
-    .textContent =
-      "Pause";
+  const number = Number(value);
+
+  return Number.isFinite(number)
+    ? number
+    : null;
+}
+
+function createFreshTimerState(questId) {
+  return {
+    questId,
+    startedAt: null,
+    durationMs: null,
+    pausedAt: null,
+    accumulatedPauseMs: 0,
+    paused: true
+  };
+}
+
+function getSavedTimerState() {
+  const raw =
+    localStorage.getItem(
+      getTimerStorageKey()
+    );
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (
+      !parsed
+      || typeof parsed !== "object"
+      || !parsed.questId
+    ) {
+      return null;
+    }
+
+    const startedAt =
+      timerNumberOrNull(
+        parsed.startedAt
+      );
+
+    if (startedAt === null) {
+      return null;
+    }
+
+    return {
+      questId: String(parsed.questId),
+      startedAt,
+      durationMs:
+        timerNumberOrNull(
+          parsed.durationMs
+        ),
+      pausedAt:
+        timerNumberOrNull(
+          parsed.pausedAt
+        ),
+      accumulatedPauseMs:
+        Math.max(
+          0,
+          Number(
+            parsed.accumulatedPauseMs
+          ) || 0
+        ),
+      paused: Boolean(parsed.paused)
+    };
+  }
+
+  catch (error) {
+    console.error(
+      "Could not read Quest Board timer state.",
+      error
+    );
+
+    return null;
+  }
+}
+
+function saveTimerState(timerState) {
+  localStorage.setItem(
+    getTimerStorageKey(),
+    JSON.stringify(timerState)
+  );
+}
+
+function clearSavedTimerState() {
+  localStorage.removeItem(
+    getTimerStorageKey()
+  );
+}
+
+function getTimerElapsedMs(
+  timerState,
+  now = Date.now()
+) {
+  if (!timerState) {
+    return 0;
+  }
+
+  const startedAt =
+    timerNumberOrNull(
+      timerState.startedAt
+    );
+
+  if (startedAt === null) {
+    return 0;
+  }
+
+  let endTime = now;
+
+  if (timerState.paused) {
+    const pausedAt =
+      timerNumberOrNull(
+        timerState.pausedAt
+      );
+
+    if (pausedAt !== null) {
+      endTime = pausedAt;
+    }
+  }
+
+  return Math.max(
+    0,
+    endTime
+      - startedAt
+      - (
+        Number(
+          timerState.accumulatedPauseMs
+        ) || 0
+      )
+  );
+}
+
+function stopTimerUiInterval() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startTimerUiInterval() {
+  stopTimerUiInterval();
 
   timerInterval =
     setInterval(
-      () => {
-        timerSeconds++;
-        updateTimerDisplay();
-      },
-      1000
+      syncTimerDisplayFromStorage,
+      250
     );
 }
 
-
-function pauseTimer() {
-  if (timerInterval) {
-    clearInterval(
-      timerInterval
-    );
-
-    timerInterval =
-      null;
+function syncTimerDisplayFromStorage() {
+  if (!activeQuest) {
+    return;
   }
 
-  $("#timerToggleButton")
-    .textContent =
-      "Start";
-}
+  const timerState =
+    getSavedTimerState();
 
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+  ) {
+    return;
+  }
 
-function resetTimer() {
-  pauseTimer();
-
-  timerSeconds =
-    0;
+  timerDisplayMs =
+    getTimerElapsedMs(timerState);
 
   updateTimerDisplay();
 }
 
+function restoreTimerForQuest(questId) {
+  stopTimerUiInterval();
+
+  const timerState =
+    getSavedTimerState();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (
+    !timerState
+    || timerState.questId !== questId
+  ) {
+    timerDisplayMs = 0;
+    updateTimerDisplay();
+
+    if (timerButton) {
+      timerButton.textContent = "Start";
+    }
+
+    return;
+  }
+
+  timerDisplayMs =
+    getTimerElapsedMs(timerState);
+
+  updateTimerDisplay();
+
+  if (timerButton) {
+    timerButton.textContent =
+      timerState.paused
+        ? "Start"
+        : "Pause";
+  }
+
+  if (!timerState.paused) {
+    startTimerUiInterval();
+  }
+}
+
+function startTimer() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const now = Date.now();
+  let timerState =
+    getSavedTimerState();
+
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+  ) {
+    timerState =
+      createFreshTimerState(
+        activeQuest.id
+      );
+
+    timerState.startedAt = now;
+    timerState.paused = false;
+  }
+
+  else if (timerState.paused) {
+    const pausedAt =
+      timerNumberOrNull(
+        timerState.pausedAt
+      );
+
+    if (pausedAt !== null) {
+      timerState.accumulatedPauseMs +=
+        Math.max(
+          0,
+          now - pausedAt
+        );
+    }
+
+    timerState.pausedAt = null;
+    timerState.paused = false;
+  }
+
+  saveTimerState(timerState);
+
+  timerDisplayMs =
+    getTimerElapsedMs(
+      timerState,
+      now
+    );
+
+  updateTimerDisplay();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (timerButton) {
+    timerButton.textContent = "Pause";
+  }
+
+  startTimerUiInterval();
+}
+
+function pauseTimer() {
+  if (!activeQuest) {
+    stopTimerUiInterval();
+    return;
+  }
+
+  const timerState =
+    getSavedTimerState();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+    || timerState.paused
+  ) {
+    stopTimerUiInterval();
+
+    if (timerButton) {
+      timerButton.textContent = "Start";
+    }
+
+    return;
+  }
+
+  timerState.pausedAt = Date.now();
+  timerState.paused = true;
+
+  saveTimerState(timerState);
+
+  timerDisplayMs =
+    getTimerElapsedMs(timerState);
+
+  stopTimerUiInterval();
+  updateTimerDisplay();
+
+  if (timerButton) {
+    timerButton.textContent = "Start";
+  }
+}
+
+function resetTimer() {
+  stopTimerUiInterval();
+
+  if (activeQuest) {
+    const timerState =
+      getSavedTimerState();
+
+    if (
+      timerState
+      && timerState.questId
+        === activeQuest.id
+    ) {
+      clearSavedTimerState();
+    }
+  }
+
+  timerDisplayMs = 0;
+  updateTimerDisplay();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (timerButton) {
+    timerButton.textContent = "Start";
+  }
+}
+
+function clearTimerForQuest(questId) {
+  const timerState =
+    getSavedTimerState();
+
+  if (
+    timerState
+    && timerState.questId === questId
+  ) {
+    clearSavedTimerState();
+  }
+
+  stopTimerUiInterval();
+  timerDisplayMs = 0;
+}
 
 function toggleTimer() {
-  if (timerInterval) {
+  if (!activeQuest) {
+    return;
+  }
+
+  const timerState =
+    getSavedTimerState();
+
+  const isRunning =
+    Boolean(
+      timerState
+      && timerState.questId
+        === activeQuest.id
+      && !timerState.paused
+    );
+
+  if (isRunning) {
     pauseTimer();
   }
 
@@ -2091,48 +2460,45 @@ function toggleTimer() {
   }
 }
 
-
 function updateTimerDisplay() {
-  const hours =
+  const display =
+    $("#timerDisplay");
+
+  if (!display) {
+    return;
+  }
+
+  const totalSeconds =
     Math.floor(
-      timerSeconds / 3600
+      Math.max(0, timerDisplayMs)
+      / 1000
     );
+
+  const hours =
+    Math.floor(totalSeconds / 3600);
 
   const minutes =
     Math.floor(
-      (
-        timerSeconds % 3600
-      ) / 60
+      (totalSeconds % 3600) / 60
     );
 
   const seconds =
-    timerSeconds % 60;
+    totalSeconds % 60;
 
   if (hours > 0) {
-    $("#timerDisplay")
-      .textContent =
-        (
-          String(hours)
-            .padStart(2, "0")
-          + ":"
-          + String(minutes)
-            .padStart(2, "0")
-          + ":"
-          + String(seconds)
-            .padStart(2, "0")
-        );
+    display.textContent =
+      String(hours).padStart(2, "0")
+      + ":"
+      + String(minutes).padStart(2, "0")
+      + ":"
+      + String(seconds).padStart(2, "0");
   }
 
   else {
-    $("#timerDisplay")
-      .textContent =
-        (
-          String(minutes)
-            .padStart(2, "0")
-          + ":"
-          + String(seconds)
-            .padStart(2, "0")
-        );
+    display.textContent =
+      String(minutes).padStart(2, "0")
+      + ":"
+      + String(seconds).padStart(2, "0");
   }
 }
 
@@ -2638,6 +3004,10 @@ function resetCharacter() {
   ) {
     return;
   }
+
+  stopTimerUiInterval();
+  clearSavedTimerState();
+  timerDisplayMs = 0;
 
   saveState(
     createFreshState()
@@ -4515,6 +4885,22 @@ document.addEventListener(
 );
 
 
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState === "visible"
+      && activeQuest
+      && $("#questDialog")?.open
+    ) {
+      restoreTimerForQuest(
+        activeQuest.id
+      );
+    }
+  }
+);
+
+
 // =========================================================
 // 75. RESTORE PENDING BOSS REWARD
 // =========================================================
@@ -4542,22 +4928,44 @@ function restorePendingVictory() {
 // =========================================================
 
 async function initializeApp() {
+  /*
+    PERSONAL APP FIRST.
+
+    Nothing involving Supabase is allowed to prevent
+    existing local Quest Board data from rendering.
+  */
+
   chooseProfile();
 
-  render();
+  try {
+    render();
+  }
 
-  await setView(
-    activeView
-  );
+  catch (error) {
+    console.error(
+      "Local Quest Board render failed:",
+      error
+    );
+  }
+
+  try {
+    await setView(
+      activeView
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "View restoration failed:",
+      error
+    );
+  }
 
   await initializeSupabase();
 
-  /*
-    Check immediately so a gift received while
-    the app was closed is deposited on launch.
-  */
-
-  await checkIncomingGifts();
+  if (supabaseReady) {
+    await checkIncomingGifts();
+  }
 
   renderSettings(
     getSettings()
@@ -4565,6 +4973,7 @@ async function initializeApp() {
 
   if (
     activeView === "party"
+    && supabaseReady
   ) {
     await refreshParty();
   }
@@ -4573,4 +4982,12 @@ async function initializeApp() {
 }
 
 
-initializeApp();
+initializeApp()
+  .catch(
+    error => {
+      console.error(
+        "Quest Board initialization failed:",
+        error
+      );
+    }
+  );
