@@ -37,10 +37,12 @@ const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_16wAhIyuMsClbOYoAZt6aQ_unXWTJ_n";
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+  window.supabase?.createClient
+    ? window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      )
+    : null;
 
 
 // =========================================================
@@ -1009,6 +1011,21 @@ async function initializeSupabase() {
   setPartySyncStatus(
     "Connecting to the guild..."
   );
+
+  if (!supabaseClient) {
+    supabaseReady = false;
+
+    console.warn(
+      "Supabase library did not load. Running Quest Board in local-only mode."
+    );
+
+    setPartySyncStatus(
+      "Party sync unavailable. Personal progress still works.",
+      "error"
+    );
+
+    return;
+  }
 
   try {
     const {
@@ -5693,3 +5710,104 @@ document.addEventListener(
     }
   }
 );
+
+
+// =========================================================
+// 75. RESTORE PENDING BOSS REWARD
+// =========================================================
+
+function restorePendingVictory() {
+  const state =
+    normalizeWeek();
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.bossDefeatedWeek
+      === weekKey
+    && state.bossRewardsClaimedWeek
+      !== weekKey
+  ) {
+    openBossDefeated();
+  }
+}
+
+
+// =========================================================
+// 76. INITIALIZE
+// =========================================================
+
+async function initializeApp() {
+  /*
+    PERSONAL APP FIRST.
+
+    Nothing involving Supabase is allowed to prevent
+    existing local Quest Board data from rendering.
+  */
+
+  chooseProfile();
+
+  const initialState =
+    normalizeWeek();
+
+  discoverEligibleRelics(
+    initialState
+  );
+
+  try {
+    render();
+  }
+
+  catch (error) {
+    console.error(
+      "Local Quest Board render failed:",
+      error
+    );
+  }
+
+  try {
+    await setView(
+      activeView
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "View restoration failed:",
+      error
+    );
+  }
+
+  await initializeSupabase();
+
+  if (supabaseReady) {
+    await checkIncomingGifts();
+  }
+
+  renderSettings(
+    getSettings()
+  );
+
+  if (
+    activeView === "party"
+    && supabaseReady
+  ) {
+    await refreshParty();
+  }
+
+  restorePendingVictory();
+
+  appInitialized = true;
+}
+
+
+initializeApp()
+  .catch(
+    error => {
+      console.error(
+        "Quest Board initialization failed:",
+        error
+      );
+    }
+  );
