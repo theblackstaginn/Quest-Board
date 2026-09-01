@@ -998,3 +998,1002 @@ function renderWeeklyProgress(
   const goal =
     Number(settings.weeklyGoal)
     || DEFAULT_WEEKLY_GOAL;
+      const completed =
+    state.weeklyCompleted.length;
+
+  const percent =
+    Math.min(
+      100,
+      (completed / goal) * 100
+    );
+
+  $("#weeklyObjectiveTitle")
+    .textContent =
+      `Complete ${goal} Quests`;
+
+  $("#weeklyProgressLabel")
+    .textContent =
+      `${completed} / ${goal}`;
+
+  $("#weeklyProgressBar")
+    .style.width =
+      `${percent}%`;
+
+  if (completed >= goal) {
+    $("#weekStatus")
+      .textContent =
+        "Week conquered.";
+  }
+
+  else if (
+    completed === goal - 1
+    && goal > 1
+  ) {
+    $("#weekStatus")
+      .textContent =
+        "One quest remains.";
+  }
+
+  else if (completed > 0) {
+    $("#weekStatus")
+      .textContent =
+        "The campaign has begun.";
+  }
+
+  else {
+    $("#weekStatus")
+      .textContent =
+        "The board is open.";
+  }
+}
+
+
+// =========================================================
+// 22. BOSS BATTLE
+// =========================================================
+
+function renderBossBattle(
+  state,
+  settings
+) {
+  const goal =
+    Number(settings.weeklyGoal)
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  const weekConquered =
+    state.weeklyCompleted.length
+    >= goal;
+
+  const bossDefeated =
+    state.bossDefeatedWeek
+    === weekKey;
+
+  const bossButton =
+    $("#bossButton");
+
+  bossButton.disabled =
+    !weekConquered
+    || bossDefeated;
+
+  if (bossDefeated) {
+    $("#bossLockText")
+      .textContent =
+        "Defeated this week.";
+  }
+
+  else if (weekConquered) {
+    $("#bossLockText")
+      .textContent =
+        "Unlocked. Face the boss.";
+  }
+
+  else {
+    $("#bossLockText")
+      .textContent =
+        `Unlock by completing ${goal} quests.`;
+  }
+}
+
+
+// =========================================================
+// 23. QUEST CARDS
+// =========================================================
+
+function renderQuestCards() {
+  $("#questGrid").innerHTML =
+    QUESTS
+      .map(
+        quest => `
+          <article
+            class="quest-card"
+            data-quest-id="${quest.id}"
+            tabindex="0"
+            role="button"
+          >
+
+            <div class="quest-card-content">
+
+              <p class="quest-type">
+                ${escapeHtml(
+                  quest.category
+                )}
+              </p>
+
+              <h3>
+                ${escapeHtml(
+                  quest.title
+                )}
+              </h3>
+
+              <p>
+                ${escapeHtml(
+                  quest.description
+                )}
+              </p>
+
+            </div>
+
+
+            <div class="quest-card-meta">
+
+              <span class="quest-duration">
+                ${escapeHtml(
+                  quest.time
+                )}
+              </span>
+
+
+              <span class="quest-gold-reward">
+
+                <img
+                  src="icons/gold-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                ${quest.gold}
+
+              </span>
+
+
+              <span
+                class="quest-arrow"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+
+            </div>
+
+          </article>
+        `
+      )
+      .join("");
+}
+
+
+// =========================================================
+// 24. QUEST CARD BINDINGS
+// =========================================================
+
+function bindQuestCards() {
+  $$("[data-quest-id]")
+    .forEach(
+      element => {
+        element.onclick =
+          () => {
+            if (element.disabled) {
+              return;
+            }
+
+            openQuest(
+              element.dataset.questId
+            );
+          };
+
+        if (
+          element.classList.contains(
+            "quest-card"
+          )
+        ) {
+          element.onkeydown =
+            event => {
+              if (
+                event.key === "Enter"
+                || event.key === " "
+              ) {
+                event.preventDefault();
+
+                openQuest(
+                  element.dataset.questId
+                );
+              }
+            };
+        }
+      }
+    );
+}
+
+
+// =========================================================
+// 25. CHARACTER STATS
+// =========================================================
+
+function renderCharacterStats(state) {
+  renderStat(
+    "strength",
+    state.xp.strength
+  );
+
+  renderStat(
+    "endurance",
+    state.xp.endurance
+  );
+
+  renderStat(
+    "restoration",
+    state.xp.restoration
+  );
+}
+
+
+function renderStat(type, xp) {
+  const {
+    level,
+    progress
+  } =
+    getLevelData(xp);
+
+  $(`#${type}Level`)
+    .textContent =
+      `Lv. ${level}`;
+
+  $(`#${type}Xp`)
+    .textContent =
+      `${xp} XP`;
+
+  $(`#${type}Bar`)
+    .style.width =
+      `${progress}%`;
+}
+
+
+// =========================================================
+// 26. CHARACTER SUMMARY
+// =========================================================
+
+function renderCharacterSummary(
+  state,
+  settings
+) {
+  const character =
+    getCharacterConfig();
+
+  const displayName =
+    settings.playerName
+    || character.defaultName;
+
+  const totalXp =
+    state.xp.strength
+    + state.xp.endurance
+    + state.xp.restoration;
+
+  $("#characterProfileName")
+    .textContent =
+      displayName;
+
+  $("#characterClassName")
+    .textContent =
+      character.className;
+
+  $("#characterCardImage")
+    .src =
+      character.card;
+
+  $("#characterCardImage")
+    .alt =
+      `${displayName} — ${character.className}`;
+
+  $("#characterGold")
+    .textContent =
+      state.gold;
+
+  $("#characterCrystals")
+    .textContent =
+      state.crystals;
+
+  $("#characterWeeklyQuests")
+    .textContent =
+      state.weeklyCompleted.length;
+
+  $("#characterTotalQuests")
+    .textContent =
+      state.history.length;
+
+  $("#characterTotalXp")
+    .textContent =
+      totalXp;
+
+  document.body.dataset.characterTheme =
+    character.theme;
+
+  document.body.dataset.profileId =
+    activeProfileId;
+}
+
+
+// =========================================================
+// 27. OPEN QUEST
+// =========================================================
+
+function openQuest(id) {
+  const quest =
+    findQuest(id);
+
+  if (!quest) {
+    return;
+  }
+
+  if (id === "boss") {
+    const state =
+      normalizeWeek();
+
+    const settings =
+      getSettings();
+
+    const goal =
+      Number(settings.weeklyGoal)
+      || DEFAULT_WEEKLY_GOAL;
+
+    const weekKey =
+      getWeekKey();
+
+    if (
+      state.weeklyCompleted.length
+      < goal
+    ) {
+      return;
+    }
+
+    if (
+      state.bossDefeatedWeek
+      === weekKey
+    ) {
+      return;
+    }
+  }
+
+  activeQuest =
+    quest;
+
+  resetTimer();
+
+  $("#dialogCategory")
+    .textContent =
+      quest.category;
+
+  $("#dialogTitle")
+    .textContent =
+      quest.title;
+
+  $("#dialogDescription")
+    .textContent =
+      quest.description;
+
+  $("#dialogTime")
+    .textContent =
+      quest.time;
+
+  if (quest.id === "boss") {
+    $("#dialogReward")
+      .innerHTML =
+        `
+          +${BOSS_STRENGTH_XP} Strength XP
+          ·
+          +${BOSS_ENDURANCE_XP} Endurance XP
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_GOLD}
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/crystal-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_CRYSTALS}
+        `;
+  }
+
+  else {
+    $("#dialogReward")
+      .innerHTML =
+        `
+          +${quest.xp}
+          ${capitalize(
+            quest.xpType
+          )}
+          XP
+          ·
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${quest.gold}
+        `;
+  }
+
+  renderExerciseList(quest);
+
+  $("#questDialog")
+    .showModal();
+}
+
+
+// =========================================================
+// 28. EXERCISE CHECKLIST
+// =========================================================
+
+function renderExerciseList(quest) {
+  $("#exerciseList")
+    .innerHTML =
+      quest.exercises
+        .map(
+          (
+            exercise,
+            index
+          ) => `
+            <label class="exercise-row">
+
+              <input
+                type="checkbox"
+                id="exercise-${index}"
+              >
+
+              <span>
+                ${escapeHtml(
+                  exercise
+                )}
+              </span>
+
+            </label>
+          `
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 29. COMPLETE QUEST
+// =========================================================
+
+async function completeQuest() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const completedQuest =
+    activeQuest;
+
+  if (
+    completedQuest.id === "boss"
+  ) {
+    await completeBossBattle();
+    return;
+  }
+
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  const goal =
+    Number(settings.weeklyGoal)
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  const completedBefore =
+    state.weeklyCompleted.length;
+
+  const completedAt =
+    new Date()
+      .toISOString();
+
+  const earnedXp =
+    Number(completedQuest.xp)
+    || 0;
+
+  const earnedGold =
+    Number(completedQuest.gold)
+    || 0;
+
+  state.weeklyCompleted.push({
+    questId:
+      completedQuest.id,
+
+    completedAt
+  });
+
+  state.xp[
+    completedQuest.xpType
+  ] += earnedXp;
+
+  state.gold +=
+    earnedGold;
+
+  state.history.unshift({
+    questId:
+      completedQuest.id,
+
+    title:
+      completedQuest.title,
+
+    category:
+      completedQuest.category,
+
+    xp:
+      earnedXp,
+
+    xpType:
+      completedQuest.xpType,
+
+    gold:
+      earnedGold,
+
+    crystals:
+      0,
+
+    completedAt
+  });
+
+  const completedAfter =
+    state.weeklyCompleted.length;
+
+  const conqueredWeekNow =
+    completedBefore < goal
+    && completedAfter >= goal
+    && state.weekConqueredRewardWeek
+      !== weekKey;
+
+  if (conqueredWeekNow) {
+    state.gold +=
+      WEEK_CONQUERED_GOLD;
+
+    state.weekConqueredRewardWeek =
+      weekKey;
+  }
+
+  saveState(state);
+
+  activeQuest =
+    null;
+
+  closeQuest();
+
+  let partySynced =
+    false;
+
+  if (
+    supabaseReady
+    && supabaseUser
+    && currentParty
+  ) {
+    partySynced =
+      await syncQuestActivityToParty(
+        completedQuest,
+        completedAt
+      );
+  }
+
+  render();
+
+  if (currentParty) {
+    await renderParty();
+  }
+
+  if (conqueredWeekNow) {
+    openWeekConquered();
+    return;
+  }
+
+  if (
+    supabaseReady
+    && currentParty
+    && !partySynced
+  ) {
+    showToast(
+      `Quest saved · +${earnedXp} XP · +${earnedGold} Gold · Party sync failed`
+    );
+  }
+
+  else {
+    showToast(
+      `Quest Complete · +${earnedXp} XP · +${earnedGold} Gold`
+    );
+  }
+}
+
+
+// =========================================================
+// 30. WEEK CONQUERED
+// =========================================================
+
+function openWeekConquered() {
+  const dialog =
+    $("#weekConqueredDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+function closeWeekConquered() {
+  const dialog =
+    $("#weekConqueredDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+
+  render();
+
+  showToast(
+    `Week Conquered · +${WEEK_CONQUERED_GOLD} Gold · Boss Battle Unlocked`
+  );
+}
+
+
+// =========================================================
+// 31. COMPLETE BOSS BATTLE
+// =========================================================
+
+async function completeBossBattle() {
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  const goal =
+    Number(settings.weeklyGoal)
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.weeklyCompleted.length
+    < goal
+  ) {
+    closeQuest();
+
+    activeQuest =
+      null;
+
+    showToast(
+      "Conquer the week before facing the Boss."
+    );
+
+    return;
+  }
+
+  if (
+    state.bossDefeatedWeek
+    === weekKey
+  ) {
+    closeQuest();
+
+    activeQuest =
+      null;
+
+    showToast(
+      "The Boss has already been defeated this week."
+    );
+
+    return;
+  }
+
+  state.bossDefeatedWeek =
+    weekKey;
+
+  saveState(state);
+
+  activeQuest =
+    null;
+
+  closeQuest();
+  render();
+  openBossDefeated();
+}
+
+
+// =========================================================
+// 32. BOSS DEFEATED / CRYSTAL REVEAL
+// =========================================================
+
+function openBossDefeated() {
+  const dialog =
+    $("#bossDefeatedDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+// =========================================================
+// 33. CLAIM BOSS REWARDS
+// =========================================================
+
+async function claimBossRewards() {
+  const state =
+    normalizeWeek();
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.bossDefeatedWeek
+    !== weekKey
+  ) {
+    showToast(
+      "No Boss reward is waiting."
+    );
+
+    return;
+  }
+
+  if (
+    state.bossRewardsClaimedWeek
+    === weekKey
+  ) {
+    closeBossDefeated();
+
+    showToast(
+      "Boss rewards already claimed."
+    );
+
+    return;
+  }
+
+  const completedAt =
+    new Date()
+      .toISOString();
+
+  state.xp.strength +=
+    BOSS_STRENGTH_XP;
+
+  state.xp.endurance +=
+    BOSS_ENDURANCE_XP;
+
+  state.gold +=
+    BOSS_GOLD;
+
+  state.crystals +=
+    BOSS_CRYSTALS;
+
+  state.bossRewardsClaimedWeek =
+    weekKey;
+
+  state.history.unshift({
+    questId:
+      "boss",
+
+    title:
+      "Boss Battle",
+
+    category:
+      "Boss",
+
+    xp:
+      BOSS_STRENGTH_XP
+      + BOSS_ENDURANCE_XP,
+
+    xpType:
+      "mixed",
+
+    gold:
+      BOSS_GOLD,
+
+    crystals:
+      BOSS_CRYSTALS,
+
+    completedAt
+  });
+
+  saveState(state);
+
+  let partySynced =
+    false;
+
+  if (
+    supabaseReady
+    && supabaseUser
+    && currentParty
+  ) {
+    partySynced =
+      await syncBossActivityToParty(
+        completedAt
+      );
+  }
+
+  closeBossDefeated();
+  render();
+
+  if (currentParty) {
+    await renderParty();
+  }
+
+  if (
+    supabaseReady
+    && currentParty
+    && !partySynced
+  ) {
+    showToast(
+      `Boss Rewards Claimed · +100 XP · +${BOSS_GOLD} Gold · +${BOSS_CRYSTALS} Crystals · Party sync failed`
+    );
+  }
+
+  else {
+    showToast(
+      `Boss Rewards Claimed · +100 XP · +${BOSS_GOLD} Gold · +${BOSS_CRYSTALS} Crystals`
+    );
+  }
+}
+
+
+function closeBossDefeated() {
+  const dialog =
+    $("#bossDefeatedDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+
+// =========================================================
+// 34. SYNC NORMAL QUEST ACTIVITY
+// =========================================================
+
+async function syncQuestActivityToParty(
+  quest,
+  completedAt
+) {
+  try {
+    const settings =
+      getSettings();
+
+    const character =
+      getCharacterConfig();
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("quest_activity")
+        .insert({
+          party_id:
+            currentParty.id,
+
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          quest_id:
+            quest.id,
+
+          quest_title:
+            quest.title,
+
+          xp:
+            quest.xp,
+
+          gold:
+            quest.gold,
+
+          week_key:
+            getWeekKey(),
+
+          completed_at:
+            completedAt
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
+  }
+
+  catch (error) {
+    console.error(
+      "Could not sync quest to party:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+// =========================================================
+// 35. SYNC BOSS ACTIVITY
+// =========================================================
+
+async function syncBossActivityToParty(
+  completedAt
+) {
+  try {
+    const settings =
+      getSettings();
+
+    const character =
+      getCharacterConfig();
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("quest_activity")
+        .insert({
+          party_id:
+            currentParty.id,
+
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          quest_id:
+            "boss",
+
+          quest_title:
+            "Boss Battle",
+
+          xp:
+            BOSS_STRENGTH_XP
+            + BOSS_ENDURANCE_XP,
+
+          gold:
+            BOSS_GOLD,
+
+          week_key:
+            getWeekKey(),
+
+          completed_at:
+            completedAt
+        });
+
+    if (error) {
