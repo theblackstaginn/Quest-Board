@@ -252,7 +252,7 @@ const RELIC_SOURCE_BADGES = {
   boss: "badges/boss-defeated.webp",
   level: "badges/level-up.webp",
   party: "badges/party-challenge.webp",
-  secret: "badges/secret-achievement.webp"
+  secret: "badges/secret-acheivment.webp"
 };
 
 const RELIC_SOURCE_LABELS = {
@@ -1231,6 +1231,42 @@ async function loadCurrentParty() {
 // 19A. RELIC COLLECTION ENGINE
 // =========================================================
 
+function applyRelicImageSizing(image) {
+  if (!image) {
+    return;
+  }
+
+  const width = Number(image.naturalWidth) || 0;
+  const height = Number(image.naturalHeight) || 0;
+
+  if (!width || !height) {
+    return;
+  }
+
+  const ratio = width / height;
+
+  image.style.width = "100%";
+  image.style.height = "100%";
+  image.style.objectFit = "contain";
+  image.style.objectPosition = "center";
+
+  image.dataset.relicAspect =
+    ratio > 1.08
+      ? "wide"
+      : ratio < 0.78
+        ? "tall"
+        : "balanced";
+}
+
+function handleRelicAssetError(image) {
+  if (!image) {
+    return;
+  }
+
+  image.hidden = true;
+}
+
+
 function getRelicById(id) {
   return RELICS.find(
     relic => relic.id === id
@@ -1442,14 +1478,16 @@ function renderRelicCollection(state) {
                   src="${escapeHtml(relic.image)}"
                   alt="${unlocked ? escapeHtml(relic.name) : ""}"
                   loading="lazy"
+                  onload="applyRelicImageSizing(this)"
+                  onerror="handleRelicAssetError(this)"
                 >
 
                 ${
                   unlocked
                     ? `
                       <span class="relic-card-badges" aria-hidden="true">
-                        <img src="${rarityBadge}" alt="">
-                        <img src="${sourceBadge}" alt="">
+                        <img src="${rarityBadge}" alt="" onerror="handleRelicAssetError(this)">
+                        <img src="${sourceBadge}" alt="" onerror="handleRelicAssetError(this)">
                       </span>
                     `
                     : `
@@ -1526,6 +1564,12 @@ function openRelicDialog(
 
   $("#relicDialogImage").alt =
     `${relic.name}. ${relic.flavor}`;
+
+  $("#relicDialogImage").onload =
+    event => applyRelicImageSizing(event.currentTarget);
+
+  $("#relicDialogImage").onerror =
+    event => handleRelicAssetError(event.currentTarget);
 
   $("#relicDialogRarityBadge").src =
     RELIC_RARITY_BADGES[relic.rarity];
