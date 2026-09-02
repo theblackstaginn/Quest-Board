@@ -2711,10 +2711,12 @@ body.reduce-motion *::after {
 .relic-collection-panel {
   margin-top: 20px;
   padding: 24px;
+
   background-image: url("mossy-stone.webp");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: 380px auto;
+  background-position: center center;
+  background-repeat: repeat;
+
   box-shadow: var(--shadow);
 }
 
