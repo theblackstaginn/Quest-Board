@@ -54,7 +54,7 @@ const QUESTS = [
     id: "there-back",
     title: "There and Back",
     category: "Endurance",
-    time: "15â25 min",
+    time: "15-25 min",
     xpType: "endurance",
     xp: 20,
     gold: 12,
@@ -69,18 +69,18 @@ const QUESTS = [
     id: "keep",
     title: "The Keep",
     category: "Strength",
-    time: "10â20 min",
+    time: "10-20 min",
     xpType: "strength",
     xp: 25,
     gold: 15,
     description:
       "A simple dumbbell and kettlebell strength quest. Complete two rounds for a short session or three to four rounds for the full quest.",
     exercises: [
-      "Goblet squat â 8â12 reps",
-      "One-arm dumbbell row â 8â12 reps each side",
-      "Dumbbell bench press â 8â12 reps",
-      "Romanian deadlift â 8â12 reps",
-      "Plank â 20â40 seconds"
+      "Goblet squat - 8-12 reps",
+      "One-arm dumbbell row - 8-12 reps each side",
+      "Dumbbell bench press - 8-12 reps",
+      "Romanian deadlift - 8-12 reps",
+      "Plank - 20-40 seconds"
     ]
   },
 
@@ -88,17 +88,17 @@ const QUESTS = [
     id: "dragonstrength",
     title: "DragonStrength",
     category: "Strength",
-    time: "10â20 min",
+    time: "10-20 min",
     xpType: "strength",
     xp: 30,
     gold: 20,
     description:
       "Barbell and rack training. Keep the movement controlled and leave a little strength in reserve.",
     exercises: [
-      "Barbell squat â 8â10 reps",
-      "Bench press â 8â10 reps",
-      "Barbell Romanian deadlift â 8â10 reps",
-      "Cable row or lat pulldown â 10â12 reps",
+      "Barbell squat - 8-10 reps",
+      "Bench press - 8-10 reps",
+      "Barbell Romanian deadlift - 8-10 reps",
+      "Cable row or lat pulldown - 10-12 reps",
       "Core movement of choice"
     ]
   },
@@ -117,7 +117,7 @@ const QUESTS = [
       "10 kettlebell deadlifts",
       "8 goblet squats",
       "8 dumbbell shoulder presses",
-      "20â30 second plank",
+      "20-30 second plank",
       "Repeat until 10 minutes is complete"
     ]
   },
@@ -126,7 +126,7 @@ const QUESTS = [
     id: "restoration",
     title: "Restoration",
     category: "Recovery",
-    time: "10â20 min",
+    time: "10-20 min",
     xpType: "restoration",
     xp: 20,
     gold: 10,
@@ -146,7 +146,7 @@ const QUESTS = [
     id: "ranger",
     title: "Ranger Training",
     category: "Endurance",
-    time: "20â30 min",
+    time: "20-30 min",
     xpType: "endurance",
     xp: 30,
     gold: 20,
@@ -191,7 +191,7 @@ const SPECIAL_QUESTS = {
     id: "boss",
     title: "Boss Battle",
     category: "Boss",
-    time: "30â45 min",
+    time: "30-45 min",
     xpType: "strength",
     xp: 0,
     gold: 0,
@@ -1908,7 +1908,7 @@ function renderQuestCards() {
                 class="quest-arrow"
                 aria-hidden="true"
               >
-                âº
+                > 
               </span>
 
             </div>
@@ -2040,7 +2040,7 @@ function renderCharacterSummary(
 
   $("#characterCardImage")
     .alt =
-      `${displayName} â ${character.className}`;
+      `${displayName} - ${character.className}`;
 
   $("#characterGold")
     .textContent =
@@ -2139,9 +2139,9 @@ function openQuest(id) {
       .innerHTML =
         `
           +${BOSS_STRENGTH_XP} Strength XP
-          Â·
+          |
           +${BOSS_ENDURANCE_XP} Endurance XP
-          Â·
+          |
           <img
             class="currency-icon-small"
             src="icons/gold-icon.webp"
@@ -2149,7 +2149,7 @@ function openQuest(id) {
             aria-hidden="true"
           >
           ${BOSS_GOLD}
-          Â·
+          |
           <img
             class="currency-icon-small"
             src="icons/crystal-icon.webp"
@@ -2169,7 +2169,7 @@ function openQuest(id) {
             quest.xpType
           )}
           XP
-          Â·
+          |
           <img
             class="currency-icon-small"
             src="icons/gold-icon.webp"
@@ -2374,13 +2374,13 @@ async function completeQuest() {
     && !partySynced
   ) {
     showToast(
-      `Quest saved Â· +${earnedXp} XP Â· +${earnedGold} Gold Â· Party sync failed`
+      `Quest saved | +${earnedXp} XP | +${earnedGold} Gold | Party sync failed`
     );
   }
 
   else {
     showToast(
-      `Quest Complete Â· +${earnedXp} XP Â· +${earnedGold} Gold`
+      `Quest Complete | +${earnedXp} XP | +${earnedGold} Gold`
     );
   }
 
@@ -2418,7 +2418,7 @@ function closeWeekConquered() {
   render();
 
   showToast(
-    `Week Conquered Â· +${WEEK_CONQUERED_GOLD} Gold Â· Boss Battle Unlocked`
+    `Week Conquered | +${WEEK_CONQUERED_GOLD} Gold | Boss Battle Unlocked`
   );
 
   showNextRelicReveal();
@@ -2630,13 +2630,13 @@ async function claimBossRewards() {
     && !partySynced
   ) {
     showToast(
-      `Boss Rewards Claimed Â· +100 XP Â· +${BOSS_GOLD} Gold Â· +${BOSS_CRYSTALS} Crystals Â· Party sync failed`
+      `Boss Rewards Claimed | +100 XP | +${BOSS_GOLD} Gold | +${BOSS_CRYSTALS} Crystals | Party sync failed`
     );
   }
 
   else {
     showToast(
-      `Boss Rewards Claimed Â· +100 XP Â· +${BOSS_GOLD} Gold Â· +${BOSS_CRYSTALS} Crystals`
+      `Boss Rewards Claimed | +100 XP | +${BOSS_GOLD} Gold | +${BOSS_CRYSTALS} Crystals`
     );
   }
 
@@ -3334,13 +3334,13 @@ function openHistory() {
 
                     ${dateText}
 
-                    Â· +${item.xp}
+                    | +${item.xp}
                     ${xpTypeText} XP
 
                     ${
                       gold
                         ? `
-                          Â·
+                          |
                           <img
                             class="currency-icon-small"
                             src="icons/gold-icon.webp"
@@ -3355,7 +3355,7 @@ function openHistory() {
                     ${
                       crystals
                         ? `
-                          Â·
+                          |
                           <img
                             class="currency-icon-small"
                             src="icons/crystal-icon.webp"
@@ -3857,7 +3857,7 @@ async function createParty() {
     await loadCurrentParty();
 
     showToast(
-      `Fellowship created Â· ${inviteCode}`
+      `Fellowship created | ${inviteCode}`
     );
   }
 
@@ -4102,7 +4102,7 @@ async function renderParty() {
       true;
 
     setPartySyncStatus(
-      "Connected Â· No fellowship joined.",
+      "Connected | No fellowship joined.",
       "connected"
     );
 
@@ -4752,7 +4752,7 @@ async function sendPartyGift() {
     render();
 
     showToast(
-      `Gift Sent Â· ${recipientName} received ${amount} ${capitalize(
+      `Gift Sent | ${recipientName} received ${amount} ${capitalize(
         currency
       )}`
     );
@@ -4975,7 +4975,7 @@ function showGiftReceivedNotification(
         : "Gold";
 
     showToast(
-      `Gift Received Â· ${gift.sender_display_name} sent you ${gift.amount} ${currencyName}!`
+      `Gift Received | ${gift.sender_display_name} sent you ${gift.amount} ${currencyName}!`
     );
 
     return;
@@ -5029,8 +5029,8 @@ function showGiftReceivedNotification(
   }
 
   showToast(
-    `Gifts Received Â· ${parts.join(
-      " Â· "
+    `Gifts Received | ${parts.join(
+      " | "
     )}`
   );
 }
@@ -5180,8 +5180,8 @@ function renderPartyActivity(activity) {
 
                 <span>
                   ${dateText}
-                  Â· +${item.xp} XP
-                  Â· +${item.gold} Gold
+                  | +${item.xp} XP
+                  | +${item.gold} Gold
                 </span>
 
               </article>
