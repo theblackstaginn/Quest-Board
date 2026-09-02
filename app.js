@@ -936,3 +936,934 @@ function saveSettings(settings) {
 // =========================================================
 // 14. PERSONAL QUEST STATE
 // =========================================================
+function createFreshState() {
+  return {
+    weekKey:
+      getWeekKey(),
+
+    weeklyCompleted:
+      [],
+
+    xp: {
+      strength: 0,
+      endurance: 0,
+      restoration: 0
+    },
+
+    gold:
+      0,
+
+    crystals:
+      0,
+
+    history:
+      [],
+
+    claimedGiftIds:
+      [],
+
+    discoveredRelics:
+      [],
+
+    relicDiscoveryDates:
+      {},
+
+    weekConqueredRewardWeek:
+      null,
+
+    bossDefeatedWeek:
+      null,
+
+    bossRewardsClaimedWeek:
+      null
+  };
+}
+
+
+function migrateState(parsed) {
+  const fresh =
+    createFreshState();
+
+  return {
+    ...fresh,
+    ...parsed,
+
+    xp: {
+      ...fresh.xp,
+      ...(parsed?.xp || {})
+    },
+
+    gold:
+      Number(parsed?.gold)
+      || 0,
+
+    crystals:
+      Number(parsed?.crystals)
+      || 0,
+
+    weeklyCompleted:
+      Array.isArray(
+        parsed?.weeklyCompleted
+      )
+        ? parsed.weeklyCompleted
+        : [],
+
+    history:
+      Array.isArray(
+        parsed?.history
+      )
+        ? parsed.history
+        : [],
+
+    claimedGiftIds:
+      Array.isArray(
+        parsed?.claimedGiftIds
+      )
+        ? parsed.claimedGiftIds
+        : [],
+
+    discoveredRelics:
+      Array.isArray(
+        parsed?.discoveredRelics
+      )
+        ? parsed.discoveredRelics
+        : [],
+
+    relicDiscoveryDates:
+      parsed?.relicDiscoveryDates
+      && typeof parsed.relicDiscoveryDates
+        === "object"
+        ? parsed.relicDiscoveryDates
+        : {},
+
+    weekConqueredRewardWeek:
+      parsed?.weekConqueredRewardWeek
+      || null,
+
+    bossDefeatedWeek:
+      parsed?.bossDefeatedWeek
+      || null,
+
+    bossRewardsClaimedWeek:
+      parsed?.bossRewardsClaimedWeek
+      || null
+  };
+}
+
+
+function getState() {
+  const saved =
+    localStorage.getItem(
+      getStorageKey()
+    );
+
+  if (!saved) {
+    return createFreshState();
+  }
+
+  try {
+    return migrateState(
+      JSON.parse(saved)
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not read Quest Board state.",
+      error
+    );
+
+    return createFreshState();
+  }
+}
+
+
+function saveState(state) {
+  localStorage.setItem(
+    getStorageKey(),
+    JSON.stringify(state)
+  );
+}
+
+
+// =========================================================
+// 15. WEEK HANDLING
+// =========================================================
+
+function getWeekKey(
+  date = new Date()
+) {
+  const workingDate =
+    new Date(
+      Date.UTC(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      )
+    );
+
+  const dayNumber =
+    workingDate.getUTCDay()
+    || 7;
+
+  workingDate.setUTCDate(
+    workingDate.getUTCDate()
+    + 4
+    - dayNumber
+  );
+
+  const yearStart =
+    new Date(
+      Date.UTC(
+        workingDate.getUTCFullYear(),
+        0,
+        1
+      )
+    );
+
+  const weekNumber =
+    Math.ceil(
+      (
+        (
+          workingDate
+          - yearStart
+        )
+        / 86400000
+        + 1
+      )
+      / 7
+    );
+
+  return (
+    `${workingDate.getUTCFullYear()}`
+    + "-W"
+    + String(weekNumber)
+      .padStart(2, "0")
+  );
+}
+
+
+function normalizeWeek() {
+  const state =
+    getState();
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.weekKey !== weekKey
+  ) {
+    state.weekKey =
+      weekKey;
+
+    state.weeklyCompleted =
+      [];
+
+    saveState(state);
+  }
+
+  return state;
+}
+
+
+// =========================================================
+// 16. LEVEL SYSTEM
+// =========================================================
+
+function getLevelData(xp) {
+  const safeXp =
+    Math.max(
+      0,
+      Number(xp) || 0
+    );
+
+  return {
+    level:
+      Math.floor(
+        safeXp / XP_PER_LEVEL
+      ) + 1,
+
+    progress:
+      safeXp % XP_PER_LEVEL
+  };
+}
+
+
+// =========================================================
+// 17. QUEST LOOKUP
+// =========================================================
+
+function findQuest(id) {
+  return (
+    QUESTS.find(
+      quest =>
+        quest.id === id
+    )
+    || SPECIAL_QUESTS[id]
+  );
+}
+
+
+// =========================================================
+// 18. SUPABASE INITIALIZATION
+// =========================================================
+
+async function initializeSupabase() {
+  setPartySyncStatus(
+    "Connecting to the guild..."
+  );
+
+  if (!supabaseClient) {
+    supabaseReady =
+      false;
+
+    console.warn(
+      "Supabase library did not load. Running Quest Board in local-only mode."
+    );
+
+    setPartySyncStatus(
+      "Party sync unavailable. Personal progress still works.",
+      "error"
+    );
+
+    return;
+  }
+
+  try {
+    const {
+      data: {
+        session
+      }
+    } =
+      await supabaseClient.auth
+        .getSession();
+
+    if (session?.user) {
+      supabaseUser =
+        session.user;
+    }
+
+    else {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .signInAnonymously();
+
+      if (error) {
+        throw error;
+      }
+
+      supabaseUser =
+        data.user;
+    }
+
+    if (!supabaseUser) {
+      throw new Error(
+        "Supabase did not return a user."
+      );
+    }
+
+    supabaseReady =
+      true;
+
+    await syncProfileToSupabase();
+    await loadCurrentParty();
+
+    setPartySyncStatus(
+      "Guild connection established.",
+      "connected"
+    );
+
+    startPartyRefreshLoop();
+  }
+
+  catch (error) {
+    supabaseReady =
+      false;
+
+    console.error(
+      "Supabase initialization failed:",
+      error
+    );
+
+    setPartySyncStatus(
+      "Party sync unavailable. Personal progress still works.",
+      "error"
+    );
+  }
+}
+
+
+// =========================================================
+// 19. SYNC PROFILE
+// =========================================================
+
+async function syncProfileToSupabase() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    return;
+  }
+
+  const settings =
+    getSettings();
+
+  const character =
+    getCharacterConfig();
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("profiles")
+      .upsert(
+        {
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          class_name:
+            character.className
+        },
+        {
+          onConflict:
+            "user_id"
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+}
+
+
+// =========================================================
+// 20. LOAD CURRENT PARTY
+// =========================================================
+
+async function loadCurrentParty() {
+  currentParty =
+    null;
+
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    return null;
+  }
+
+  const {
+    data: membership,
+    error: membershipError
+  } =
+    await supabaseClient
+      .from("party_members")
+      .select(
+        "party_id, joined_at"
+      )
+      .eq(
+        "user_id",
+        supabaseUser.id
+      )
+      .order(
+        "joined_at",
+        {
+          ascending: false
+        }
+      )
+      .limit(1)
+      .maybeSingle();
+
+  if (membershipError) {
+    throw membershipError;
+  }
+
+  if (!membership) {
+    await renderParty();
+
+    renderSettings(
+      getSettings()
+    );
+
+    return null;
+  }
+
+  const {
+    data: party,
+    error: partyError
+  } =
+    await supabaseClient
+      .from("parties")
+      .select("*")
+      .eq(
+        "id",
+        membership.party_id
+      )
+      .single();
+
+  if (partyError) {
+    throw partyError;
+  }
+
+  currentParty =
+    party;
+
+  await renderParty();
+
+  renderSettings(
+    getSettings()
+  );
+
+  return currentParty;
+}
+
+
+// =========================================================
+// 21. RELIC COLLECTION ENGINE
+// =========================================================
+
+function applyRelicImageSizing(image) {
+  if (!image) {
+    return;
+  }
+
+  const width =
+    Number(image.naturalWidth)
+    || 0;
+
+  const height =
+    Number(image.naturalHeight)
+    || 0;
+
+  if (
+    !width
+    || !height
+  ) {
+    return;
+  }
+
+  const ratio =
+    width / height;
+
+  image.style.width =
+    "100%";
+
+  image.style.height =
+    "100%";
+
+  image.style.objectFit =
+    "contain";
+
+  image.style.objectPosition =
+    "center";
+
+  image.dataset.relicAspect =
+    ratio > 1.08
+      ? "wide"
+      : ratio < 0.78
+        ? "tall"
+        : "balanced";
+}
+
+
+function handleRelicAssetError(image) {
+  if (!image) {
+    return;
+  }
+
+  image.hidden =
+    true;
+}
+
+
+function getRelicById(id) {
+  return (
+    RELICS.find(
+      relic =>
+        relic.id === id
+    )
+    || null
+  );
+}
+
+
+function getRelicStats(state) {
+  const normalHistory =
+    state.history.filter(
+      item =>
+        item.questId !== "boss"
+    );
+
+  const strengthQuests =
+    normalHistory.filter(
+      item =>
+        item.xpType === "strength"
+    ).length;
+
+  const enduranceQuests =
+    normalHistory.filter(
+      item =>
+        item.xpType === "endurance"
+    ).length;
+
+  const restorationQuests =
+    normalHistory.filter(
+      item =>
+        item.xpType === "restoration"
+    ).length;
+
+  const rogueQuests =
+    normalHistory.filter(
+      item =>
+        item.questId === "rogue"
+    ).length;
+
+  const rangerQuests =
+    normalHistory.filter(
+      item =>
+        item.questId === "ranger"
+    ).length;
+
+  const uniqueCoreQuests =
+    new Set(
+      normalHistory
+        .map(
+          item =>
+            item.questId
+        )
+        .filter(
+          questId =>
+            QUESTS.some(
+              quest =>
+                quest.id === questId
+            )
+        )
+    ).size;
+
+  const bossesDefeated =
+    state.history.filter(
+      item =>
+        item.questId === "boss"
+    ).length;
+
+  const strengthLevel =
+    getLevelData(
+      state.xp.strength
+    ).level;
+
+  const enduranceLevel =
+    getLevelData(
+      state.xp.endurance
+    ).level;
+
+  const restorationLevel =
+    getLevelData(
+      state.xp.restoration
+    ).level;
+
+  const levels = [
+    strengthLevel,
+    enduranceLevel,
+    restorationLevel
+  ];
+
+  return {
+    totalQuests:
+      normalHistory.length,
+
+    strengthQuests,
+
+    enduranceQuests,
+
+    restorationQuests,
+
+    rogueQuests,
+
+    rangerQuests,
+
+    uniqueCoreQuests,
+
+    bossesDefeated,
+
+    strengthLevel,
+
+    enduranceLevel,
+
+    restorationLevel,
+
+    minimumStatLevel:
+      Math.min(...levels),
+
+    maximumStatLevel:
+      Math.max(...levels),
+
+    hasConqueredWeek:
+      Boolean(
+        state.weekConqueredRewardWeek
+      )
+  };
+}
+
+
+function discoverEligibleRelics(state) {
+  const discovered =
+    new Set(
+      state.discoveredRelics
+      || []
+    );
+
+  const stats =
+    getRelicStats(state);
+
+  const newlyDiscovered =
+    [];
+
+  for (const relic of RELICS) {
+    if (
+      relic.manual
+      || discovered.has(
+        relic.id
+      )
+      || typeof relic.condition
+        !== "function"
+      || !relic.condition(stats)
+    ) {
+      continue;
+    }
+
+    discovered.add(
+      relic.id
+    );
+
+    newlyDiscovered.push(
+      relic.id
+    );
+
+    state.relicDiscoveryDates[
+      relic.id
+    ] =
+      state.relicDiscoveryDates[
+        relic.id
+      ]
+      || new Date()
+        .toISOString();
+  }
+
+  if (
+    newlyDiscovered.length > 0
+  ) {
+    state.discoveredRelics =
+      Array.from(discovered);
+
+    saveState(state);
+  }
+
+  return newlyDiscovered;
+}
+
+
+function unlockRelicById(
+  relicId,
+  {
+    reveal = true
+  } = {}
+) {
+  const relic =
+    getRelicById(
+      relicId
+    );
+
+  if (!relic) {
+    return false;
+  }
+
+  const state =
+    getState();
+
+  const discovered =
+    new Set(
+      state.discoveredRelics
+      || []
+    );
+
+  if (
+    discovered.has(
+      relicId
+    )
+  ) {
+    return false;
+  }
+
+  discovered.add(
+    relicId
+  );
+
+  state.discoveredRelics =
+    Array.from(discovered);
+
+  state.relicDiscoveryDates[
+    relicId
+  ] =
+    new Date()
+      .toISOString();
+
+  saveState(state);
+
+  renderRelicCollection(
+    state
+  );
+
+  if (reveal) {
+    queueRelicReveals(
+      [relicId]
+    );
+  }
+
+  return true;
+}
+
+
+function renderRelicCollection(state) {
+  const grid =
+    $("#relicGrid");
+
+  const count =
+    $("#relicCollectionCount");
+
+  if (
+    !grid
+    || !count
+  ) {
+    return;
+  }
+
+  const discovered =
+    new Set(
+      state.discoveredRelics
+      || []
+    );
+
+  count.textContent =
+    `${discovered.size} / ${RELICS.length} discovered`;
+
+  const visibleRelics =
+    RELICS.filter(
+      relic =>
+        activeRelicFilter === "all"
+        || relic.rarity
+          === activeRelicFilter
+    );
+
+  grid.innerHTML =
+    visibleRelics
+      .map(
+        relic => {
+          const unlocked =
+            discovered.has(
+              relic.id
+            );
+
+          const rarityBadge =
+            RELIC_RARITY_BADGES[
+              relic.rarity
+            ];
+
+          const sourceBadge =
+            RELIC_SOURCE_BADGES[
+              relic.source
+            ];
+
+          return `
+            <button
+              class="relic-card ${
+                unlocked
+                  ? "is-discovered"
+                  : "is-locked"
+              }"
+              type="button"
+              data-relic-id="${
+                escapeHtml(
+                  relic.id
+                )
+              }"
+              aria-label="${
+                unlocked
+                  ? escapeHtml(
+                      relic.name
+                    )
+                  : "Undiscovered relic"
+              }"
+              ${
+                unlocked
+                  ? ""
+                  : "disabled"
+              }
+            >
+              <span class="relic-art-shell">
+
+                <img
+                  class="relic-card-image"
+                  src="${
+                    escapeHtml(
+                      relic.image
+                    )
+                  }"
+                  alt="${
+                    unlocked
+                      ? escapeHtml(
+                          relic.name
+                        )
+                      : ""
+                  }"
+                  loading="lazy"
+                  onload="applyRelicImageSizing(this)"
+                  onerror="handleRelicAssetError(this)"
+                >
+
+                ${
+                  unlocked
+                    ? `
+                      <span
+                        class="relic-card-badges"
+                        aria-hidden="true"
+                      >
+                        <img
+                          src="${rarityBadge}"
+                          alt=""
+                          onerror="handleRelicAssetError(this)"
+                        >
+
+                        <img
+                          src="${sourceBadge}"
+                          alt=""
+                          onerror="handleRelicAssetError(this)"
+                        >
+                      </span>
+                    `
+                    : `
+                      <span
+                        class="relic-lock-overlay"
+                        aria-hidden="true"
+                      >
+                        <strong>?</strong>
+                        <span>Undiscovered</span>
+                      </span>
+                    `
+                }
+
+              </span>
+            </button>
+          `;
+        }
+      )
+      .join("");
+}
