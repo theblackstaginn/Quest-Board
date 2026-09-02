@@ -6290,3 +6290,942 @@ async function usePartyTreasure(
 // =========================================================
 // 72. PARTY CHALLENGE
 // =========================================================
+function renderPartyChallenge(
+  activity,
+  memberCount,
+  bonusProgress = 0
+) {
+  const currentWeek =
+    getWeekKey();
+
+  const settings =
+    getSettings();
+
+  const personalGoal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  const safeMemberCount =
+    Math.max(
+      1,
+      memberCount
+    );
+
+  const partyGoal =
+    personalGoal
+    * safeMemberCount;
+
+  const weeklyActivity =
+    activity.filter(
+      item =>
+        item.week_key
+          === currentWeek
+        && item.quest_id
+          !== "boss"
+    );
+
+  const completed =
+    weeklyActivity.length
+    + bonusProgress;
+
+  const percent =
+    Math.min(
+      100,
+      (
+        completed
+        / partyGoal
+      ) * 100
+    );
+
+  $("#partyChallengeTitle")
+    .textContent =
+      `Complete ${partyGoal} Quests`;
+
+  $("#partyChallengeProgress")
+    .textContent =
+      `${completed} / ${partyGoal}`;
+
+  $("#partyChallengeBar")
+    .style.width =
+      `${percent}%`;
+
+  if (
+    completed >= partyGoal
+  ) {
+    $("#partyChallengeStatus")
+      .textContent =
+        "Challenge conquered.";
+
+    unlockRelicById(
+      "fellowship-pin",
+      {
+        reveal:
+          appInitialized
+      }
+    );
+  }
+
+  else if (
+    completed > 0
+  ) {
+    $("#partyChallengeStatus")
+      .textContent =
+        bonusProgress > 0
+          ? `The fellowship advances. ${bonusProgress} bonus progress applied.`
+          : "The fellowship advances.";
+  }
+
+  else {
+    $("#partyChallengeStatus")
+      .textContent =
+        "The campaign awaits.";
+  }
+}
+
+
+// =========================================================
+// 73. PARTY ACTIVITY
+// =========================================================
+
+function renderPartyActivity(activity) {
+  const recent =
+    activity.slice(
+      0,
+      12
+    );
+
+  if (
+    recent.length === 0
+  ) {
+    $("#partyActivityList")
+      .innerHTML =
+        `
+          <p class="muted">
+            No party activity yet.
+          </p>
+        `;
+
+    return;
+  }
+
+  $("#partyActivityList")
+    .innerHTML =
+      recent
+        .map(
+          item => {
+            const date =
+              new Date(
+                item.completed_at
+              );
+
+            const dateText =
+              date.toLocaleDateString(
+                undefined,
+                {
+                  month:
+                    "short",
+
+                  day:
+                    "numeric"
+                }
+              );
+
+            const boss =
+              item.quest_id
+              === "boss";
+
+            return `
+              <article class="party-activity-item">
+
+                <strong>
+                  ${
+                    escapeHtml(
+                      item.display_name
+                    )
+                  }
+                  ${
+                    boss
+                      ? "defeated"
+                      : "completed"
+                  }
+                  ${
+                    escapeHtml(
+                      item.quest_title
+                    )
+                  }
+                </strong>
+
+                <span>
+                  ${dateText}
+                  | +${item.xp} XP
+                  | +${item.gold} Gold
+                </span>
+
+              </article>
+            `;
+          }
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 74. PARTY STATUS
+// =========================================================
+
+function setPartySyncStatus(
+  text,
+  state = ""
+) {
+  const element =
+    $("#partySyncStatus");
+
+  if (!element) {
+    return;
+  }
+
+  element.textContent =
+    text;
+
+  element.dataset.state =
+    state;
+}
+
+
+// =========================================================
+// 75. PARTY REFRESH LOOP
+// =========================================================
+
+function startPartyRefreshLoop() {
+  clearInterval(
+    partyRefreshTimer
+  );
+
+  partyRefreshTimer =
+    setInterval(
+      async () => {
+        /*
+          Gifts can arrive while the user
+          is viewing any screen.
+        */
+
+        await checkIncomingGifts();
+
+        if (
+          activeView === "party"
+        ) {
+          await refreshParty();
+        }
+      },
+      PARTY_REFRESH_INTERVAL
+    );
+}
+
+
+// =========================================================
+// 76. TOAST
+// =========================================================
+
+function showToast(message) {
+  const toast =
+    $("#toast");
+
+  if (!toast) {
+    return;
+  }
+
+  toast.textContent =
+    message;
+
+  toast.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toastTimeout
+  );
+
+  toastTimeout =
+    setTimeout(
+      () => {
+        toast.classList.remove(
+          "show"
+        );
+      },
+      2400
+    );
+}
+
+
+// =========================================================
+// 77. UTILITIES
+// =========================================================
+
+function capitalize(text) {
+  if (!text) {
+    return "";
+  }
+
+  return (
+    text
+      .charAt(0)
+      .toUpperCase()
+    + text.slice(1)
+  );
+}
+
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+}
+
+
+// =========================================================
+// 78. MAIN EVENTS
+// =========================================================
+
+$("#closeQuestButton")
+  ?.addEventListener(
+    "click",
+    closeQuest
+  );
+
+$("#completeQuestButton")
+  ?.addEventListener(
+    "click",
+    completeQuest
+  );
+
+$("#timerToggleButton")
+  ?.addEventListener(
+    "click",
+    toggleTimer
+  );
+
+$("#timerResetButton")
+  ?.addEventListener(
+    "click",
+    resetTimer
+  );
+
+$("#showHistoryButton")
+  ?.addEventListener(
+    "click",
+    openHistory
+  );
+
+$("#closeHistoryButton")
+  ?.addEventListener(
+    "click",
+    closeHistory
+  );
+
+$("#weekContinueButton")
+  ?.addEventListener(
+    "click",
+    closeWeekConquered
+  );
+
+$("#claimBossRewardsButton")
+  ?.addEventListener(
+    "click",
+    claimBossRewards
+  );
+
+$$(".nav-item")
+  .forEach(
+    button => {
+      button.addEventListener(
+        "click",
+        () =>
+          setView(
+            button.dataset.view
+          )
+      );
+    }
+  );
+
+
+// =========================================================
+// 79. SETTINGS EVENTS
+// =========================================================
+
+$("#savePlayerNameButton")
+  ?.addEventListener(
+    "click",
+    savePlayerName
+  );
+
+$("#weeklyGoalSelect")
+  ?.addEventListener(
+    "change",
+    saveWeeklyGoal
+  );
+
+$("#reducedMotionToggle")
+  ?.addEventListener(
+    "change",
+    saveReducedMotion
+  );
+
+$("#soundToggle")
+  ?.addEventListener(
+    "change",
+    saveSoundSetting
+  );
+
+$("#resetWeekButton")
+  ?.addEventListener(
+    "click",
+    resetThisWeek
+  );
+
+$("#clearHistoryButton")
+  ?.addEventListener(
+    "click",
+    clearQuestHistory
+  );
+
+$("#resetCharacterButton")
+  ?.addEventListener(
+    "click",
+    resetCharacter
+  );
+
+
+// =========================================================
+// 80. PARTY EVENTS
+// =========================================================
+
+$("#createPartyButton")
+  ?.addEventListener(
+    "click",
+    createParty
+  );
+
+$("#showJoinPartyButton")
+  ?.addEventListener(
+    "click",
+    toggleJoinPartyForm
+  );
+
+$("#joinPartyButton")
+  ?.addEventListener(
+    "click",
+    joinParty
+  );
+
+$("#partyCodeInput")
+  ?.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key === "Enter"
+      ) {
+        joinParty();
+      }
+    }
+  );
+
+$("#leavePartyButton")
+  ?.addEventListener(
+    "click",
+    leaveParty
+  );
+
+$("#refreshPartyButton")
+  ?.addEventListener(
+    "click",
+    refreshParty
+  );
+
+$("#partyMembers")
+  ?.addEventListener(
+    "click",
+    event => {
+      const button =
+        event.target.closest(
+          "[data-gift-user-id]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      openGiftDialog(
+        button.dataset
+          .giftUserId,
+        button.dataset
+          .giftName
+      );
+    }
+  );
+
+$("#closeGiftButton")
+  ?.addEventListener(
+    "click",
+    closeGiftDialog
+  );
+
+$("#sendGiftButton")
+  ?.addEventListener(
+    "click",
+    sendPartyGift
+  );
+
+$("#giftCurrencySelect")
+  ?.addEventListener(
+    "change",
+    updateGiftAvailableText
+  );
+
+$("#giftAmountInput")
+  ?.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key === "Enter"
+      ) {
+        sendPartyGift();
+      }
+    }
+  );
+
+
+// =========================================================
+// 81. PARTY TREASURE EVENTS
+// =========================================================
+
+$("#partyTreasureGrid")
+  ?.addEventListener(
+    "click",
+    event => {
+      const button =
+        event.target.closest(
+          "[data-use-treasure]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      usePartyTreasure(
+        button.dataset
+          .useTreasure
+      );
+    }
+  );
+
+$("#closeTreasureButton")
+  ?.addEventListener(
+    "click",
+    () => {
+      const dialog =
+        $("#treasureDialog");
+
+      if (dialog?.open) {
+        dialog.close();
+      }
+
+      showNextRelicReveal();
+    }
+  );
+
+$("#treasureDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+      const dialog =
+        $("#treasureDialog");
+
+      if (
+        event.target === dialog
+      ) {
+        dialog.close();
+        showNextRelicReveal();
+      }
+    }
+  );
+
+$("#treasureDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+
+      const dialog =
+        $("#treasureDialog");
+
+      if (dialog?.open) {
+        dialog.close();
+      }
+
+      showNextRelicReveal();
+    }
+  );
+
+
+// =========================================================
+// 82. RELIC COLLECTION EVENTS
+// =========================================================
+
+$("#relicFilters")
+  ?.addEventListener(
+    "click",
+    event => {
+      const button =
+        event.target.closest(
+          "[data-relic-filter]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      setRelicFilter(
+        button.dataset
+          .relicFilter
+      );
+    }
+  );
+
+$("#relicGrid")
+  ?.addEventListener(
+    "click",
+    event => {
+      const card =
+        event.target.closest(
+          "[data-relic-id]"
+        );
+
+      if (
+        !card
+        || card.disabled
+      ) {
+        return;
+      }
+
+      openRelicDialog(
+        card.dataset
+          .relicId
+      );
+    }
+  );
+
+$("#closeRelicButton")
+  ?.addEventListener(
+    "click",
+    closeRelicDialog
+  );
+
+$("#relicContinueButton")
+  ?.addEventListener(
+    "click",
+    closeRelicDialog
+  );
+
+$("#relicDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+      if (
+        event.target
+        === $("#relicDialog")
+      ) {
+        closeRelicDialog();
+      }
+    }
+  );
+
+$("#relicDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+      closeRelicDialog();
+    }
+  );
+
+
+// =========================================================
+// 83. DIALOG OUTSIDE CLICK
+// =========================================================
+
+$("#questDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+      if (
+        event.target
+        === $("#questDialog")
+      ) {
+        closeQuest();
+      }
+    }
+  );
+
+$("#historyDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+      if (
+        event.target
+        === $("#historyDialog")
+      ) {
+        closeHistory();
+      }
+    }
+  );
+
+$("#giftDialog")
+  ?.addEventListener(
+    "click",
+    event => {
+      if (
+        event.target
+        === $("#giftDialog")
+      ) {
+        closeGiftDialog();
+      }
+    }
+  );
+
+$("#giftDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+      closeGiftDialog();
+    }
+  );
+
+
+// =========================================================
+// 84. LOCK VICTORY DIALOGS
+// =========================================================
+
+$("#weekConqueredDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+    }
+  );
+
+$("#bossDefeatedDialog")
+  ?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+    }
+  );
+
+
+// =========================================================
+// 85. ESCAPE KEY
+// =========================================================
+
+document.addEventListener(
+  "keydown",
+  event => {
+    if (
+      event.key !== "Escape"
+    ) {
+      return;
+    }
+
+    if (
+      $("#weekConqueredDialog")
+        ?.open
+      || $("#bossDefeatedDialog")
+        ?.open
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    if (
+      $("#treasureDialog")
+        ?.open
+    ) {
+      $("#treasureDialog")
+        .close();
+
+      showNextRelicReveal();
+      return;
+    }
+
+    if (
+      $("#relicDialog")
+        ?.open
+    ) {
+      closeRelicDialog();
+      return;
+    }
+
+    if (
+      $("#questDialog")
+        ?.open
+    ) {
+      closeQuest();
+      return;
+    }
+
+    if (
+      $("#giftDialog")
+        ?.open
+    ) {
+      closeGiftDialog();
+      return;
+    }
+
+    if (
+      $("#historyDialog")
+        ?.open
+    ) {
+      closeHistory();
+    }
+  }
+);
+
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState
+        === "visible"
+      && activeQuest
+      && $("#questDialog")
+        ?.open
+    ) {
+      restoreTimerForQuest(
+        activeQuest.id
+      );
+    }
+  }
+);
+
+
+// =========================================================
+// 86. RESTORE PENDING BOSS REWARD
+// =========================================================
+
+function restorePendingVictory() {
+  const state =
+    normalizeWeek();
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.bossDefeatedWeek
+      === weekKey
+    && state.bossRewardsClaimedWeek
+      !== weekKey
+  ) {
+    openBossDefeated();
+  }
+}
+
+
+// =========================================================
+// 87. INITIALIZE
+// =========================================================
+
+async function initializeApp() {
+  /*
+    Personal app first.
+
+    Nothing involving Supabase may prevent
+    existing local Quest Board data from rendering.
+  */
+
+  chooseProfile();
+
+  const initialState =
+    normalizeWeek();
+
+  discoverEligibleRelics(
+    initialState
+  );
+
+  try {
+    render();
+  }
+
+  catch (error) {
+    console.error(
+      "Local Quest Board render failed:",
+      error
+    );
+  }
+
+  try {
+    await setView(
+      activeView
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "View restoration failed:",
+      error
+    );
+  }
+
+  await initializeSupabase();
+
+  if (supabaseReady) {
+    await checkIncomingGifts();
+  }
+
+  renderSettings(
+    getSettings()
+  );
+
+  if (
+    activeView === "party"
+    && supabaseReady
+  ) {
+    await refreshParty();
+  }
+
+  restorePendingVictory();
+
+  appInitialized =
+    true;
+}
+
+
+initializeApp()
+  .catch(
+    error => {
+      console.error(
+        "Quest Board initialization failed:",
+        error
+      );
+    }
+  );
