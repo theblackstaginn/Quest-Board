@@ -5079,3 +5079,1214 @@ async function fetchPartyActivity() {
 // =========================================================
 // 61. RENDER PARTY MEMBERS
 // =========================================================
+function renderPartyMembers(
+  members,
+  activity
+) {
+  if (
+    members.length === 0
+  ) {
+    $("#partyMembers")
+      .innerHTML =
+        `
+          <p class="muted">
+            No companions found.
+          </p>
+        `;
+
+    return;
+  }
+
+  const currentWeek =
+    getWeekKey();
+
+  $("#partyMembers")
+    .innerHTML =
+      members
+        .map(
+          member => {
+            const weeklyQuestActivity =
+              activity.filter(
+                item =>
+                  item.user_id
+                    === member.user_id
+                  && item.week_key
+                    === currentWeek
+                  && item.quest_id
+                    !== "boss"
+              );
+
+            const weeklyGoldActivity =
+              activity.filter(
+                item =>
+                  item.user_id
+                    === member.user_id
+                  && item.week_key
+                    === currentWeek
+              );
+
+            const weeklyGold =
+              weeklyGoldActivity.reduce(
+                (
+                  total,
+                  item
+                ) =>
+                  total
+                  + (
+                    Number(
+                      item.gold
+                    )
+                    || 0
+                  ),
+                0
+              );
+
+            const character =
+              member.profile_id
+                ? getCharacterConfig(
+                    member.profile_id
+                  )
+                : null;
+
+            const cardImage =
+              character?.card
+              || "";
+
+            const isCurrentPlayer =
+              Boolean(
+                supabaseUser
+                && member.user_id
+                  === supabaseUser.id
+              );
+
+            return `
+              <article class="party-member-card">
+
+                ${
+                  cardImage
+                    ? `
+                      <img
+                        class="party-member-portrait"
+                        src="${cardImage}"
+                        alt="${
+                          escapeHtml(
+                            member.display_name
+                          )
+                        }"
+                      >
+                    `
+                    : `
+                      <div class="party-member-avatar">
+                        ${
+                          escapeHtml(
+                            member.display_name
+                              .charAt(0)
+                              .toUpperCase()
+                          )
+                        }
+                      </div>
+                    `
+                }
+
+                <div class="party-member-info">
+
+                  <strong>
+                    ${
+                      escapeHtml(
+                        member.display_name
+                      )
+                    }
+                  </strong>
+
+                  <span>
+                    ${
+                      escapeHtml(
+                        member.class_name
+                      )
+                    }
+                  </span>
+
+                  <small>
+                    ${weeklyQuestActivity.length}
+                    quest${
+                      weeklyQuestActivity.length
+                        === 1
+                        ? ""
+                        : "s"
+                    }
+                    this week
+                  </small>
+
+                </div>
+
+                <div class="party-member-score">
+
+                  <strong>
+                    ${weeklyGold}g
+                  </strong>
+
+                  <span>
+                    earned
+                  </span>
+
+                  ${
+                    isCurrentPlayer
+                      ? `
+                        <small class="party-self-label">
+                          You
+                        </small>
+                      `
+                      : `
+                        <button
+                          class="party-gift-button"
+                          type="button"
+                          data-gift-user-id="${
+                            escapeHtml(
+                              member.user_id
+                            )
+                          }"
+                          data-gift-name="${
+                            escapeHtml(
+                              member.display_name
+                            )
+                          }"
+                        >
+                          Gift
+                        </button>
+                      `
+                  }
+
+                </div>
+
+              </article>
+            `;
+          }
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 62. PARTY GIFTING
+// =========================================================
+
+function openGiftDialog(
+  userId,
+  displayName
+) {
+  if (
+    !currentParty
+    || !supabaseUser
+    || userId
+      === supabaseUser.id
+  ) {
+    return;
+  }
+
+  giftRecipient = {
+    userId,
+
+    displayName:
+      displayName
+      || "Adventurer"
+  };
+
+  const state =
+    getState();
+
+  $("#giftRecipientName")
+    .textContent =
+      giftRecipient.displayName;
+
+  $("#giftGoldBalance")
+    .textContent =
+      state.gold;
+
+  $("#giftCrystalBalance")
+    .textContent =
+      state.crystals;
+
+  $("#giftCurrencySelect")
+    .value =
+      "gold";
+
+  $("#giftAmountInput")
+    .value =
+      "";
+
+  $("#giftError")
+    .textContent =
+      "";
+
+  updateGiftAvailableText();
+
+  const dialog =
+    $("#giftDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+
+    setTimeout(
+      () => {
+        $("#giftAmountInput")
+          ?.focus();
+      },
+      100
+    );
+  }
+}
+
+
+function closeGiftDialog() {
+  const dialog =
+    $("#giftDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+
+  giftRecipient =
+    null;
+
+  giftSending =
+    false;
+
+  if (
+    $("#sendGiftButton")
+  ) {
+    $("#sendGiftButton")
+      .disabled =
+        false;
+  }
+
+  if (
+    $("#giftAmountInput")
+  ) {
+    $("#giftAmountInput")
+      .value =
+        "";
+  }
+
+  if (
+    $("#giftError")
+  ) {
+    $("#giftError")
+      .textContent =
+        "";
+  }
+}
+
+
+function updateGiftAvailableText() {
+  const state =
+    getState();
+
+  const currency =
+    $("#giftCurrencySelect")
+      ?.value
+    || "gold";
+
+  const balance =
+    currency === "crystals"
+      ? state.crystals
+      : state.gold;
+
+  const label =
+    currency === "crystals"
+      ? "Crystals"
+      : "Gold";
+
+  $("#giftAvailableText")
+    .textContent =
+      `Available: ${balance} ${label}`;
+}
+
+
+// =========================================================
+// 63. SEND PARTY GIFT
+// =========================================================
+
+async function sendPartyGift() {
+  if (giftSending) {
+    return;
+  }
+
+  if (
+    !supabaseReady
+    || !supabaseUser
+    || !currentParty
+    || !giftRecipient
+  ) {
+    $("#giftError")
+      .textContent =
+        "The fellowship connection is unavailable.";
+
+    return;
+  }
+
+  const currency =
+    $("#giftCurrencySelect")
+      .value;
+
+  const rawAmount =
+    Number(
+      $("#giftAmountInput")
+        .value
+    );
+
+  const amount =
+    Math.floor(
+      rawAmount
+    );
+
+  if (
+    !Number.isFinite(amount)
+    || amount < 1
+  ) {
+    $("#giftError")
+      .textContent =
+        "Enter a valid gift amount.";
+
+    return;
+  }
+
+  if (
+    ![
+      "gold",
+      "crystals"
+    ].includes(currency)
+  ) {
+    $("#giftError")
+      .textContent =
+        "Choose Gold or Crystals.";
+
+    return;
+  }
+
+  const state =
+    getState();
+
+  const balance =
+    Number(
+      state[currency]
+    )
+    || 0;
+
+  if (
+    amount > balance
+  ) {
+    $("#giftError")
+      .textContent =
+        `You only have ${balance} ${
+          capitalize(
+            currency
+          )
+        }.`;
+
+    return;
+  }
+
+  const settings =
+    getSettings();
+
+  const character =
+    getCharacterConfig();
+
+  giftSending =
+    true;
+
+  $("#sendGiftButton")
+    .disabled =
+      true;
+
+  $("#giftError")
+    .textContent =
+      "";
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .insert({
+          party_id:
+            currentParty.id,
+
+          sender_user_id:
+            supabaseUser.id,
+
+          recipient_user_id:
+            giftRecipient.userId,
+
+          sender_profile_id:
+            activeProfileId,
+
+          sender_display_name:
+            settings.playerName
+            || character.defaultName,
+
+          currency,
+
+          amount
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    /*
+      Personal balances are local, so deduct only
+      after Supabase accepts the transfer.
+    */
+
+    state[currency] =
+      balance - amount;
+
+    saveState(
+      state
+    );
+
+    const recipientName =
+      giftRecipient.displayName;
+
+    closeGiftDialog();
+    render();
+
+    showToast(
+      `Gift Sent | ${recipientName} received ${amount} ${capitalize(currency)}`
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Gift could not be sent:",
+      error
+    );
+
+    giftSending =
+      false;
+
+    $("#sendGiftButton")
+      .disabled =
+        false;
+
+    $("#giftError")
+      .textContent =
+        "The gift could not be sent.";
+  }
+}
+
+
+// =========================================================
+// 64. RECEIVE PARTY GIFTS
+// =========================================================
+
+async function checkIncomingGifts() {
+  if (
+    checkingIncomingGifts
+    || !supabaseReady
+    || !supabaseUser
+  ) {
+    return;
+  }
+
+  checkingIncomingGifts =
+    true;
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .select(
+          "id, sender_display_name, currency, amount, created_at"
+        )
+        .eq(
+          "recipient_user_id",
+          supabaseUser.id
+        )
+        .is(
+          "claimed_at",
+          null
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              true
+          }
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    const gifts =
+      data
+      || [];
+
+    if (
+      gifts.length === 0
+    ) {
+      return;
+    }
+
+    const state =
+      getState();
+
+    const claimedIds =
+      new Set(
+        state.claimedGiftIds
+        || []
+      );
+
+    const newlyReceived =
+      [];
+
+    for (
+      const gift
+      of gifts
+    ) {
+      if (
+        claimedIds.has(
+          gift.id
+        )
+      ) {
+        continue;
+      }
+
+      const amount =
+        Math.floor(
+          Number(
+            gift.amount
+          )
+        );
+
+      const currency =
+        gift.currency;
+
+      if (
+        amount < 1
+        || ![
+          "gold",
+          "crystals"
+        ].includes(currency)
+      ) {
+        continue;
+      }
+
+      state[currency] =
+        (
+          Number(
+            state[currency]
+          )
+          || 0
+        )
+        + amount;
+
+      claimedIds.add(
+        gift.id
+      );
+
+      newlyReceived.push(
+        gift
+      );
+    }
+
+    state.claimedGiftIds =
+      Array.from(
+        claimedIds
+      )
+        .slice(-500);
+
+    if (
+      newlyReceived.length > 0
+    ) {
+      saveState(
+        state
+      );
+    }
+
+    const giftIds =
+      gifts.map(
+        gift =>
+          gift.id
+      );
+
+    const {
+      error: claimError
+    } =
+      await supabaseClient
+        .from(
+          "gift_transfers"
+        )
+        .update({
+          claimed_at:
+            new Date()
+              .toISOString()
+        })
+        .in(
+          "id",
+          giftIds
+        )
+        .eq(
+          "recipient_user_id",
+          supabaseUser.id
+        )
+        .is(
+          "claimed_at",
+          null
+        );
+
+    if (claimError) {
+      console.error(
+        "Gift receipt could not be acknowledged:",
+        claimError
+      );
+    }
+
+    if (
+      newlyReceived.length > 0
+    ) {
+      render();
+
+      showGiftReceivedNotification(
+        newlyReceived
+      );
+    }
+  }
+
+  catch (error) {
+    console.error(
+      "Could not check incoming gifts:",
+      error
+    );
+  }
+
+  finally {
+    checkingIncomingGifts =
+      false;
+  }
+}
+
+
+// =========================================================
+// 65. GIFT RECEIVED NOTIFICATION
+// =========================================================
+
+function showGiftReceivedNotification(
+  gifts
+) {
+  if (
+    gifts.length === 1
+  ) {
+    const gift =
+      gifts[0];
+
+    const currencyName =
+      gift.currency
+        === "crystals"
+        ? "Crystals"
+        : "Gold";
+
+    showToast(
+      `Gift Received | ${gift.sender_display_name} sent you ${gift.amount} ${currencyName}!`
+    );
+
+    return;
+  }
+
+  const gold =
+    gifts
+      .filter(
+        gift =>
+          gift.currency
+          === "gold"
+      )
+      .reduce(
+        (
+          total,
+          gift
+        ) =>
+          total
+          + Number(
+            gift.amount
+          ),
+        0
+      );
+
+  const crystals =
+    gifts
+      .filter(
+        gift =>
+          gift.currency
+          === "crystals"
+      )
+      .reduce(
+        (
+          total,
+          gift
+        ) =>
+          total
+          + Number(
+            gift.amount
+          ),
+        0
+      );
+
+  const parts =
+    [];
+
+  if (
+    gold > 0
+  ) {
+    parts.push(
+      `${gold} Gold`
+    );
+  }
+
+  if (
+    crystals > 0
+  ) {
+    parts.push(
+      `${crystals} Crystals`
+    );
+  }
+
+  showToast(
+    `Gifts Received | ${
+      parts.join(
+        " | "
+      )
+    }`
+  );
+}
+
+
+// =========================================================
+// 66. PARTY TREASURE INVENTORY
+// =========================================================
+
+async function fetchPartyTreasureInventory() {
+  if (
+    !currentParty
+    || !supabaseUser
+  ) {
+    return [];
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        "party_treasure_inventory"
+      )
+      .select(
+        "item_id, quantity"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .eq(
+        "user_id",
+        supabaseUser.id
+      )
+      .gt(
+        "quantity",
+        0
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+
+// =========================================================
+// 67. PARTY BONUS PROGRESS
+// =========================================================
+
+async function fetchPartyBonusProgress() {
+  if (!currentParty) {
+    return 0;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        "party_weekly_bonuses"
+      )
+      .select(
+        "bonus_progress"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .eq(
+        "week_key",
+        getWeekKey()
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return (
+    Number(
+      data?.bonus_progress
+    )
+    || 0
+  );
+}
+
+
+// =========================================================
+// 68. RENDER PARTY TREASURE
+// =========================================================
+
+function renderPartyTreasure(
+  inventory
+) {
+  const grid =
+    $("#partyTreasureGrid");
+
+  const totalElement =
+    $("#partyTreasureTotal");
+
+  if (
+    !grid
+    || !totalElement
+  ) {
+    return;
+  }
+
+  const total =
+    inventory.reduce(
+      (
+        sum,
+        row
+      ) =>
+        sum
+        + (
+          Number(
+            row.quantity
+          )
+          || 0
+        ),
+      0
+    );
+
+  totalElement.textContent =
+    `${total} item${
+      total === 1
+        ? ""
+        : "s"
+    }`;
+
+  if (
+    inventory.length === 0
+  ) {
+    grid.innerHTML =
+      `
+        <p class="muted">
+          No consumable treasure yet.
+          Defeat a weekly Boss while in a fellowship
+          for a chance to discover some.
+        </p>
+      `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    inventory
+      .map(
+        row => {
+          const item =
+            PARTY_TREASURES[
+              row.item_id
+            ];
+
+          if (!item) {
+            return "";
+          }
+
+          const quantity =
+            Number(
+              row.quantity
+            )
+            || 0;
+
+          return `
+            <article class="party-treasure-card">
+
+              <div class="party-treasure-glyph">
+                ${
+                  escapeHtml(
+                    item.glyph
+                  )
+                }
+              </div>
+
+              <div class="party-treasure-info">
+
+                <strong>
+                  ${
+                    escapeHtml(
+                      item.name
+                    )
+                  }
+                  ×${quantity}
+                </strong>
+
+                <span>
+                  ${
+                    escapeHtml(
+                      item.description
+                    )
+                  }
+                </span>
+
+                <small>
+                  ${
+                    escapeHtml(
+                      item.rarity
+                    )
+                  }
+                </small>
+
+              </div>
+
+              <button
+                class="party-treasure-use"
+                type="button"
+                data-use-treasure="${
+                  escapeHtml(
+                    row.item_id
+                  )
+                }"
+              >
+                Use
+              </button>
+
+            </article>
+          `;
+        }
+      )
+      .join("");
+}
+
+
+// =========================================================
+// 69. TREASURE REVEAL
+// =========================================================
+
+function showTreasureReveal(itemId) {
+  const item =
+    PARTY_TREASURES[
+      itemId
+    ];
+
+  if (!item) {
+    return;
+  }
+
+  $("#treasureDialogGlyph")
+    .textContent =
+      item.glyph;
+
+  $("#treasureDialogTitle")
+    .textContent =
+      item.name;
+
+  $("#treasureDialogRarity")
+    .textContent =
+      item.rarity;
+
+  $("#treasureDialogDescription")
+    .textContent =
+      item.description;
+
+  const dialog =
+    $("#treasureDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+// =========================================================
+// 70. AWARD WEEKLY BOSS TREASURE
+// =========================================================
+
+async function ensureWeeklyBossTreasureDrop(
+  reveal = false
+) {
+  if (
+    !currentParty
+    || !supabaseUser
+  ) {
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "award_party_boss_treasure",
+      {
+        supplied_party_id:
+          currentParty.id,
+
+        supplied_week_key:
+          getWeekKey()
+      }
+    );
+
+  if (error) {
+    console.error(
+      "Party treasure award failed:",
+      error
+    );
+
+    return null;
+  }
+
+  const result =
+    Array.isArray(data)
+      ? data[0]
+      : data;
+
+  if (
+    result?.newly_awarded
+    && reveal
+  ) {
+    showTreasureReveal(
+      result.item_id
+    );
+  }
+
+  return result;
+}
+
+
+// =========================================================
+// 71. USE PARTY TREASURE
+// =========================================================
+
+async function usePartyTreasure(
+  itemId
+) {
+  if (
+    partyTreasureUsing
+    || !PARTY_TREASURES[
+      itemId
+    ]
+    || !currentParty
+  ) {
+    return;
+  }
+
+  partyTreasureUsing =
+    true;
+
+  const treasureButtons =
+    $$("[data-use-treasure]");
+
+  treasureButtons.forEach(
+    button => {
+      button.disabled =
+        true;
+    }
+  );
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "use_party_treasure",
+        {
+          supplied_party_id:
+            currentParty.id,
+
+          supplied_item_id:
+            itemId,
+
+          supplied_week_key:
+            getWeekKey()
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    /*
+      Gold and Crystal treasure arrives through
+      the existing cross-device gift system.
+    */
+
+    await checkIncomingGifts();
+    await refreshParty();
+
+    showToast(
+      data?.message
+      || `${PARTY_TREASURES[itemId].name} used.`
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Treasure could not be used:",
+      error
+    );
+
+    showToast(
+      "That treasure could not be used."
+    );
+  }
+
+  finally {
+    partyTreasureUsing =
+      false;
+
+    treasureButtons.forEach(
+      button => {
+        button.disabled =
+          false;
+      }
+    );
+  }
+}
+
+
+// =========================================================
+// 72. PARTY CHALLENGE
+// =========================================================
