@@ -2906,3 +2906,1188 @@ async function completeQuest() {
 // =========================================================
 // 33. WEEK CONQUERED
 // =========================================================
+function openWeekConquered() {
+  const dialog =
+    $("#weekConqueredDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+function closeWeekConquered() {
+  const dialog =
+    $("#weekConqueredDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+
+  render();
+
+  showToast(
+    `Week Conquered | +${WEEK_CONQUERED_GOLD} Gold | Boss Battle Unlocked`
+  );
+
+  showNextRelicReveal();
+}
+
+
+// =========================================================
+// 34. COMPLETE BOSS BATTLE
+// =========================================================
+
+async function completeBossBattle() {
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.weeklyCompleted.length
+    < goal
+  ) {
+    clearTimerForQuest(
+      "boss"
+    );
+
+    closeQuest();
+
+    activeQuest =
+      null;
+
+    showToast(
+      "Conquer the week before facing the Boss."
+    );
+
+    return;
+  }
+
+  if (
+    state.bossDefeatedWeek
+    === weekKey
+  ) {
+    clearTimerForQuest(
+      "boss"
+    );
+
+    closeQuest();
+
+    activeQuest =
+      null;
+
+    showToast(
+      "The Boss has already been defeated this week."
+    );
+
+    return;
+  }
+
+  state.bossDefeatedWeek =
+    weekKey;
+
+  saveState(state);
+
+  clearTimerForQuest(
+    "boss"
+  );
+
+  activeQuest =
+    null;
+
+  closeQuest();
+  render();
+  openBossDefeated();
+}
+
+
+// =========================================================
+// 35. BOSS DEFEATED
+// =========================================================
+
+function openBossDefeated() {
+  const dialog =
+    $("#bossDefeatedDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+// =========================================================
+// 36. CLAIM BOSS REWARDS
+// =========================================================
+
+async function claimBossRewards() {
+  const state =
+    normalizeWeek();
+
+  const weekKey =
+    getWeekKey();
+
+  if (
+    state.bossDefeatedWeek
+    !== weekKey
+  ) {
+    showToast(
+      "No Boss reward is waiting."
+    );
+
+    return;
+  }
+
+  if (
+    state.bossRewardsClaimedWeek
+    === weekKey
+  ) {
+    closeBossDefeated();
+
+    showToast(
+      "Boss rewards already claimed."
+    );
+
+    return;
+  }
+
+  const completedAt =
+    new Date()
+      .toISOString();
+
+  state.xp.strength +=
+    BOSS_STRENGTH_XP;
+
+  state.xp.endurance +=
+    BOSS_ENDURANCE_XP;
+
+  state.gold +=
+    BOSS_GOLD;
+
+  state.crystals +=
+    BOSS_CRYSTALS;
+
+  state.bossRewardsClaimedWeek =
+    weekKey;
+
+  state.history.unshift({
+    questId:
+      "boss",
+
+    title:
+      "Boss Battle",
+
+    category:
+      "Boss",
+
+    xp:
+      BOSS_STRENGTH_XP
+      + BOSS_ENDURANCE_XP,
+
+    xpType:
+      "mixed",
+
+    gold:
+      BOSS_GOLD,
+
+    crystals:
+      BOSS_CRYSTALS,
+
+    completedAt
+  });
+
+  saveState(state);
+
+  const newlyDiscoveredRelics =
+    discoverEligibleRelics(
+      state
+    );
+
+  let partySynced =
+    false;
+
+  let bossTreasureDrop =
+    null;
+
+  if (
+    supabaseReady
+    && supabaseUser
+    && currentParty
+  ) {
+    partySynced =
+      await syncBossActivityToParty(
+        completedAt
+      );
+
+    if (partySynced) {
+      bossTreasureDrop =
+        await ensureWeeklyBossTreasureDrop(
+          false
+        );
+    }
+  }
+
+  /*
+    Close the Boss modal before attempting
+    to display the treasure reveal. Opening
+    two modal dialogs at once is unreliable
+    on mobile Safari.
+  */
+
+  closeBossDefeated();
+  render();
+
+  if (currentParty) {
+    await renderParty();
+  }
+
+  if (
+    bossTreasureDrop
+      ?.newly_awarded
+  ) {
+    showTreasureReveal(
+      bossTreasureDrop.item_id
+    );
+  }
+
+  if (
+    supabaseReady
+    && currentParty
+    && !partySynced
+  ) {
+    showToast(
+      `Boss Rewards Claimed | +100 XP | +${BOSS_GOLD} Gold | +${BOSS_CRYSTALS} Crystals | Party sync failed`
+    );
+  }
+
+  else {
+    showToast(
+      `Boss Rewards Claimed | +100 XP | +${BOSS_GOLD} Gold | +${BOSS_CRYSTALS} Crystals`
+    );
+  }
+
+  queueRelicReveals(
+    newlyDiscoveredRelics
+  );
+}
+
+
+function closeBossDefeated() {
+  const dialog =
+    $("#bossDefeatedDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+
+// =========================================================
+// 37. SYNC NORMAL QUEST ACTIVITY
+// =========================================================
+
+async function syncQuestActivityToParty(
+  quest,
+  completedAt
+) {
+  try {
+    const settings =
+      getSettings();
+
+    const character =
+      getCharacterConfig();
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("quest_activity")
+        .insert({
+          party_id:
+            currentParty.id,
+
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          quest_id:
+            quest.id,
+
+          quest_title:
+            quest.title,
+
+          xp:
+            quest.xp,
+
+          gold:
+            quest.gold,
+
+          week_key:
+            getWeekKey(),
+
+          completed_at:
+            completedAt
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
+  }
+
+  catch (error) {
+    console.error(
+      "Could not sync quest to party:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+// =========================================================
+// 38. SYNC BOSS ACTIVITY
+// =========================================================
+
+async function syncBossActivityToParty(
+  completedAt
+) {
+  try {
+    const settings =
+      getSettings();
+
+    const character =
+      getCharacterConfig();
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("quest_activity")
+        .insert({
+          party_id:
+            currentParty.id,
+
+          user_id:
+            supabaseUser.id,
+
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          quest_id:
+            "boss",
+
+          quest_title:
+            "Boss Battle",
+
+          xp:
+            BOSS_STRENGTH_XP
+            + BOSS_ENDURANCE_XP,
+
+          gold:
+            BOSS_GOLD,
+
+          week_key:
+            getWeekKey(),
+
+          completed_at:
+            completedAt
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
+  }
+
+  catch (error) {
+    console.error(
+      "Could not sync Boss victory to party:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+// =========================================================
+// 39. CLOSE QUEST
+// =========================================================
+
+function closeQuest() {
+  /*
+    Stop only the visible refresh loop.
+    The persisted timestamp keeps running.
+  */
+
+  stopTimerUiInterval();
+
+  const dialog =
+    $("#questDialog");
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+
+// =========================================================
+// 40. TIMER
+// =========================================================
+
+function getTimerStorageKey() {
+  return (
+    "questBoardTimerState-"
+    + activeProfileId
+  );
+}
+
+
+function timerNumberOrNull(value) {
+  if (
+    value === null
+    || value === undefined
+    || value === ""
+  ) {
+    return null;
+  }
+
+  const number =
+    Number(value);
+
+  return Number.isFinite(number)
+    ? number
+    : null;
+}
+
+
+function createFreshTimerState(
+  questId
+) {
+  return {
+    questId,
+
+    startedAt:
+      null,
+
+    durationMs:
+      null,
+
+    pausedAt:
+      null,
+
+    accumulatedPauseMs:
+      0,
+
+    paused:
+      true
+  };
+}
+
+
+function getSavedTimerState() {
+  const raw =
+    localStorage.getItem(
+      getTimerStorageKey()
+    );
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed =
+      JSON.parse(raw);
+
+    if (
+      !parsed
+      || typeof parsed
+        !== "object"
+      || !parsed.questId
+    ) {
+      return null;
+    }
+
+    const startedAt =
+      timerNumberOrNull(
+        parsed.startedAt
+      );
+
+    if (
+      startedAt === null
+    ) {
+      return null;
+    }
+
+    return {
+      questId:
+        String(
+          parsed.questId
+        ),
+
+      startedAt,
+
+      durationMs:
+        timerNumberOrNull(
+          parsed.durationMs
+        ),
+
+      pausedAt:
+        timerNumberOrNull(
+          parsed.pausedAt
+        ),
+
+      accumulatedPauseMs:
+        Math.max(
+          0,
+          Number(
+            parsed.accumulatedPauseMs
+          )
+          || 0
+        ),
+
+      paused:
+        Boolean(
+          parsed.paused
+        )
+    };
+  }
+
+  catch (error) {
+    console.error(
+      "Could not read Quest Board timer state.",
+      error
+    );
+
+    return null;
+  }
+}
+
+
+function saveTimerState(
+  timerState
+) {
+  localStorage.setItem(
+    getTimerStorageKey(),
+    JSON.stringify(
+      timerState
+    )
+  );
+}
+
+
+function clearSavedTimerState() {
+  localStorage.removeItem(
+    getTimerStorageKey()
+  );
+}
+
+
+function getTimerElapsedMs(
+  timerState,
+  now = Date.now()
+) {
+  if (!timerState) {
+    return 0;
+  }
+
+  const startedAt =
+    timerNumberOrNull(
+      timerState.startedAt
+    );
+
+  if (
+    startedAt === null
+  ) {
+    return 0;
+  }
+
+  let endTime =
+    now;
+
+  if (timerState.paused) {
+    const pausedAt =
+      timerNumberOrNull(
+        timerState.pausedAt
+      );
+
+    if (
+      pausedAt !== null
+    ) {
+      endTime =
+        pausedAt;
+    }
+  }
+
+  return Math.max(
+    0,
+    endTime
+      - startedAt
+      - (
+        Number(
+          timerState
+            .accumulatedPauseMs
+        )
+        || 0
+      )
+  );
+}
+
+
+function stopTimerUiInterval() {
+  if (timerInterval) {
+    clearInterval(
+      timerInterval
+    );
+
+    timerInterval =
+      null;
+  }
+}
+
+
+function startTimerUiInterval() {
+  stopTimerUiInterval();
+
+  timerInterval =
+    setInterval(
+      syncTimerDisplayFromStorage,
+      250
+    );
+}
+
+
+function syncTimerDisplayFromStorage() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const timerState =
+    getSavedTimerState();
+
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+  ) {
+    return;
+  }
+
+  timerDisplayMs =
+    getTimerElapsedMs(
+      timerState
+    );
+
+  updateTimerDisplay();
+}
+
+
+function restoreTimerForQuest(
+  questId
+) {
+  stopTimerUiInterval();
+
+  const timerState =
+    getSavedTimerState();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (
+    !timerState
+    || timerState.questId
+      !== questId
+  ) {
+    timerDisplayMs =
+      0;
+
+    updateTimerDisplay();
+
+    if (timerButton) {
+      timerButton.textContent =
+        "Start";
+    }
+
+    return;
+  }
+
+  timerDisplayMs =
+    getTimerElapsedMs(
+      timerState
+    );
+
+  updateTimerDisplay();
+
+  if (timerButton) {
+    timerButton.textContent =
+      timerState.paused
+        ? "Start"
+        : "Pause";
+  }
+
+  if (
+    !timerState.paused
+  ) {
+    startTimerUiInterval();
+  }
+}
+
+
+function startTimer() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const now =
+    Date.now();
+
+  let timerState =
+    getSavedTimerState();
+
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+  ) {
+    timerState =
+      createFreshTimerState(
+        activeQuest.id
+      );
+
+    timerState.startedAt =
+      now;
+
+    timerState.paused =
+      false;
+  }
+
+  else if (
+    timerState.paused
+  ) {
+    const pausedAt =
+      timerNumberOrNull(
+        timerState.pausedAt
+      );
+
+    if (
+      pausedAt !== null
+    ) {
+      timerState
+        .accumulatedPauseMs +=
+          Math.max(
+            0,
+            now - pausedAt
+          );
+    }
+
+    timerState.pausedAt =
+      null;
+
+    timerState.paused =
+      false;
+  }
+
+  saveTimerState(
+    timerState
+  );
+
+  timerDisplayMs =
+    getTimerElapsedMs(
+      timerState,
+      now
+    );
+
+  updateTimerDisplay();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (timerButton) {
+    timerButton.textContent =
+      "Pause";
+  }
+
+  startTimerUiInterval();
+}
+
+
+function pauseTimer() {
+  if (!activeQuest) {
+    stopTimerUiInterval();
+    return;
+  }
+
+  const timerState =
+    getSavedTimerState();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (
+    !timerState
+    || timerState.questId
+      !== activeQuest.id
+    || timerState.paused
+  ) {
+    stopTimerUiInterval();
+
+    if (timerButton) {
+      timerButton.textContent =
+        "Start";
+    }
+
+    return;
+  }
+
+  timerState.pausedAt =
+    Date.now();
+
+  timerState.paused =
+    true;
+
+  saveTimerState(
+    timerState
+  );
+
+  timerDisplayMs =
+    getTimerElapsedMs(
+      timerState
+    );
+
+  stopTimerUiInterval();
+  updateTimerDisplay();
+
+  if (timerButton) {
+    timerButton.textContent =
+      "Start";
+  }
+}
+
+
+function resetTimer() {
+  stopTimerUiInterval();
+
+  if (activeQuest) {
+    const timerState =
+      getSavedTimerState();
+
+    if (
+      timerState
+      && timerState.questId
+        === activeQuest.id
+    ) {
+      clearSavedTimerState();
+    }
+  }
+
+  timerDisplayMs =
+    0;
+
+  updateTimerDisplay();
+
+  const timerButton =
+    $("#timerToggleButton");
+
+  if (timerButton) {
+    timerButton.textContent =
+      "Start";
+  }
+}
+
+
+function clearTimerForQuest(
+  questId
+) {
+  const timerState =
+    getSavedTimerState();
+
+  if (
+    timerState
+    && timerState.questId
+      === questId
+  ) {
+    clearSavedTimerState();
+  }
+
+  stopTimerUiInterval();
+
+  timerDisplayMs =
+    0;
+}
+
+
+function toggleTimer() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const timerState =
+    getSavedTimerState();
+
+  const isRunning =
+    Boolean(
+      timerState
+      && timerState.questId
+        === activeQuest.id
+      && !timerState.paused
+    );
+
+  if (isRunning) {
+    pauseTimer();
+  }
+
+  else {
+    startTimer();
+  }
+}
+
+
+function updateTimerDisplay() {
+  const display =
+    $("#timerDisplay");
+
+  if (!display) {
+    return;
+  }
+
+  const totalSeconds =
+    Math.floor(
+      Math.max(
+        0,
+        timerDisplayMs
+      )
+      / 1000
+    );
+
+  const hours =
+    Math.floor(
+      totalSeconds
+      / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (
+        totalSeconds
+        % 3600
+      )
+      / 60
+    );
+
+  const seconds =
+    totalSeconds
+    % 60;
+
+  if (
+    hours > 0
+  ) {
+    display.textContent =
+      String(hours)
+        .padStart(
+          2,
+          "0"
+        )
+      + ":"
+      + String(minutes)
+        .padStart(
+          2,
+          "0"
+        )
+      + ":"
+      + String(seconds)
+        .padStart(
+          2,
+          "0"
+        );
+  }
+
+  else {
+    display.textContent =
+      String(minutes)
+        .padStart(
+          2,
+          "0"
+        )
+      + ":"
+      + String(seconds)
+        .padStart(
+          2,
+          "0"
+        );
+  }
+}
+
+
+// =========================================================
+// 41. HISTORY
+// =========================================================
+
+function openHistory() {
+  const state =
+    normalizeWeek();
+
+  if (
+    state.history.length
+    === 0
+  ) {
+    $("#historyList")
+      .innerHTML =
+        `
+          <p class="muted">
+            No quests completed yet.
+            The chronicle awaits.
+          </p>
+        `;
+  }
+
+  else {
+    $("#historyList")
+      .innerHTML =
+        state.history
+          .map(
+            item => {
+              const date =
+                new Date(
+                  item.completedAt
+                );
+
+              const dateText =
+                date.toLocaleDateString(
+                  undefined,
+                  {
+                    month:
+                      "short",
+
+                    day:
+                      "numeric",
+
+                    year:
+                      "numeric"
+                  }
+                );
+
+              const gold =
+                Number(
+                  item.gold
+                )
+                || 0;
+
+              const crystals =
+                Number(
+                  item.crystals
+                )
+                || 0;
+
+              const xpTypeText =
+                item.xpType
+                  === "mixed"
+                  ? "Mixed"
+                  : capitalize(
+                      item.xpType
+                    );
+
+              return `
+                <article class="history-item">
+
+                  <strong>
+                    ${
+                      escapeHtml(
+                        item.title
+                      )
+                    }
+                  </strong>
+
+                  <span>
+
+                    ${dateText}
+
+                    | +${item.xp}
+                    ${xpTypeText} XP
+
+                    ${
+                      gold
+                        ? `
+                          |
+                          <img
+                            class="currency-icon-small"
+                            src="icons/gold-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${gold}
+                        `
+                        : ""
+                    }
+
+                    ${
+                      crystals
+                        ? `
+                          |
+                          <img
+                            class="currency-icon-small"
+                            src="icons/crystal-icon.webp"
+                            alt=""
+                            aria-hidden="true"
+                          >
+                          ${crystals}
+                        `
+                        : ""
+                    }
+
+                  </span>
+
+                </article>
+              `;
+            }
+          )
+          .join("");
+  }
+
+  $("#historyDialog")
+    .showModal();
+}
+
+
+function closeHistory() {
+  if (
+    $("#historyDialog")?.open
+  ) {
+    $("#historyDialog")
+      .close();
+  }
+}
+
+
+// =========================================================
+// 42. VIEW HEADERS
+// =========================================================
