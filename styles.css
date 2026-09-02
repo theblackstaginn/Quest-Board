@@ -3103,8 +3103,8 @@ body.reduce-motion *::after {
 body[data-active-view="party"] .world-overlay {
   background-image:
     linear-gradient(
-      rgba(8, 5, 2, 0.16),
-      rgba(4, 3, 2, 0.42)
+      rgba(24, 14, 6, 0.02),
+      rgba(12, 7, 3, 0.14)
     ),
     url("party-tavern-bg.webp");
 
@@ -3116,6 +3116,10 @@ body[data-active-view="party"] .world-overlay {
 
   background-repeat:
     no-repeat;
+
+  filter:
+    brightness(1.32)
+    saturate(1.08);
 }
 
 body[data-active-view="party"] .party-hero {
