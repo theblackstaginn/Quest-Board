@@ -4140,6 +4140,8 @@ async function setView(view) {
     "questBoardActiveView",
     activeView
   );
+  document.body.dataset.activeView =
+  activeView;
 
   $$(".app-view")
     .forEach(
