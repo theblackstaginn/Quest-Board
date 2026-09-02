@@ -1867,3 +1867,1042 @@ function renderRelicCollection(state) {
       )
       .join("");
 }
+function setRelicFilter(filter) {
+  const allowed = [
+    "all",
+    "common",
+    "uncommon",
+    "rare",
+    "epic",
+    "legendary",
+    "mythic"
+  ];
+
+  activeRelicFilter =
+    allowed.includes(filter)
+      ? filter
+      : "all";
+
+  $$(".relic-filter")
+    .forEach(
+      button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.relicFilter
+            === activeRelicFilter
+        );
+      }
+    );
+
+  renderRelicCollection(
+    getState()
+  );
+}
+
+
+function openRelicDialog(
+  relicId,
+  {
+    reveal = false
+  } = {}
+) {
+  const relic =
+    getRelicById(
+      relicId
+    );
+
+  const state =
+    getState();
+
+  if (
+    !relic
+    || !(
+      state.discoveredRelics
+      || []
+    ).includes(relicId)
+  ) {
+    return;
+  }
+
+  currentRelicRevealMode =
+    reveal;
+
+  $("#relicDialogEyebrow")
+    .textContent =
+      reveal
+        ? "Relic Discovered"
+        : "Relic";
+
+  $("#relicDialogTitle")
+    .textContent =
+      relic.name;
+
+  $("#relicDialogImage")
+    .src =
+      relic.image;
+
+  $("#relicDialogImage")
+    .alt =
+      `${relic.name}. ${relic.flavor}`;
+
+  $("#relicDialogImage")
+    .onload =
+      event =>
+        applyRelicImageSizing(
+          event.currentTarget
+        );
+
+  $("#relicDialogImage")
+    .onerror =
+      event =>
+        handleRelicAssetError(
+          event.currentTarget
+        );
+
+  $("#relicDialogRarityBadge")
+    .src =
+      RELIC_RARITY_BADGES[
+        relic.rarity
+      ];
+
+  $("#relicDialogRarityBadge")
+    .alt =
+      `${capitalize(relic.rarity)} rarity`;
+
+  $("#relicDialogRarityText")
+    .textContent =
+      capitalize(
+        relic.rarity
+      );
+
+  $("#relicDialogSourceBadge")
+    .src =
+      RELIC_SOURCE_BADGES[
+        relic.source
+      ];
+
+  $("#relicDialogSourceBadge")
+    .alt =
+      RELIC_SOURCE_LABELS[
+        relic.source
+      ];
+
+  $("#relicDialogSourceText")
+    .textContent =
+      RELIC_SOURCE_LABELS[
+        relic.source
+      ];
+
+  const discoveredAt =
+    state.relicDiscoveryDates?.[
+      relicId
+    ];
+
+  $("#relicDiscoveredDate")
+    .textContent =
+      discoveredAt
+        ? `Discovered ${
+            new Date(
+              discoveredAt
+            ).toLocaleDateString(
+              undefined,
+              {
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+              }
+            )
+          }`
+        : "Discovered relic";
+
+  $("#relicContinueButton")
+    .textContent =
+      reveal
+        ? "Claim Relic"
+        : "Close";
+
+  const dialog =
+    $("#relicDialog");
+
+  if (
+    dialog
+    && !dialog.open
+  ) {
+    dialog.showModal();
+  }
+}
+
+
+function closeRelicDialog() {
+  const dialog =
+    $("#relicDialog");
+
+  const wasReveal =
+    currentRelicRevealMode;
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+
+  currentRelicRevealMode =
+    false;
+
+  if (wasReveal) {
+    setTimeout(
+      showNextRelicReveal,
+      180
+    );
+  }
+}
+
+
+function queueRelicReveals(
+  relicIds,
+  {
+    defer = false
+  } = {}
+) {
+  for (
+    const relicId
+    of relicIds || []
+  ) {
+    if (
+      getRelicById(relicId)
+      && !relicRevealQueue.includes(
+        relicId
+      )
+    ) {
+      relicRevealQueue.push(
+        relicId
+      );
+    }
+  }
+
+  if (!defer) {
+    showNextRelicReveal();
+  }
+}
+
+
+function showNextRelicReveal() {
+  if (
+    $("#relicDialog")?.open
+    || $("#weekConqueredDialog")?.open
+    || $("#bossDefeatedDialog")?.open
+    || relicRevealQueue.length === 0
+  ) {
+    return;
+  }
+
+  const relicId =
+    relicRevealQueue.shift();
+
+  openRelicDialog(
+    relicId,
+    {
+      reveal: true
+    }
+  );
+}
+
+
+// =========================================================
+// 22. MAIN RENDER
+// =========================================================
+
+function render() {
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  renderProfile(
+    settings
+  );
+
+  renderWeeklyProgress(
+    state,
+    settings
+  );
+
+  renderBossBattle(
+    state,
+    settings
+  );
+
+  renderQuestCards();
+
+  renderCharacterStats(
+    state
+  );
+
+  renderCharacterSummary(
+    state,
+    settings
+  );
+
+  renderRelicCollection(
+    state
+  );
+
+  renderSettings(
+    settings
+  );
+
+  /*
+    Party rendering is asynchronous.
+    Local personal progress does not wait on it.
+  */
+
+  void renderParty();
+
+  applyMotionSetting(
+    settings
+  );
+
+  bindQuestCards();
+}
+
+
+// =========================================================
+// 23. PROFILE DISPLAY
+// =========================================================
+
+function renderProfile(settings) {
+  const character =
+    getCharacterConfig();
+
+  const name =
+    settings.playerName
+    || character.defaultName;
+
+  $("#profileName")
+    .textContent =
+      name;
+
+  $("#profileAvatar")
+    .textContent =
+      name
+        .charAt(0)
+        .toUpperCase();
+}
+
+
+// =========================================================
+// 24. WEEKLY PROGRESS
+// =========================================================
+
+function renderWeeklyProgress(
+  state,
+  settings
+) {
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  const completed =
+    state.weeklyCompleted.length;
+
+  const percent =
+    Math.min(
+      100,
+      (
+        completed
+        / goal
+      ) * 100
+    );
+
+  $("#weeklyObjectiveTitle")
+    .textContent =
+      `Complete ${goal} Quests`;
+
+  $("#weeklyProgressLabel")
+    .textContent =
+      `${completed} / ${goal}`;
+
+  $("#weeklyProgressBar")
+    .style.width =
+      `${percent}%`;
+
+  if (
+    completed >= goal
+  ) {
+    $("#weekStatus")
+      .textContent =
+        "Week conquered.";
+  }
+
+  else if (
+    completed === goal - 1
+    && goal > 1
+  ) {
+    $("#weekStatus")
+      .textContent =
+        "One quest remains.";
+  }
+
+  else if (
+    completed > 0
+  ) {
+    $("#weekStatus")
+      .textContent =
+        "The campaign has begun.";
+  }
+
+  else {
+    $("#weekStatus")
+      .textContent =
+        "The board is open.";
+  }
+}
+
+
+// =========================================================
+// 25. BOSS BATTLE
+// =========================================================
+
+function renderBossBattle(
+  state,
+  settings
+) {
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  const weekConquered =
+    state.weeklyCompleted.length
+    >= goal;
+
+  const bossDefeated =
+    state.bossDefeatedWeek
+    === weekKey;
+
+  const bossButton =
+    $("#bossButton");
+
+  if (!bossButton) {
+    return;
+  }
+
+  bossButton.disabled =
+    !weekConquered
+    || bossDefeated;
+
+  if (bossDefeated) {
+    $("#bossLockText")
+      .textContent =
+        "Defeated this week.";
+  }
+
+  else if (weekConquered) {
+    $("#bossLockText")
+      .textContent =
+        "Unlocked. Face the boss.";
+  }
+
+  else {
+    $("#bossLockText")
+      .textContent =
+        `Unlock by completing ${goal} quests.`;
+  }
+}
+
+
+// =========================================================
+// 26. QUEST CARDS
+// =========================================================
+
+function renderQuestCards() {
+  const grid =
+    $("#questGrid");
+
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML =
+    QUESTS
+      .map(
+        quest => `
+          <article
+            class="quest-card"
+            data-quest-id="${quest.id}"
+            tabindex="0"
+            role="button"
+          >
+
+            <div class="quest-card-content">
+
+              <p class="quest-type">
+                ${
+                  escapeHtml(
+                    quest.category
+                  )
+                }
+              </p>
+
+              <h3>
+                ${
+                  escapeHtml(
+                    quest.title
+                  )
+                }
+              </h3>
+
+              <p>
+                ${
+                  escapeHtml(
+                    quest.description
+                  )
+                }
+              </p>
+
+            </div>
+
+            <div class="quest-card-meta">
+
+              <span class="quest-duration">
+                ${
+                  escapeHtml(
+                    quest.time
+                  )
+                }
+              </span>
+
+              <span class="quest-gold-reward">
+
+                <img
+                  src="icons/gold-icon.webp"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                ${quest.gold}
+
+              </span>
+
+              <span
+                class="quest-arrow"
+                aria-hidden="true"
+              >
+                &gt;
+              </span>
+
+            </div>
+
+          </article>
+        `
+      )
+      .join("");
+}
+
+
+// =========================================================
+// 27. QUEST CARD BINDINGS
+// =========================================================
+
+function bindQuestCards() {
+  $$("[data-quest-id]")
+    .forEach(
+      element => {
+        element.onclick =
+          () => {
+            if (
+              element.disabled
+            ) {
+              return;
+            }
+
+            openQuest(
+              element.dataset.questId
+            );
+          };
+
+        if (
+          element.classList.contains(
+            "quest-card"
+          )
+        ) {
+          element.onkeydown =
+            event => {
+              if (
+                event.key === "Enter"
+                || event.key === " "
+              ) {
+                event.preventDefault();
+
+                openQuest(
+                  element.dataset.questId
+                );
+              }
+            };
+        }
+      }
+    );
+}
+
+
+// =========================================================
+// 28. CHARACTER STATS
+// =========================================================
+
+function renderCharacterStats(state) {
+  renderStat(
+    "strength",
+    state.xp.strength
+  );
+
+  renderStat(
+    "endurance",
+    state.xp.endurance
+  );
+
+  renderStat(
+    "restoration",
+    state.xp.restoration
+  );
+}
+
+
+function renderStat(
+  type,
+  xp
+) {
+  const {
+    level,
+    progress
+  } =
+    getLevelData(xp);
+
+  $(`#${type}Level`)
+    .textContent =
+      `Lv. ${level}`;
+
+  $(`#${type}Xp`)
+    .textContent =
+      `${xp} XP`;
+
+  $(`#${type}Bar`)
+    .style.width =
+      `${progress}%`;
+}
+
+
+// =========================================================
+// 29. CHARACTER SUMMARY
+// =========================================================
+
+function renderCharacterSummary(
+  state,
+  settings
+) {
+  const character =
+    getCharacterConfig();
+
+  const displayName =
+    settings.playerName
+    || character.defaultName;
+
+  const totalXp =
+    state.xp.strength
+    + state.xp.endurance
+    + state.xp.restoration;
+
+  $("#characterProfileName")
+    .textContent =
+      displayName;
+
+  $("#characterClassName")
+    .textContent =
+      character.className;
+
+  $("#characterCardImage")
+    .src =
+      character.card;
+
+  $("#characterCardImage")
+    .alt =
+      `${displayName} - ${character.className}`;
+
+  $("#characterGold")
+    .textContent =
+      state.gold;
+
+  $("#characterCrystals")
+    .textContent =
+      state.crystals;
+
+  $("#characterWeeklyQuests")
+    .textContent =
+      state.weeklyCompleted.length;
+
+  $("#characterTotalQuests")
+    .textContent =
+      state.history.length;
+
+  $("#characterTotalXp")
+    .textContent =
+      totalXp;
+
+  document.body.dataset.characterTheme =
+    character.theme;
+
+  document.body.dataset.profileId =
+    activeProfileId;
+}
+
+
+// =========================================================
+// 30. OPEN QUEST
+// =========================================================
+
+function openQuest(id) {
+  const quest =
+    findQuest(id);
+
+  if (!quest) {
+    return;
+  }
+
+  if (
+    id === "boss"
+  ) {
+    const state =
+      normalizeWeek();
+
+    const settings =
+      getSettings();
+
+    const goal =
+      Number(
+        settings.weeklyGoal
+      )
+      || DEFAULT_WEEKLY_GOAL;
+
+    const weekKey =
+      getWeekKey();
+
+    if (
+      state.weeklyCompleted.length
+      < goal
+    ) {
+      return;
+    }
+
+    if (
+      state.bossDefeatedWeek
+      === weekKey
+    ) {
+      return;
+    }
+  }
+
+  activeQuest =
+    quest;
+
+  restoreTimerForQuest(
+    quest.id
+  );
+
+  $("#dialogCategory")
+    .textContent =
+      quest.category;
+
+  $("#dialogTitle")
+    .textContent =
+      quest.title;
+
+  $("#dialogDescription")
+    .textContent =
+      quest.description;
+
+  $("#dialogTime")
+    .textContent =
+      quest.time;
+
+  if (
+    quest.id === "boss"
+  ) {
+    $("#dialogReward")
+      .innerHTML =
+        `
+          +${BOSS_STRENGTH_XP} Strength XP
+          |
+          +${BOSS_ENDURANCE_XP} Endurance XP
+          |
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_GOLD}
+          |
+          <img
+            class="currency-icon-small"
+            src="icons/crystal-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${BOSS_CRYSTALS}
+        `;
+  }
+
+  else {
+    $("#dialogReward")
+      .innerHTML =
+        `
+          +${quest.xp}
+          ${
+            capitalize(
+              quest.xpType
+            )
+          }
+          XP
+          |
+          <img
+            class="currency-icon-small"
+            src="icons/gold-icon.webp"
+            alt=""
+            aria-hidden="true"
+          >
+          ${quest.gold}
+        `;
+  }
+
+  renderExerciseList(
+    quest
+  );
+
+  $("#questDialog")
+    .showModal();
+}
+
+
+// =========================================================
+// 31. EXERCISE CHECKLIST
+// =========================================================
+
+function renderExerciseList(quest) {
+  $("#exerciseList")
+    .innerHTML =
+      quest.exercises
+        .map(
+          (
+            exercise,
+            index
+          ) => `
+            <label class="exercise-row">
+
+              <input
+                type="checkbox"
+                id="exercise-${index}"
+              >
+
+              <span>
+                ${
+                  escapeHtml(
+                    exercise
+                  )
+                }
+              </span>
+
+            </label>
+          `
+        )
+        .join("");
+}
+
+
+// =========================================================
+// 32. COMPLETE QUEST
+// =========================================================
+
+async function completeQuest() {
+  if (!activeQuest) {
+    return;
+  }
+
+  const completedQuest =
+    activeQuest;
+
+  if (
+    completedQuest.id
+    === "boss"
+  ) {
+    await completeBossBattle();
+    return;
+  }
+
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  const weekKey =
+    getWeekKey();
+
+  const completedBefore =
+    state.weeklyCompleted.length;
+
+  const completedAt =
+    new Date()
+      .toISOString();
+
+  const earnedXp =
+    Number(
+      completedQuest.xp
+    )
+    || 0;
+
+  const earnedGold =
+    Number(
+      completedQuest.gold
+    )
+    || 0;
+
+  state.weeklyCompleted.push({
+    questId:
+      completedQuest.id,
+
+    completedAt
+  });
+
+  state.xp[
+    completedQuest.xpType
+  ] += earnedXp;
+
+  state.gold +=
+    earnedGold;
+
+  state.history.unshift({
+    questId:
+      completedQuest.id,
+
+    title:
+      completedQuest.title,
+
+    category:
+      completedQuest.category,
+
+    xp:
+      earnedXp,
+
+    xpType:
+      completedQuest.xpType,
+
+    gold:
+      earnedGold,
+
+    crystals:
+      0,
+
+    completedAt
+  });
+
+  const completedAfter =
+    state.weeklyCompleted.length;
+
+  const conqueredWeekNow =
+    completedBefore < goal
+    && completedAfter >= goal
+    && state.weekConqueredRewardWeek
+      !== weekKey;
+
+  if (conqueredWeekNow) {
+    state.gold +=
+      WEEK_CONQUERED_GOLD;
+
+    state.weekConqueredRewardWeek =
+      weekKey;
+  }
+
+  saveState(state);
+
+  const newlyDiscoveredRelics =
+    discoverEligibleRelics(
+      state
+    );
+
+  clearTimerForQuest(
+    completedQuest.id
+  );
+
+  activeQuest =
+    null;
+
+  closeQuest();
+
+  let partySynced =
+    false;
+
+  if (
+    supabaseReady
+    && supabaseUser
+    && currentParty
+  ) {
+    partySynced =
+      await syncQuestActivityToParty(
+        completedQuest,
+        completedAt
+      );
+  }
+
+  render();
+
+  if (currentParty) {
+    await renderParty();
+  }
+
+  if (conqueredWeekNow) {
+    queueRelicReveals(
+      newlyDiscoveredRelics,
+      {
+        defer: true
+      }
+    );
+
+    openWeekConquered();
+    return;
+  }
+
+  if (
+    supabaseReady
+    && currentParty
+    && !partySynced
+  ) {
+    showToast(
+      `Quest saved | +${earnedXp} XP | +${earnedGold} Gold | Party sync failed`
+    );
+  }
+
+  else {
+    showToast(
+      `Quest Complete | +${earnedXp} XP | +${earnedGold} Gold`
+    );
+  }
+
+  queueRelicReveals(
+    newlyDiscoveredRelics
+  );
+}
+
+
+// =========================================================
+// 33. WEEK CONQUERED
+// =========================================================
