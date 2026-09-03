@@ -583,57 +583,37 @@ const RELICS = [
 
 const PARTY_TREASURES = {
   "fellowship-token": {
-    name:
-      "Fellowship Token",
-
-    rarity:
-      "Common",
-
-    glyph:
-      "+1",
-
+    name: "Fellowship Token",
+    rarity: "Common",
+    glyph: "+1",
+    image: "consumables/fellowship-token.webp",
     description:
       "Adds one bonus point to the shared weekly challenge."
   },
 
   "banner-of-plenty": {
-    name:
-      "Banner of Plenty",
-
-    rarity:
-      "Uncommon",
-
-    glyph:
-      "G",
-
+    name: "Banner of Plenty",
+    rarity: "Uncommon",
+    glyph: "G",
+    image: "consumables/banner-of-plenty.webp",
     description:
       "Grants 15 Gold to every fellowship member."
   },
 
   "crystal-parcel": {
-    name:
-      "Crystal Parcel",
-
-    rarity:
-      "Rare",
-
-    glyph:
-      "C",
-
+    name: "Crystal Parcel",
+    rarity: "Rare",
+    glyph: "C",
+    image: "consumables/crystal-parcel.webp",
     description:
       "Grants one Crystal to every fellowship member."
   },
 
   "rallying-horn": {
-    name:
-      "Rallying Horn",
-
-    rarity:
-      "Epic",
-
-    glyph:
-      "+3",
-
+    name: "Rallying Horn",
+    rarity: "Epic",
+    glyph: "+3",
+    image: "consumables/rallying-horn.webp",
     description:
       "Adds three bonus points to the shared weekly challenge."
   }
