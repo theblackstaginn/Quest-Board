@@ -5946,54 +5946,34 @@ async function fetchPartyBonusProgress() {
 // 68. RENDER PARTY TREASURE
 // =========================================================
 
-function renderPartyTreasure(
-  inventory
-) {
+function renderPartyTreasure(inventory) {
   const grid =
     $("#partyTreasureGrid");
 
-  const totalElement =
-    $("#partyTreasureTotal");
-
-  if (
-    !grid
-    || !totalElement
-  ) {
+  if (!grid) {
     return;
   }
 
   const total =
     inventory.reduce(
-      (
-        sum,
-        row
-      ) =>
+      (sum, row) =>
         sum
         + (
-          Number(
-            row.quantity
-          )
+          Number(row.quantity)
           || 0
         ),
       0
     );
 
-  totalElement.textContent =
-    `${total} item${
-      total === 1
-        ? ""
-        : "s"
-    }`;
+  $("#partyTreasureTotal")
+    .textContent =
+      `${total} item${total === 1 ? "" : "s"}`;
 
-  if (
-    inventory.length === 0
-  ) {
+  if (!inventory.length) {
     grid.innerHTML =
       `
         <p class="muted">
           No consumable treasure yet.
-          Defeat a weekly Boss while in a fellowship
-          for a chance to discover some.
         </p>
       `;
 
@@ -6013,48 +5993,44 @@ function renderPartyTreasure(
             return "";
           }
 
-          const quantity =
-            Number(
-              row.quantity
-            )
-            || 0;
-
           return `
             <article class="party-treasure-card">
 
-              <div class="party-treasure-glyph">
-                ${
-                  escapeHtml(
-                    item.glyph
-                  )
-                }
+              <div class="party-treasure-art">
+
+                <img
+                  src="${escapeHtml(item.image)}"
+                  alt="${escapeHtml(item.name)}"
+                  loading="lazy"
+                  onerror="
+                    this.hidden = true;
+                    this.nextElementSibling.hidden = false;
+                  "
+                >
+
+                <span
+                  class="party-treasure-glyph"
+                  hidden
+                  aria-hidden="true"
+                >
+                  ${escapeHtml(item.glyph)}
+                </span>
+
               </div>
 
               <div class="party-treasure-info">
 
                 <strong>
-                  ${
-                    escapeHtml(
-                      item.name
-                    )
-                  }
-                  ×${quantity}
+                  ${escapeHtml(item.name)}
+                  ×${Number(row.quantity) || 0}
                 </strong>
 
                 <span>
-                  ${
-                    escapeHtml(
-                      item.description
-                    )
-                  }
+                  ${escapeHtml(item.description)}
                 </span>
 
                 <small>
-                  ${
-                    escapeHtml(
-                      item.rarity
-                    )
-                  }
+                  ${escapeHtml(item.rarity)}
                 </small>
 
               </div>
@@ -6062,11 +6038,7 @@ function renderPartyTreasure(
               <button
                 class="party-treasure-use"
                 type="button"
-                data-use-treasure="${
-                  escapeHtml(
-                    row.item_id
-                  )
-                }"
+                data-use-treasure="${escapeHtml(row.item_id)}"
               >
                 Use
               </button>
@@ -6079,23 +6051,34 @@ function renderPartyTreasure(
 }
 
 
-// =========================================================
-// 69. TREASURE REVEAL
-// =========================================================
-
 function showTreasureReveal(itemId) {
   const item =
-    PARTY_TREASURES[
-      itemId
-    ];
+    PARTY_TREASURES[itemId];
 
   if (!item) {
     return;
   }
 
-  $("#treasureDialogGlyph")
-    .textContent =
-      item.glyph;
+  const image =
+    $("#treasureDialogImage");
+
+  const fallback =
+    $("#treasureDialogGlyph");
+
+  image.src =
+    item.image;
+
+  image.alt =
+    item.name;
+
+  image.hidden =
+    false;
+
+  fallback.textContent =
+    item.glyph;
+
+  fallback.hidden =
+    true;
 
   $("#treasureDialogTitle")
     .textContent =
