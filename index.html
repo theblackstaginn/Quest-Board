@@ -52,6 +52,7 @@
             <strong>Emergency Quest</strong>
             <span class="quest-summary">When your brain says absolutely fucking not.</span>
           </button>
+
           <button class="quick-quest boss-quest" id="bossButton" type="button" data-quest-id="boss" disabled>
             <span class="quest-time">30–45 MIN</span>
             <strong>Boss Battle</strong>
@@ -67,6 +68,7 @@
             </div>
             <button class="text-button" id="showHistoryButton" type="button">History</button>
           </div>
+
           <div class="quest-grid" id="questGrid"></div>
         </section>
       </section>
@@ -83,11 +85,13 @@
               <h2 id="characterProfileName">Farmer</h2>
               <p class="character-class-name" id="characterClassName">Half-Orc Wizard</p>
             </div>
+
             <div class="currency-wallet">
               <div class="currency-purse" aria-label="Gold">
                 <img class="currency-icon" src="icons/gold-icon.webp" alt="" aria-hidden="true">
                 <strong id="characterGold">0</strong>
               </div>
+
               <div class="currency-purse" aria-label="Crystals">
                 <img class="currency-icon" src="icons/crystal-icon.webp" alt="" aria-hidden="true">
                 <strong id="characterCrystals">0</strong>
@@ -99,29 +103,49 @@
             <article class="stat-card">
               <span class="stat-name">Strength</span>
               <strong id="strengthLevel">Lv. 1</strong>
-              <div class="stat-progress"><div class="stat-progress-fill" id="strengthBar"></div></div>
+              <div class="stat-progress">
+                <div class="stat-progress-fill" id="strengthBar"></div>
+              </div>
               <small id="strengthXp">0 XP</small>
             </article>
+
             <article class="stat-card">
               <span class="stat-name">Endurance</span>
               <strong id="enduranceLevel">Lv. 1</strong>
-              <div class="stat-progress"><div class="stat-progress-fill" id="enduranceBar"></div></div>
+              <div class="stat-progress">
+                <div class="stat-progress-fill" id="enduranceBar"></div>
+              </div>
               <small id="enduranceXp">0 XP</small>
             </article>
+
             <article class="stat-card">
               <span class="stat-name">Restoration</span>
               <strong id="restorationLevel">Lv. 1</strong>
-              <div class="stat-progress"><div class="stat-progress-fill" id="restorationBar"></div></div>
+              <div class="stat-progress">
+                <div class="stat-progress-fill" id="restorationBar"></div>
+              </div>
               <small id="restorationXp">0 XP</small>
             </article>
           </div>
 
           <section class="character-summary-panel">
             <p class="eyebrow">Adventurer Record</p>
+
             <div class="character-summary-grid">
-              <div class="summary-stat"><span>Quests This Week</span><strong id="characterWeeklyQuests">0</strong></div>
-              <div class="summary-stat"><span>Total Quests</span><strong id="characterTotalQuests">0</strong></div>
-              <div class="summary-stat"><span>Total XP</span><strong id="characterTotalXp">0</strong></div>
+              <div class="summary-stat">
+                <span>Quests This Week</span>
+                <strong id="characterWeeklyQuests">0</strong>
+              </div>
+
+              <div class="summary-stat">
+                <span>Total Quests</span>
+                <strong id="characterTotalQuests">0</strong>
+              </div>
+
+              <div class="summary-stat">
+                <span>Total XP</span>
+                <strong id="characterTotalXp">0</strong>
+              </div>
             </div>
           </section>
 
@@ -132,6 +156,7 @@
                 <h2 id="relicCollectionTitle">Relic Collection</h2>
                 <p class="relic-collection-count" id="relicCollectionCount">0 / 24 discovered</p>
               </div>
+
               <img class="relic-heading-badge" src="badges/secret-acheivment.webp" alt="" aria-hidden="true">
             </div>
 
@@ -152,16 +177,22 @@
 
       <section class="app-view" id="partyView" data-app-view="party" hidden>
         <section class="party-hero">
-          <p class="eyebrow">Fellowship</p><h2>Your Party</h2><p class="muted">Train separately. Advance together.</p>
+          <h2>Your Party</h2>
+          <p class="muted">Train separately. Advance together.</p>
         </section>
+
         <div class="party-sync-status" id="partySyncStatus">Connecting to the guild...</div>
+
         <section class="party-empty-state" id="partyEmptyState">
-          <p class="eyebrow">No Party Joined</p><h2>Form a Fellowship</h2>
+          <p class="eyebrow">No Party Joined</p>
+          <h2>Form a Fellowship</h2>
           <p>Create a private party or join one using an invite code.</p>
+
           <div class="party-action-grid">
             <button class="fantasy-action-button" id="createPartyButton" type="button">Create Party</button>
             <button class="fantasy-action-button secondary" id="showJoinPartyButton" type="button">Join Party</button>
           </div>
+
           <div class="join-party-form" id="joinPartyForm" hidden>
             <label for="partyCodeInput">Party Code</label>
             <input id="partyCodeInput" type="text" inputmode="text" autocomplete="off" maxlength="12" placeholder="ENTER CODE">
@@ -171,63 +202,152 @@
 
         <section class="party-dashboard" id="partyDashboard" hidden>
           <section class="party-banner">
-            <p class="eyebrow">Party</p><h2 id="partyName">The Fellowship</h2>
-            <div class="party-code-line"><span>Invite Code</span><strong id="partyInviteCode">------</strong></div>
+            <h2 id="partyName">The Fellowship</h2>
+
+            <div class="party-code-line">
+              <span>Invite Code</span>
+              <strong id="partyInviteCode">------</strong>
+            </div>
           </section>
+
           <section class="party-section">
-            <div class="section-heading"><div><p class="eyebrow">Companions</p><h2>Party Members</h2></div></div>
+            <div class="section-heading">
+              <div>
+                <h2>Party Members</h2>
+              </div>
+            </div>
+
             <div class="party-members" id="partyMembers"></div>
           </section>
+
           <section class="party-challenge">
-            <p class="eyebrow">Shared Challenge</p><h2 id="partyChallengeTitle">Complete 6 Quests</h2>
+            <h2 id="partyChallengeTitle">Complete 6 Quests</h2>
+
             <p class="muted">Combined weekly progress from every member of the fellowship.</p>
-            <div class="progress-meta"><strong id="partyChallengeProgress">0 / 6</strong><span id="partyChallengeStatus">The campaign awaits.</span></div>
-            <div class="progress-track"><div class="progress-fill" id="partyChallengeBar"></div></div>
+
+            <div class="progress-meta">
+              <strong id="partyChallengeProgress">0 / 6</strong>
+              <span id="partyChallengeStatus">The campaign awaits.</span>
+            </div>
+
+            <div class="progress-track">
+              <div class="progress-fill" id="partyChallengeBar"></div>
+            </div>
           </section>
+
           <section class="party-treasure-panel" aria-labelledby="partyTreasureTitle">
             <div class="section-heading">
-              <div><p class="eyebrow">Boss Spoils</p><h2 id="partyTreasureTitle">Fellowship Treasury</h2></div>
+              <div>
+                <h2 id="partyTreasureTitle">Fellowship Treasury</h2>
+              </div>
+
               <span class="party-treasure-total" id="partyTreasureTotal">0 items</span>
             </div>
+
             <p class="party-treasure-copy">Defeat the weekly Boss while in a fellowship to earn one consumable treasure.</p>
-            <div class="party-treasure-grid" id="partyTreasureGrid"><p class="muted">No consumable treasure yet.</p></div>
+
+            <div class="party-treasure-grid" id="partyTreasureGrid">
+              <p class="muted">No consumable treasure yet.</p>
+            </div>
           </section>
+
           <section class="party-section">
             <div class="section-heading">
-              <div><p class="eyebrow">Chronicle</p><h2>Recent Activity</h2></div>
+              <div>
+                <h2>Recent Activity</h2>
+              </div>
+
               <button class="text-button" id="refreshPartyButton" type="button">Refresh</button>
             </div>
-            <div class="party-activity-list" id="partyActivityList"><p class="muted">No party activity yet.</p></div>
+
+            <div class="party-activity-list" id="partyActivityList">
+              <p class="muted">No party activity yet.</p>
+            </div>
           </section>
         </section>
       </section>
 
       <section class="app-view" id="settingsView" data-app-view="settings" hidden>
-        <section class="settings-hero"><p class="eyebrow">Guild Configuration</p><h2>Settings</h2><p class="muted">Shape the board to suit your campaign.</p></section>
+        <section class="settings-hero">
+          <p class="eyebrow">Guild Configuration</p>
+          <h2>Settings</h2>
+          <p class="muted">Shape the board to suit your campaign.</p>
+        </section>
+
         <section class="settings-panel">
-          <p class="eyebrow">Adventurer</p><h2>Player</h2>
-          <div class="setting-row"><div class="setting-copy"><strong>Player Name</strong><span>Renaming your adventurer does not change your class or character identity.</span></div><input class="setting-input" id="playerNameInput" type="text" maxlength="20" autocomplete="off"></div>
+          <p class="eyebrow">Adventurer</p>
+          <h2>Player</h2>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Player Name</strong>
+              <span>Renaming your adventurer does not change your class or character identity.</span>
+            </div>
+
+            <input class="setting-input" id="playerNameInput" type="text" maxlength="20" autocomplete="off">
+          </div>
+
           <button class="fantasy-action-button" id="savePlayerNameButton" type="button">Save Name</button>
         </section>
+
         <section class="settings-panel">
-          <p class="eyebrow">Campaign</p><h2>Weekly Goal</h2>
-          <div class="setting-row"><div class="setting-copy"><strong>Quests Per Week</strong><span>Choose how many quests are required to conquer the week.</span></div>
-            <select class="setting-input" id="weeklyGoalSelect"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select>
+          <p class="eyebrow">Campaign</p>
+          <h2>Weekly Goal</h2>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Quests Per Week</strong>
+              <span>Choose how many quests are required to conquer the week.</span>
+            </div>
+
+            <select class="setting-input" id="weeklyGoalSelect">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
           </div>
         </section>
+
         <section class="settings-panel">
-          <p class="eyebrow">Interface</p><h2>Experience</h2>
-          <label class="setting-toggle-row"><div class="setting-copy"><strong>Reduced Motion</strong><span>Limit interface movement and transitions.</span></div><input id="reducedMotionToggle" type="checkbox"></label>
-          <label class="setting-toggle-row"><div class="setting-copy"><strong>Sound Effects</strong><span>Reserved for future quest and level-up sounds.</span></div><input id="soundToggle" type="checkbox"></label>
+          <p class="eyebrow">Interface</p>
+          <h2>Experience</h2>
+
+          <label class="setting-toggle-row">
+            <div class="setting-copy">
+              <strong>Reduced Motion</strong>
+              <span>Limit interface movement and transitions.</span>
+            </div>
+
+            <input id="reducedMotionToggle" type="checkbox">
+          </label>
+
+          <label class="setting-toggle-row">
+            <div class="setting-copy">
+              <strong>Sound Effects</strong>
+              <span>Reserved for future quest and level-up sounds.</span>
+            </div>
+
+            <input id="soundToggle" type="checkbox">
+          </label>
         </section>
+
         <section class="settings-panel danger-panel">
-          <p class="eyebrow">Chronicle Management</p><h2>Quest Data</h2>
+          <p class="eyebrow">Chronicle Management</p>
+          <h2>Quest Data</h2>
+
           <button class="settings-danger-button" id="resetWeekButton" type="button">Reset This Week</button>
           <button class="settings-danger-button" id="clearHistoryButton" type="button">Clear Quest History</button>
           <button class="settings-danger-button severe" id="resetCharacterButton" type="button">Reset Character</button>
         </section>
+
         <section class="settings-panel" id="partySettingsPanel">
-          <p class="eyebrow">Fellowship</p><h2>Party</h2><p class="muted" id="partySettingsStatus">Connecting to Supabase...</p>
+          <p class="eyebrow">Fellowship</p>
+          <h2>Party</h2>
+          <p class="muted" id="partySettingsStatus">Connecting to Supabase...</p>
+
           <button class="settings-danger-button" id="leavePartyButton" type="button" disabled>Leave Party</button>
         </section>
       </section>
@@ -242,51 +362,130 @@
   </div>
 
   <dialog class="quest-dialog" id="questDialog">
-    <div class="dialog-header"><div><p class="eyebrow" id="dialogCategory">Quest</p><h2 id="dialogTitle">Quest Title</h2></div><button class="close-button" id="closeQuestButton" type="button" aria-label="Close quest">×</button></div>
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow" id="dialogCategory">Quest</p>
+        <h2 id="dialogTitle">Quest Title</h2>
+      </div>
+
+      <button class="close-button" id="closeQuestButton" type="button" aria-label="Close quest">×</button>
+    </div>
+
     <p class="quest-description" id="dialogDescription">Quest description.</p>
-    <div class="quest-detail-meta"><span id="dialogTime">10 min</span><span id="dialogReward">+20 XP</span></div>
+
+    <div class="quest-detail-meta">
+      <span id="dialogTime">10 min</span>
+      <span id="dialogReward">+20 XP</span>
+    </div>
+
     <div class="exercise-list" id="exerciseList"></div>
-    <section class="quest-timer"><div><p class="eyebrow">Quest Timer</p><strong id="timerDisplay">00:00</strong></div><div class="timer-controls"><button id="timerToggleButton" type="button">Start</button><button id="timerResetButton" type="button">Reset</button></div></section>
+
+    <section class="quest-timer">
+      <div>
+        <p class="eyebrow">Quest Timer</p>
+        <strong id="timerDisplay">00:00</strong>
+      </div>
+
+      <div class="timer-controls">
+        <button id="timerToggleButton" type="button">Start</button>
+        <button id="timerResetButton" type="button">Reset</button>
+      </div>
+    </section>
+
     <button class="complete-quest-button" id="completeQuestButton" type="button">Complete Quest</button>
   </dialog>
 
   <dialog class="history-dialog" id="historyDialog">
-    <div class="dialog-header"><div><p class="eyebrow">Chronicle</p><h2>Quest History</h2></div><button class="close-button" id="closeHistoryButton" type="button" aria-label="Close history">×</button></div>
-    <div id="historyList"><p class="muted">No quests completed yet.</p></div>
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow">Chronicle</p>
+        <h2>Quest History</h2>
+      </div>
+
+      <button class="close-button" id="closeHistoryButton" type="button" aria-label="Close history">×</button>
+    </div>
+
+    <div id="historyList">
+      <p class="muted">No quests completed yet.</p>
+    </div>
   </dialog>
 
   <dialog class="victory-dialog week-victory-dialog" id="weekConqueredDialog">
     <div class="victory-panel">
       <img class="victory-art" src="week-conquered.webp" alt="Week Conquered">
-      <button class="victory-image-button continue-victory-button" id="weekContinueButton" type="button" aria-label="Continue">Continue</button>
+
+      <button class="victory-image-button continue-victory-button" id="weekContinueButton" type="button" aria-label="Continue">
+        Continue
+      </button>
     </div>
   </dialog>
 
   <dialog class="victory-dialog boss-victory-dialog" id="bossDefeatedDialog">
     <div class="victory-panel">
       <img class="victory-art" src="cluster.webp" alt="Boss Defeated — a crystal cluster has been revealed">
-      <button class="victory-image-button claim-reward-button" id="claimBossRewardsButton" type="button" aria-label="Claim rewards">Claim Rewards</button>
+
+      <button class="victory-image-button claim-reward-button" id="claimBossRewardsButton" type="button" aria-label="Claim rewards">
+        Claim Rewards
+      </button>
     </div>
   </dialog>
-
 
   <dialog class="gift-dialog" id="giftDialog">
     <div class="dialog-header">
-      <div><p class="eyebrow">Fellowship Gift</p><h2>Send Treasure</h2></div>
+      <div>
+        <p class="eyebrow">Fellowship Gift</p>
+        <h2>Send Treasure</h2>
+      </div>
+
       <button class="close-button" id="closeGiftButton" type="button" aria-label="Close gift window">×</button>
     </div>
-    <p class="gift-recipient-line">Send a gift to <strong id="giftRecipientName">Adventurer</strong></p>
+
+    <p class="gift-recipient-line">
+      Send a gift to <strong id="giftRecipientName">Adventurer</strong>
+    </p>
+
     <div class="gift-wallet-preview">
-      <div><img src="icons/gold-icon.webp" alt="" aria-hidden="true"><span>Your Gold</span><strong id="giftGoldBalance">0</strong></div>
-      <div><img src="icons/crystal-icon.webp" alt="" aria-hidden="true"><span>Your Crystals</span><strong id="giftCrystalBalance">0</strong></div>
+      <div>
+        <img src="icons/gold-icon.webp" alt="" aria-hidden="true">
+        <span>Your Gold</span>
+        <strong id="giftGoldBalance">0</strong>
+      </div>
+
+      <div>
+        <img src="icons/crystal-icon.webp" alt="" aria-hidden="true">
+        <span>Your Crystals</span>
+        <strong id="giftCrystalBalance">0</strong>
+      </div>
     </div>
-    <label class="gift-field" for="giftCurrencySelect"><span>Treasure</span><select id="giftCurrencySelect" class="gift-input"><option value="gold">Gold</option><option value="crystals">Crystals</option></select></label>
-    <label class="gift-field" for="giftAmountInput"><span>Amount</span><input id="giftAmountInput" class="gift-input" type="number" inputmode="numeric" min="1" step="1" placeholder="Enter amount"></label>
+
+    <label class="gift-field" for="giftCurrencySelect">
+      <span>Treasure</span>
+
+      <select id="giftCurrencySelect" class="gift-input">
+        <option value="gold">Gold</option>
+        <option value="crystals">Crystals</option>
+      </select>
+    </label>
+
+    <label class="gift-field" for="giftAmountInput">
+      <span>Amount</span>
+
+      <input
+        id="giftAmountInput"
+        class="gift-input"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        step="1"
+        placeholder="Enter amount"
+      >
+    </label>
+
     <p class="gift-available" id="giftAvailableText">Available: 0 Gold</p>
     <p class="gift-error" id="giftError" aria-live="polite"></p>
+
     <button class="gift-send-button" id="sendGiftButton" type="button">Send Gift</button>
   </dialog>
-
 
   <dialog class="relic-dialog" id="relicDialog" aria-labelledby="relicDialogTitle">
     <div class="relic-dialog-panel">
@@ -295,22 +494,28 @@
           <p class="eyebrow" id="relicDialogEyebrow">Relic</p>
           <h2 id="relicDialogTitle">Ancient Relic</h2>
         </div>
+
         <button class="close-button" id="closeRelicButton" type="button" aria-label="Close relic">×</button>
       </div>
+
       <div class="relic-dialog-art-shell">
         <img id="relicDialogImage" class="relic-dialog-image" src="" alt="">
       </div>
+
       <div class="relic-dialog-badges">
         <div class="relic-dialog-badge-block">
           <img id="relicDialogRarityBadge" src="" alt="">
           <span id="relicDialogRarityText">Common</span>
         </div>
+
         <div class="relic-dialog-badge-block">
           <img id="relicDialogSourceBadge" src="" alt="">
           <span id="relicDialogSourceText">Quest</span>
         </div>
       </div>
+
       <p class="relic-discovered-date" id="relicDiscoveredDate"></p>
+
       <button class="relic-continue-button" id="relicContinueButton" type="button">Close</button>
     </div>
   </dialog>
@@ -318,18 +523,38 @@
   <dialog class="treasure-dialog" id="treasureDialog" aria-labelledby="treasureDialogTitle">
     <div class="treasure-dialog-panel">
       <p class="eyebrow">Party Treasure Discovered</p>
+
       <div class="treasure-dialog-art">
-        <img class="treasure-dialog-image" id="treasureDialogImage" src="" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
-        <span class="treasure-glyph" id="treasureDialogGlyph" aria-hidden="true" hidden>*</span>
+        <img
+          class="treasure-dialog-image"
+          id="treasureDialogImage"
+          src=""
+          alt=""
+          onerror="this.hidden=true;this.nextElementSibling.hidden=false"
+        >
+
+        <span
+          class="treasure-glyph"
+          id="treasureDialogGlyph"
+          aria-hidden="true"
+          hidden
+        >
+          *
+        </span>
       </div>
+
       <h2 id="treasureDialogTitle">Fellowship Token</h2>
       <p class="treasure-rarity" id="treasureDialogRarity">Common</p>
       <p id="treasureDialogDescription"></p>
-      <button class="relic-continue-button" id="closeTreasureButton" type="button">Claim Treasure</button>
+
+      <button class="relic-continue-button" id="closeTreasureButton" type="button">
+        Claim Treasure
+      </button>
     </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js?v=55"></script>
 </body>
