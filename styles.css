@@ -1166,6 +1166,60 @@ body[data-character-theme="amethyst"] .character-class-name {
   box-shadow: var(--shadow);
 }
 
+/* Full-art clickable Fellowship portrait */
+
+.party-member-portrait-button {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 92px;
+  margin: 0;
+  padding: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(83, 54, 26, 0.52);
+  border-radius: 4px;
+  outline: none;
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(201, 154, 80, 0.18),
+      transparent 68%
+    ),
+    rgba(28, 19, 12, 0.9);
+  box-shadow:
+    inset 0 0 12px rgba(230, 189, 115, 0.08),
+    0 5px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    filter 140ms ease,
+    border-color 140ms ease;
+}
+
+.party-member-portrait-button:hover {
+  border-color: rgba(114, 75, 34, 0.82);
+  filter: brightness(1.07);
+}
+
+.party-member-portrait-button:active {
+  transform: scale(0.96);
+}
+
+.party-member-portrait-button:focus-visible {
+  outline: 2px solid #8f612d;
+  outline-offset: 2px;
+}
+
+.party-member-portrait {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+  object-position: center;
+  box-shadow: none;
+}
+
 .party-member-avatar {
   display: grid;
   place-items: center;
@@ -1176,15 +1230,6 @@ body[data-character-theme="amethyst"] .character-class-name {
   color: #24170d;
   font-family: var(--font-heading);
   font-weight: 800;
-}
-
-.party-member-portrait {
-  width: 70px;
-  height: 92px;
-  object-fit: cover;
-  object-position: center top;
-  border: 1px solid rgba(83, 54, 26, 0.42);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
 }
 
 .party-member-info strong {
@@ -1219,8 +1264,6 @@ body[data-character-theme="amethyst"] .character-class-name {
   opacity: 1;
   text-shadow: 0 1px 0 rgba(255, 237, 197, 0.3);
 }
-
-/* Strong readable earnings block while preserving parchment art */
 
 .party-member-score {
   min-width: 78px;
@@ -1259,8 +1302,6 @@ body[data-character-theme="amethyst"] .character-class-name {
   opacity: 1;
   text-shadow: none;
 }
-
-/* Stronger Gift button */
 
 .party-gift-button {
   display: block;
@@ -1450,6 +1491,7 @@ body[data-character-theme="amethyst"] .character-class-name {
 .danger-panel {
   background-image: url("body-bg.webp");
 }
+
 .settings-danger-button {
   width: 100%;
   min-height: 46px;
@@ -2220,7 +2262,7 @@ body[data-character-theme="amethyst"] .character-class-name {
     padding: 14px;
   }
 
-  .party-member-portrait {
+  .party-member-portrait-button {
     width: 62px;
     height: 82px;
   }
@@ -2389,7 +2431,7 @@ body[data-character-theme="amethyst"] .character-class-name {
     grid-template-columns: 55px minmax(0, 1fr);
   }
 
-  .party-member-portrait {
+  .party-member-portrait-button {
     width: 55px;
     height: 74px;
   }
@@ -3096,6 +3138,7 @@ body.reduce-motion *::after {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
 /* =========================================================
    PARTY TAVERN ENVIRONMENT
 ========================================================= */
@@ -3108,14 +3151,9 @@ body[data-active-view="party"] .world-overlay {
     ),
     url("party-tavern-bg.webp");
 
-  background-size:
-    cover;
-
-  background-position:
-    center top;
-
-  background-repeat:
-    no-repeat;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 
   filter:
     brightness(1.32)
@@ -3130,8 +3168,7 @@ body[data-active-view="party"] .party-hero {
     ),
     url("mossy-stone.webp");
 
-  background-size:
-    cover;
+  background-size: cover;
 
   border:
     1px solid rgba(214, 158, 72, 0.22);
@@ -3142,22 +3179,16 @@ body[data-active-view="party"] .party-hero {
 }
 
 body[data-active-view="party"] .party-sync-status {
-  color:
-    #e4c58f;
+  color: #e4c58f;
 
   text-shadow:
     0 2px 5px rgba(0, 0, 0, 0.95);
 }
 
 body[data-active-view="party"] .party-section {
-  padding:
-    18px;
-
-  background:
-    rgba(7, 5, 3, 0.42);
-
-  border:
-    1px solid rgba(183, 126, 54, 0.16);
+  padding: 18px;
+  background: rgba(7, 5, 3, 0.42);
+  border: 1px solid rgba(183, 126, 54, 0.16);
 
   box-shadow:
     0 16px 36px rgba(0, 0, 0, 0.48);
@@ -3168,6 +3199,7 @@ body[data-active-view="party"] .party-activity-item {
   box-shadow:
     0 15px 32px rgba(0, 0, 0, 0.72);
 }
+
 /* =========================================================
    PARTY CONSUMABLE ART
 ========================================================= */
@@ -3194,6 +3226,7 @@ body[data-active-view="party"] .party-activity-item {
   width: 100%;
   height: 100%;
   object-fit: contain;
+
   filter:
     drop-shadow(
       0 5px 7px
@@ -3222,6 +3255,7 @@ body[data-active-view="party"] .party-activity-item {
   width: 100%;
   height: 100%;
   object-fit: contain;
+
   filter:
     drop-shadow(
       0 12px 18px
@@ -3244,5 +3278,328 @@ body[data-active-view="party"] .party-activity-item {
   .treasure-dialog-art {
     width: min(68vw, 240px);
     height: min(68vw, 240px);
+  }
+}
+
+/* =========================================================
+   48. FELLOWSHIP CHARACTER PROFILE DIALOG
+========================================================= */
+
+.party-character-dialog {
+  z-index: 150;
+  width: min(calc(100% - 18px), 650px);
+  max-height: 95vh;
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cream);
+}
+
+.party-character-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.party-character-dialog-panel {
+  width: 100%;
+  max-height: 93vh;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(201, 154, 80, 0.38);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      rgba(5, 6, 5, 0.9),
+      rgba(5, 6, 5, 0.97)
+    ),
+    url("mossy-stone.webp");
+  background-size: cover;
+  box-shadow: var(--shadow-heavy);
+  -webkit-overflow-scrolling: touch;
+}
+
+.party-character-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.party-character-dialog-header h2 {
+  margin-bottom: 5px;
+  color: var(--cream);
+}
+
+.party-character-dialog-class {
+  margin: 0;
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.party-character-dialog-art-shell {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-height: 65vh;
+  padding: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 154, 80, 0.22);
+  border-radius: 11px;
+  background:
+    radial-gradient(
+      circle at 50% 34%,
+      rgba(201, 154, 80, 0.12),
+      transparent 62%
+    ),
+    rgba(0, 0, 0, 0.46);
+}
+
+.party-character-dialog-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 63vh;
+  margin-inline: auto;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 15px 24px rgba(0, 0, 0, 0.58));
+}
+
+.party-character-dialog-description {
+  margin: 18px 3px;
+  color: var(--cream-soft);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.party-profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.party-profile-stat {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(201, 154, 80, 0.18);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.party-profile-stat > span {
+  display: block;
+  overflow: hidden;
+  color: var(--cream-soft);
+  font-family: var(--font-heading);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.party-profile-stat > strong {
+  display: block;
+  margin: 7px 0 10px;
+  color: var(--cream);
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+}
+
+.party-profile-stat > small {
+  display: block;
+  margin-top: 7px;
+  color: var(--cream-soft);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.party-profile-stat-track {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.74);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.party-profile-stat-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 300ms ease;
+}
+
+.party-profile-stat.strength .party-profile-stat-fill {
+  background: var(--strength);
+}
+
+.party-profile-stat.endurance .party-profile-stat-fill {
+  background: #678353;
+}
+
+.party-profile-stat.restoration .party-profile-stat-fill {
+  background: #5d7a84;
+}
+
+.party-profile-record {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid rgba(201, 154, 80, 0.2);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.party-profile-record .eyebrow {
+  margin-bottom: 12px;
+}
+
+.party-profile-record-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.party-profile-record-grid > div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(201, 154, 80, 0.12);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  text-align: center;
+}
+
+.party-profile-record-grid span {
+  display: block;
+  min-height: 2.4em;
+  color: var(--cream-soft);
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.party-profile-record-grid strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+}
+
+.party-character-dialog[open] .party-character-dialog-panel {
+  animation:
+    partyCharacterReveal
+    340ms
+    cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+
+@keyframes partyCharacterReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+    filter: brightness(1.18);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* =========================================================
+   49. FELLOWSHIP PROFILE MOBILE
+========================================================= */
+
+@media (max-width: 560px) {
+  .party-character-dialog {
+    width: calc(100% - 12px);
+  }
+
+  .party-character-dialog-panel {
+    padding: 16px;
+  }
+
+  .party-character-dialog-art-shell {
+    max-height: 59vh;
+  }
+
+  .party-character-dialog-image {
+    max-height: 57vh;
+  }
+
+  .party-profile-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .party-profile-stat {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 7px 14px;
+  }
+
+  .party-profile-stat > strong {
+    margin: 0;
+    text-align: right;
+  }
+
+  .party-profile-stat-track,
+  .party-profile-stat > small {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 390px) {
+  .party-character-dialog-panel {
+    padding: 14px;
+  }
+
+  .party-character-dialog-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .party-character-dialog-class {
+    font-size: 0.62rem;
+  }
+
+  .party-character-dialog-description {
+    font-size: 0.94rem;
+  }
+
+  .party-profile-record {
+    padding: 14px;
+  }
+
+  .party-profile-record-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .party-profile-record-grid > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    text-align: left;
+  }
+
+  .party-profile-record-grid span {
+    min-height: 0;
+  }
+
+  .party-profile-record-grid strong {
+    margin-top: 0;
   }
 }
