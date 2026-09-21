@@ -20,7 +20,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=55">
+  <link rel="stylesheet" href="styles.css?v=56">
 </head>
 
 <body>
@@ -194,6 +194,7 @@
             <div>
               <p class="eyebrow">Adventurer</p>
               <h2 id="characterProfileName">Farmer</h2>
+
               <p
                 class="character-class-name"
                 id="characterClassName"
@@ -215,6 +216,7 @@
                   alt=""
                   aria-hidden="true"
                 >
+
                 <strong id="characterGold">0</strong>
               </div>
 
@@ -229,6 +231,7 @@
                   alt=""
                   aria-hidden="true"
                 >
+
                 <strong id="characterCrystals">0</strong>
               </div>
 
@@ -468,11 +471,11 @@
       >
 
         <section class="party-hero">
-
+          <p class="eyebrow">Fellowship</p>
+          <h2>Your Party</h2>
           <p class="muted">
             Train separately. Advance together.
           </p>
-
         </section>
 
 
@@ -484,12 +487,14 @@
         </div>
 
 
-        <!-- EMPTY PARTY STATE -->
-
         <section
           class="party-empty-state"
           id="partyEmptyState"
         >
+
+          <p class="eyebrow">
+            No Party Joined
+          </p>
 
           <h2>
             Form a Fellowship
@@ -554,18 +559,17 @@
         </section>
 
 
-        <!-- PARTY DASHBOARD -->
-
         <section
           class="party-dashboard"
           id="partyDashboard"
           hidden
         >
 
-
-          <!-- PARTY BANNER -->
-
           <section class="party-banner">
+
+            <p class="eyebrow">
+              Party
+            </p>
 
             <h2 id="partyName">
               The Fellowship
@@ -587,17 +591,22 @@
           </section>
 
 
-          <!-- MEMBERS -->
-
           <section class="party-section">
 
             <div class="section-heading">
 
-              <h2>
-                Members
-              </h2>
+              <div>
+                <p class="eyebrow">
+                  Companions
+                </p>
+
+                <h2>
+                  Party Members
+                </h2>
+              </div>
 
             </div>
+
 
             <div
               class="party-members"
@@ -607,9 +616,11 @@
           </section>
 
 
-          <!-- WEEKLY PARTY CHALLENGE -->
-
           <section class="party-challenge">
+
+            <p class="eyebrow">
+              Shared Challenge
+            </p>
 
             <h2 id="partyChallengeTitle">
               Complete 6 Quests
@@ -645,8 +656,6 @@
           </section>
 
 
-          <!-- TREASURY -->
-
           <section
             class="party-treasure-panel"
             aria-labelledby="partyTreasureTitle"
@@ -654,9 +663,17 @@
 
             <div class="section-heading">
 
-              <h2 id="partyTreasureTitle">
-                Treasury
-              </h2>
+              <div>
+
+                <p class="eyebrow">
+                  Boss Spoils
+                </p>
+
+                <h2 id="partyTreasureTitle">
+                  Fellowship Treasury
+                </h2>
+
+              </div>
 
 
               <span
@@ -678,25 +695,27 @@
               class="party-treasure-grid"
               id="partyTreasureGrid"
             >
-
               <p class="muted">
                 No consumable treasure yet.
               </p>
-
             </div>
 
           </section>
 
 
-          <!-- RECENT ACTIVITY -->
-
           <section class="party-section">
 
             <div class="section-heading">
 
-              <h2>
-                Recent Activity
-              </h2>
+              <div>
+                <p class="eyebrow">
+                  Chronicle
+                </p>
+
+                <h2>
+                  Recent Activity
+                </h2>
+              </div>
 
 
               <button
@@ -714,11 +733,9 @@
               class="party-activity-list"
               id="partyActivityList"
             >
-
               <p class="muted">
                 No party activity yet.
               </p>
-
             </div>
 
           </section>
@@ -1434,7 +1451,6 @@
 
     <div class="relic-dialog-panel">
 
-
       <div class="relic-dialog-header">
 
         <div>
@@ -1600,6 +1616,208 @@
 
 
   <!-- =====================================================
+       PARTY CHARACTER DIALOG
+  ====================================================== -->
+
+  <dialog
+    class="party-character-dialog"
+    id="partyCharacterDialog"
+    aria-labelledby="partyCharacterDialogName"
+  >
+
+    <div class="party-character-dialog-panel">
+
+      <div class="party-character-dialog-header">
+
+        <div>
+
+          <p class="eyebrow">
+            Fellowship Member
+          </p>
+
+          <h2 id="partyCharacterDialogName">
+            Adventurer
+          </h2>
+
+          <p
+            class="party-character-dialog-class"
+            id="partyCharacterDialogClass"
+          >
+            Unknown Class
+          </p>
+
+        </div>
+
+
+        <button
+          class="close-button"
+          id="closePartyCharacterButton"
+          type="button"
+          aria-label="Close character profile"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="party-character-dialog-art-shell">
+
+        <img
+          class="party-character-dialog-image"
+          id="partyCharacterDialogImage"
+          src=""
+          alt=""
+        >
+
+      </div>
+
+
+      <p
+        class="party-character-dialog-description"
+        id="partyCharacterDialogDescription"
+      ></p>
+
+
+      <div class="party-profile-stats-grid">
+
+        <article class="party-profile-stat strength">
+
+          <span>
+            Strength
+          </span>
+
+          <strong id="partyProfileStrengthLevel">
+            Lv. 1
+          </strong>
+
+          <div class="party-profile-stat-track">
+
+            <div
+              class="party-profile-stat-fill"
+              id="partyProfileStrengthBar"
+            ></div>
+
+          </div>
+
+          <small id="partyProfileStrengthXp">
+            0 XP
+          </small>
+
+        </article>
+
+
+        <article class="party-profile-stat endurance">
+
+          <span>
+            Endurance
+          </span>
+
+          <strong id="partyProfileEnduranceLevel">
+            Lv. 1
+          </strong>
+
+          <div class="party-profile-stat-track">
+
+            <div
+              class="party-profile-stat-fill"
+              id="partyProfileEnduranceBar"
+            ></div>
+
+          </div>
+
+          <small id="partyProfileEnduranceXp">
+            0 XP
+          </small>
+
+        </article>
+
+
+        <article class="party-profile-stat restoration">
+
+          <span>
+            Restoration
+          </span>
+
+          <strong id="partyProfileRestorationLevel">
+            Lv. 1
+          </strong>
+
+          <div class="party-profile-stat-track">
+
+            <div
+              class="party-profile-stat-fill"
+              id="partyProfileRestorationBar"
+            ></div>
+
+          </div>
+
+          <small id="partyProfileRestorationXp">
+            0 XP
+          </small>
+
+        </article>
+
+      </div>
+
+
+      <section class="party-profile-record">
+
+        <p class="eyebrow">
+          Adventurer Record
+        </p>
+
+
+        <div class="party-profile-record-grid">
+
+          <div>
+
+            <span>
+              Quests This Week
+            </span>
+
+            <strong id="partyProfileWeeklyQuests">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Total Quests
+            </span>
+
+            <strong id="partyProfileTotalQuests">
+              0
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Total XP
+            </span>
+
+            <strong id="partyProfileTotalXp">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </dialog>
+
+
+  <!-- =====================================================
        TOAST
   ====================================================== -->
 
@@ -1616,7 +1834,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=56"></script>
 
 </body>
 </html>
