@@ -3603,3 +3603,648 @@ body[data-active-view="party"] .party-activity-item {
     margin-top: 0;
   }
 }
+/* =========================================================
+   FELLOWSHIP CHARACTER PROFILE — ASSET / RPG POLISH
+   Uses the existing Quest Board visual language.
+   Drop at the END of styles.css.
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   MAIN CHARACTER PROFILE PANEL
+   --------------------------------------------------------- */
+
+.party-character-dialog {
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(125, 82, 35, .16),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(18, 16, 12, .98),
+      rgba(7, 7, 6, .99)
+    );
+
+  border:
+    1px solid
+    rgba(170, 126, 62, .48);
+
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, .78),
+    inset 0 0 45px rgba(160, 105, 37, .055);
+}
+
+
+/* subtle old-page / parchment warmth */
+
+.party-character-dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 224, 165, .035),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 80% 65%,
+      rgba(153, 101, 42, .04),
+      transparent 34%
+    );
+
+  opacity: .9;
+}
+
+.party-character-dialog > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ---------------------------------------------------------
+   CHARACTER ART
+   Let the existing card asset feel like the centerpiece.
+   --------------------------------------------------------- */
+
+.party-character-dialog-image-wrap {
+  position: relative;
+  overflow: hidden;
+
+  margin:
+    0
+    0
+    26px;
+
+  padding: 0;
+
+  border-radius: 18px;
+
+  border:
+    1px solid
+    rgba(178, 130, 63, .42);
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(95, 61, 32, .13),
+      rgba(0, 0, 0, .82)
+    );
+
+  box-shadow:
+    inset 0 0 28px rgba(0, 0, 0, .72),
+    0 10px 28px rgba(0, 0, 0, .32);
+}
+
+
+.party-character-dialog-image {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  max-height: none;
+
+  object-fit: contain;
+  object-position: center;
+
+  margin: 0 auto;
+
+  filter:
+    saturate(.98)
+    contrast(1.02);
+}
+
+
+/* faint frame glow */
+
+.party-character-dialog-image-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  border-radius: inherit;
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(226, 183, 109, .07),
+    inset 0 0 35px
+    rgba(0, 0, 0, .45);
+}
+
+
+/* ---------------------------------------------------------
+   CHARACTER DESCRIPTION
+   --------------------------------------------------------- */
+
+.party-character-dialog-description {
+  margin:
+    22px
+    4px
+    28px;
+
+  color:
+    rgba(236, 224, 202, .94);
+
+  font-size:
+    clamp(1rem, 3.8vw, 1.12rem);
+
+  line-height: 1.72;
+
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, .8);
+}
+
+
+/* ---------------------------------------------------------
+   STAT PANELS
+   More like RPG stat plaques than generic cards.
+   --------------------------------------------------------- */
+
+.party-profile-stat {
+  position: relative;
+  overflow: hidden;
+
+  padding:
+    22px
+    22px
+    20px;
+
+  margin-bottom: 14px;
+
+  border-radius: 17px;
+
+  border:
+    1px solid
+    rgba(163, 119, 58, .38);
+
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(173, 121, 55, .08),
+      transparent 45%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(16, 15, 12, .96),
+      rgba(5, 6, 5, .98)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255, 225, 175, .035),
+    inset 0 -14px 28px
+    rgba(0, 0, 0, .18);
+}
+
+
+/* tiny ornamental inner frame */
+
+.party-profile-stat::after {
+  content: "";
+  position: absolute;
+
+  inset: 6px;
+
+  pointer-events: none;
+
+  border:
+    1px solid
+    rgba(190, 145, 78, .055);
+
+  border-radius: 12px;
+}
+
+
+.party-profile-stat-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 16px;
+}
+
+
+.party-profile-stat-name {
+  color:
+    #eadbc1;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    .88rem;
+
+  font-weight: 700;
+
+  letter-spacing:
+    .065em;
+
+  text-transform: uppercase;
+}
+
+
+.party-profile-stat-level {
+  color:
+    #f0dfc1;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    1.05rem;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+/* ---------------------------------------------------------
+   XP BARS
+   --------------------------------------------------------- */
+
+.party-profile-stat-bar {
+  position: relative;
+
+  width: 100%;
+  height: 10px;
+
+  overflow: hidden;
+
+  margin:
+    4px
+    0
+    18px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(0, 0, 0, .72);
+
+  box-shadow:
+    inset 0 1px 4px
+    rgba(0, 0, 0, .9);
+}
+
+
+.party-profile-stat-bar > span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  box-shadow:
+    0 0 10px
+    rgba(255, 255, 255, .05);
+}
+
+
+/* keep the three existing stat identities */
+
+#partyProfileStrengthBar {
+  background:
+    linear-gradient(
+      90deg,
+      #8d382d,
+      #bd5946
+    );
+}
+
+#partyProfileEnduranceBar {
+  background:
+    linear-gradient(
+      90deg,
+      #415d34,
+      #75965a
+    );
+}
+
+#partyProfileRestorationBar {
+  background:
+    linear-gradient(
+      90deg,
+      #47355e,
+      #8163a3
+    );
+}
+
+
+.party-profile-stat-xp {
+  color:
+    rgba(236, 219, 190, .91);
+
+  font-size:
+    .86rem;
+
+  font-weight: 700;
+
+  letter-spacing:
+    .02em;
+}
+
+
+/* ---------------------------------------------------------
+   ADVENTURER RECORD
+   Turn this into one unified character-sheet panel.
+   --------------------------------------------------------- */
+
+.party-profile-record {
+  position: relative;
+
+  margin-top: 20px;
+
+  padding:
+    24px
+    20px
+    20px;
+
+  border-radius: 18px;
+
+  border:
+    1px solid
+    rgba(167, 122, 59, .4);
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(169, 114, 47, .09),
+      transparent 55%
+    ),
+    rgba(5, 6, 5, .9);
+
+  box-shadow:
+    inset 0 0 30px
+    rgba(0, 0, 0, .3);
+}
+
+
+.party-profile-record-title {
+  margin:
+    0
+    0
+    18px;
+
+  color:
+    #d9a76d;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    .96rem;
+
+  font-weight: 700;
+
+  letter-spacing:
+    .13em;
+
+  text-transform: uppercase;
+}
+
+
+.party-profile-record-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+
+.party-profile-record-item {
+  display: flex;
+
+  min-width: 0;
+  min-height: 112px;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+
+  padding:
+    15px
+    8px
+    14px;
+
+  text-align: center;
+
+  border-radius: 13px;
+
+  border:
+    1px solid
+    rgba(159, 115, 56, .25);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(13, 13, 11, .94),
+      rgba(5, 5, 5, .96)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255, 229, 188, .025);
+}
+
+
+.party-profile-record-item span {
+  color:
+    rgba(236, 224, 203, .92);
+
+  font-size:
+    clamp(.76rem, 3.3vw, .88rem);
+
+  line-height: 1.2;
+}
+
+
+.party-profile-record-item strong {
+  color:
+    #e0b66f;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(1.45rem, 6vw, 1.85rem);
+
+  font-weight: 500;
+
+  line-height: 1;
+}
+
+
+/* ---------------------------------------------------------
+   FELLOWSHIP MEMBER PORTRAITS
+   Use the FULL existing character-card assets.
+   --------------------------------------------------------- */
+
+.party-member-portrait-button {
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  width: 78px;
+  height: 108px;
+
+  flex:
+    0
+    0
+    78px;
+
+  overflow: hidden;
+
+  padding: 0;
+
+  border-radius: 12px;
+
+  border:
+    1px solid
+    rgba(178, 130, 63, .4);
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(105, 74, 39, .14),
+      rgba(0, 0, 0, .75)
+    );
+
+  cursor: pointer;
+
+  box-shadow:
+    inset 0 0 16px
+    rgba(0, 0, 0, .48),
+    0 5px 14px
+    rgba(0, 0, 0, .22);
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+
+.party-member-portrait-button:hover,
+.party-member-portrait-button:focus-visible {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(219, 166, 88, .7);
+
+  box-shadow:
+    0 8px 18px
+    rgba(0, 0, 0, .34),
+    0 0 14px
+    rgba(150, 102, 43, .1);
+
+  outline: none;
+}
+
+
+.party-member-portrait {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: center;
+
+  background:
+    rgba(0, 0, 0, .28);
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+  .party-character-dialog {
+    width:
+      calc(100vw - 28px);
+
+    max-width:
+      calc(100vw - 28px);
+
+    padding:
+      18px;
+  }
+
+
+  .party-character-dialog-description {
+    margin-top: 18px;
+
+    font-size:
+      1rem;
+
+    line-height:
+      1.68;
+  }
+
+
+  .party-profile-stat {
+    padding:
+      20px
+      18px
+      18px;
+  }
+
+
+  .party-profile-record {
+    padding:
+      22px
+      14px
+      16px;
+  }
+
+
+  .party-profile-record-grid {
+    gap: 8px;
+  }
+
+
+  .party-profile-record-item {
+    min-height: 104px;
+
+    padding:
+      14px
+      5px
+      12px;
+  }
+
+
+  .party-member-portrait-button {
+    width: 68px;
+    height: 94px;
+
+    flex-basis: 68px;
+  }
+
+}
