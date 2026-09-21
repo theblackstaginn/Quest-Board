@@ -4097,10 +4097,672 @@ body[data-active-view="party"] .party-activity-item {
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
+   50. FELLOWSHIP CHARACTER PROFILE — ASSET-DRIVEN PASS
+   Uses the REAL existing Fellowship markup + Quest Board art
+========================================================= */
+
+
+/* =========================================================
+   DIALOG SHELL
+========================================================= */
+
+.party-character-dialog {
+  z-index: 150;
+
+  width: min(
+    calc(100% - 18px),
+    650px
+  );
+
+  max-height: 95vh;
+
+  margin: auto;
+  padding: 0;
+
+  overflow: visible;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: var(--cream);
+}
+
+
+.party-character-dialog::backdrop {
+  background:
+    rgba(0, 0, 0, 0.9);
+
+  backdrop-filter:
+    blur(6px);
+
+  -webkit-backdrop-filter:
+    blur(6px);
+}
+
+
+/* =========================================================
+   MAIN PROFILE PANEL
+
+   Uses the same mossy stone asset as the Character page.
+========================================================= */
+
+.party-character-dialog-panel {
+  position: relative;
+
+  width: 100%;
+  max-height: 93vh;
+
+  padding: 20px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+
+  border: 0;
+  border-radius: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(5, 6, 5, 0.14),
+      rgba(5, 6, 5, 0.28)
+    ),
+    url("mossy-stone.webp");
+
+  background-size:
+    100% 100%,
+    100% 100%;
+
+  background-position:
+    center,
+    center;
+
+  background-repeat:
+    no-repeat,
+    no-repeat;
+
+  box-shadow:
+    var(--shadow-heavy);
+
+  -webkit-overflow-scrolling:
+    touch;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.party-character-dialog-header {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+
+.party-character-dialog-header h2 {
+  margin-bottom: 5px;
+
+  color:
+    var(--cream);
+
+  font-family:
+    var(--font-display);
+
+  text-shadow:
+    0 2px 5px
+    rgba(0, 0, 0, 0.82);
+}
+
+
+.party-character-dialog-class {
+  margin: 0;
+
+  color:
+    var(--gold-light);
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.7rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.06em;
+
+  line-height:
+    1.35;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.82);
+}
+
+
+/* =========================================================
+   CHARACTER TAROT ART
+
+   No generic black frame.
+   Let the existing character card be the artwork.
+========================================================= */
+
+.party-character-dialog-art-shell {
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+
+  max-height: none;
+
+  margin: 0 0 20px;
+  padding: 0;
+
+  overflow: visible;
+
+  border: 0;
+  border-radius: 0;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+
+.party-character-dialog-image {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+
+  height: auto;
+  max-height: none;
+
+  margin: 0 auto;
+
+  object-fit: contain;
+  object-position: center;
+
+  filter:
+    drop-shadow(
+      0 18px 28px
+      rgba(0, 0, 0, 0.6)
+    );
+}
+
+
+/* =========================================================
+   CHARACTER LORE
+========================================================= */
+
+.party-character-dialog-description {
+  margin:
+    18px
+    5px
+    24px;
+
+  color:
+    #ded5c2;
+
+  font-family:
+    var(--font-body);
+
+  font-size:
+    1.02rem;
+
+  font-weight:
+    500;
+
+  line-height:
+    1.58;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.82);
+}
+
+
+/* =========================================================
+   STAT GRID
+========================================================= */
+
+.party-profile-stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   STAT PANELS
+
+   THESE are the actual existing stat-panel assets.
+========================================================= */
+
+.party-profile-stat {
+  position: relative;
+
+  min-width: 0;
+  min-height: 145px;
+
+  padding:
+    26px
+    22px;
+
+  overflow: hidden;
+
+  border: 0;
+  border-radius: 0;
+
+  background-color:
+    transparent;
+
+  background-size:
+    100% 100%;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
+
+  box-shadow:
+    none;
+}
+
+
+/* Strength artwork */
+
+.party-profile-stat.strength {
+  background-image:
+    url("strength-pnl.webp");
+}
+
+
+/* Endurance artwork */
+
+.party-profile-stat.endurance {
+  background-image:
+    url("endurance-pnl.webp");
+}
+
+
+/* Restoration artwork */
+
+.party-profile-stat.restoration {
+  background-image:
+    url("restoration-pnl.webp");
+}
+
+
+/* Remove old generic decoration */
+
+.party-profile-stat::after {
+  display: none;
+}
+
+
+/* =========================================================
+   STAT LABEL
+========================================================= */
+
+.party-profile-stat > span {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  overflow: visible;
+
+  color:
+    #eee3c5;
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.65rem;
+
+  font-weight:
+    700;
+
+  letter-spacing:
+    0.04em;
+
+  text-overflow:
+    clip;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    0 2px 3px
+    rgba(0, 0, 0, 0.85);
+}
+
+
+/* =========================================================
+   STAT LEVEL
+========================================================= */
+
+.party-profile-stat > strong {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  margin:
+    7px
+    0
+    12px;
+
+  color:
+    #f3e6c7;
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    1rem;
+
+  font-weight:
+    700;
+
+  text-shadow:
+    0 2px 4px
+    rgba(0, 0, 0, 0.85);
+}
+
+
+/* =========================================================
+   STAT XP TEXT
+========================================================= */
+
+.party-profile-stat > small {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  margin-top:
+    8px;
+
+  color:
+    #e0d5bd;
+
+  font-family:
+    var(--font-body);
+
+  font-size:
+    0.79rem;
+
+  font-weight:
+    600;
+
+  text-shadow:
+    0 2px 3px
+    rgba(0, 0, 0, 0.85);
+}
+
+
+/* =========================================================
+   STAT PROGRESS TRACK
+========================================================= */
+
+.party-profile-stat-track {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  height: 6px;
+
+  overflow: hidden;
+
+  border: 0;
+  border-radius:
+    999px;
+
+  background:
+    rgba(0, 0, 0, 0.74);
+
+  box-shadow:
+    inset
+    0
+    2px
+    4px
+    rgba(0, 0, 0, 0.8);
+}
+
+
+.party-profile-stat-fill {
+  width: 0%;
+  height: 100%;
+
+  border-radius:
+    inherit;
+
+  transition:
+    width
+    300ms
+    ease;
+}
+
+
+.party-profile-stat.strength
+.party-profile-stat-fill {
+  background:
+    var(--strength);
+}
+
+
+.party-profile-stat.endurance
+.party-profile-stat-fill {
+  background:
+    #678353;
+}
+
+
+.party-profile-stat.restoration
+.party-profile-stat-fill {
+  background:
+    #5d7a84;
+}
+
+
+/* =========================================================
+   ADVENTURER RECORD
+
+   Use the parchment/body asset instead of black UI boxes.
+========================================================= */
+
+.party-profile-record {
+  position: relative;
+
+  margin-top:
+    18px;
+
+  padding:
+    24px;
+
+  overflow: hidden;
+
+  border: 0;
+  border-radius: 0;
+
+  background-image:
+    url("body-bg.webp");
+
+  background-size:
+    100% 100%;
+
+  background-position:
+    center;
+
+  background-repeat:
+    no-repeat;
+
+  color:
+    var(--ink);
+
+  box-shadow:
+    var(--shadow);
+}
+
+
+/* Adventurer Record heading */
+
+.party-profile-record .eyebrow {
+  margin-bottom:
+    15px;
+
+  color:
+    #6d4521;
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    0.67rem;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.12em;
+
+  text-transform:
+    uppercase;
+
+  text-shadow:
+    none;
+}
+
+
+/* =========================================================
+   RECORD GRID
+========================================================= */
+
+.party-profile-record-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap:
+    10px;
+}
+
+
+/* Actual HTML uses direct div children */
+
+.party-profile-record-grid > div {
+  display: flex;
+
+  min-width: 0;
+  min-height: 104px;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding:
+    13px
+    8px;
+
+  border:
+    1px solid
+    rgba(79, 49, 24, 0.26);
+
+  border-radius:
+    9px;
+
+  background:
+    rgba(91, 58, 28, 0.08);
+
+  text-align:
+    center;
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(255, 244, 211, 0.22);
+}
+
+
+.party-profile-record-grid span {
+  display: block;
+
+  min-height:
+    2.4em;
+
+  color:
+    #594632;
+
+  font-family:
+    var(--font-body);
+
+  font-size:
+    0.74rem;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.2;
+}
+
+
+.party-profile-record-grid strong {
+  display: block;
+
+  margin-top:
+    8px;
+
+  color:
+    #70451f;
+
+  font-family:
+    var(--font-heading);
+
+  font-size:
+    1.18rem;
+
+  font-weight:
+    800;
+}
+
+
+/* =========================================================
    FELLOWSHIP MEMBER PORTRAITS
-   Use the FULL existing character-card assets.
-   --------------------------------------------------------- */
+
+   Keep the full tarot artwork visible in the Fellowship list.
+========================================================= */
 
 .party-member-portrait-button {
   position: relative;
@@ -4108,61 +4770,63 @@ body[data-active-view="party"] .party-activity-item {
   display: grid;
   place-items: center;
 
-  width: 78px;
-  height: 108px;
+  width: 70px;
+  height: 96px;
 
-  flex:
-    0
-    0
-    78px;
+  margin: 0;
+  padding: 0;
 
   overflow: hidden;
 
-  padding: 0;
-
-  border-radius: 12px;
-
   border:
     1px solid
-    rgba(178, 130, 63, .4);
+    rgba(83, 54, 26, 0.52);
+
+  border-radius:
+    5px;
+
+  outline:
+    none;
 
   background:
-    radial-gradient(
-      circle at center,
-      rgba(105, 74, 39, .14),
-      rgba(0, 0, 0, .75)
-    );
-
-  cursor: pointer;
+    rgba(20, 13, 8, 0.92);
 
   box-shadow:
-    inset 0 0 16px
-    rgba(0, 0, 0, .48),
-    0 5px 14px
-    rgba(0, 0, 0, .22);
+    0 5px 12px
+    rgba(0, 0, 0, 0.3);
+
+  cursor:
+    pointer;
 
   transition:
-    transform .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease;
+    transform
+    140ms
+    ease,
+    filter
+    140ms
+    ease;
 }
 
 
-.party-member-portrait-button:hover,
-.party-member-portrait-button:focus-visible {
+.party-member-portrait-button:hover {
+  filter:
+    brightness(1.08);
+}
+
+
+.party-member-portrait-button:active {
   transform:
-    translateY(-2px);
+    scale(0.96);
+}
 
-  border-color:
-    rgba(219, 166, 88, .7);
 
-  box-shadow:
-    0 8px 18px
-    rgba(0, 0, 0, .34),
-    0 0 14px
-    rgba(150, 102, 43, .1);
+.party-member-portrait-button:focus-visible {
+  outline:
+    2px solid
+    #8f612d;
 
-  outline: none;
+  outline-offset:
+    2px;
 }
 
 
@@ -4172,79 +4836,258 @@ body[data-active-view="party"] .party-activity-item {
   width: 100%;
   height: 100%;
 
-  object-fit: contain;
-  object-position: center;
+  border: 0;
+
+  object-fit:
+    contain;
+
+  object-position:
+    center;
 
   background:
-    rgba(0, 0, 0, .28);
+    #080705;
+
+  box-shadow:
+    none;
 }
 
 
-/* ---------------------------------------------------------
-   MOBILE
-   --------------------------------------------------------- */
+/* =========================================================
+   MOBILE CHARACTER PROFILE
+========================================================= */
 
-@media (max-width: 600px) {
+@media (max-width: 560px) {
 
   .party-character-dialog {
     width:
-      calc(100vw - 28px);
-
-    max-width:
-      calc(100vw - 28px);
-
-    padding:
-      18px;
+      calc(100% - 12px);
   }
 
 
-  .party-character-dialog-description {
-    margin-top: 18px;
+  .party-character-dialog-panel {
+    padding:
+      16px;
+  }
 
-    font-size:
-      1rem;
 
-    line-height:
-      1.68;
+  /*
+    Full character art.
+    No max-height cropping.
+  */
+
+  .party-character-dialog-art-shell {
+    max-height:
+      none;
+
+    padding:
+      0;
+  }
+
+
+  .party-character-dialog-image {
+    width:
+      100%;
+
+    max-height:
+      none;
+  }
+
+
+  /*
+    Match the Character page:
+    one large illustrated stat panel per row.
+  */
+
+  .party-profile-stats-grid {
+    grid-template-columns:
+      1fr;
+
+    gap:
+      10px;
   }
 
 
   .party-profile-stat {
+    display: grid;
+
+    grid-template-columns:
+      1fr
+      auto;
+
+    align-items:
+      center;
+
+    gap:
+      8px
+      16px;
+
+    min-height:
+      158px;
+
+    margin:
+      0;
+
     padding:
-      20px
-      18px
-      18px;
+      34px
+      32px;
+  }
+
+
+  .party-profile-stat > span {
+    grid-column:
+      1;
+
+    grid-row:
+      1;
+  }
+
+
+  .party-profile-stat > strong {
+    grid-column:
+      2;
+
+    grid-row:
+      1;
+
+    margin:
+      0;
+
+    text-align:
+      right;
+  }
+
+
+  .party-profile-stat-track {
+    grid-column:
+      1 / -1;
+
+    width:
+      100%;
+
+    margin:
+      6px
+      0
+      0;
+  }
+
+
+  .party-profile-stat > small {
+    grid-column:
+      1 / -1;
+
+    margin-top:
+      0;
   }
 
 
   .party-profile-record {
     padding:
-      22px
-      14px
-      16px;
-  }
-
-
-  .party-profile-record-grid {
-    gap: 8px;
-  }
-
-
-  .party-profile-record-item {
-    min-height: 104px;
-
-    padding:
-      14px
-      5px
-      12px;
+      22px;
   }
 
 
   .party-member-portrait-button {
-    width: 68px;
-    height: 94px;
+    width:
+      62px;
 
-    flex-basis: 68px;
+    height:
+      86px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 390px) {
+
+  .party-character-dialog-panel {
+    padding:
+      14px;
+  }
+
+
+  .party-character-dialog-header h2 {
+    font-size:
+      1.3rem;
+  }
+
+
+  .party-character-dialog-class {
+    font-size:
+      0.62rem;
+  }
+
+
+  .party-character-dialog-description {
+    font-size:
+      0.94rem;
+  }
+
+
+  .party-profile-stat {
+    min-height:
+      145px;
+
+    padding:
+      30px
+      27px;
+  }
+
+
+  .party-profile-record {
+    padding:
+      20px;
+  }
+
+
+  /*
+    Keep all three record stats together,
+    like the Character summary.
+  */
+
+  .party-profile-record-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap:
+      6px;
+  }
+
+
+  .party-profile-record-grid > div {
+    min-height:
+      92px;
+
+    padding:
+      10px
+      5px;
+  }
+
+
+  .party-profile-record-grid span {
+    min-height:
+      2.4em;
+
+    font-size:
+      0.66rem;
+  }
+
+
+  .party-profile-record-grid strong {
+    font-size:
+      1rem;
+  }
+
+
+  .party-member-portrait-button {
+    width:
+      55px;
+
+    height:
+      76px;
   }
 
 }
