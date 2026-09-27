@@ -556,6 +556,26 @@ const BOSS_ENDURANCE_XP = 50;
 const BOSS_GOLD = 100;
 const BOSS_CRYSTALS = 3;
 
+const CAMPAIGN_GOAL = 24;
+const CAMPAIGN_LOCATIONS = [
+  { at:0,name:"Guild Hall",glyph:"⌂" },{ at:3,name:"Old Road",glyph:"Ⅰ" },{ at:6,name:"Whispering Pines",glyph:"♠" },
+  { at:10,name:"Mossgate",glyph:"◇" },{ at:15,name:"Warden's Crossing",glyph:"⚔" },{ at:20,name:"Blackwood Ruins",glyph:"♜" },{ at:24,name:"Heart of the Wood",glyph:"★" }
+];
+const ADVENTURER_TITLES = [{level:1,title:"Wayfarer"},{level:3,title:"Adventurer"},{level:5,title:"Pathfinder"},{level:8,title:"Vanguard"},{level:12,title:"Champion"},{level:18,title:"Warden"},{level:25,title:"Legend of the Guild"}];
+const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:"ranger",title:"Follow the Blackwood Trail"},{questId:"keep",title:"Break the Mossgate Guard"},{questId:"boss",title:"Defeat the Briar Warden"}];
+const ACHIEVEMENTS = [
+ {id:"first-step",name:"First Step",copy:"Complete your first quest.",test:s=>s.history.length>=1},{id:"road-worn",name:"Road-Worn",copy:"Complete 10 quests.",test:s=>s.history.length>=10},
+ {id:"veteran",name:"Guild Veteran",copy:"Complete 25 quests.",test:s=>s.history.length>=25},{id:"strength-ii",name:"Ironbound",copy:"Reach Strength level 3.",test:s=>getLevelData(s.xp.strength).level>=3},
+ {id:"endurance-ii",name:"Long Road",copy:"Reach Endurance level 3.",test:s=>getLevelData(s.xp.endurance).level>=3},{id:"restoration-ii",name:"Restored",copy:"Reach Restoration level 3.",test:s=>getLevelData(s.xp.restoration).level>=3},
+ {id:"week",name:"Conqueror",copy:"Conquer a week.",test:s=>Boolean(s.weekConqueredRewardWeek)},{id:"boss",name:"Warden Breaker",copy:"Defeat a weekly boss.",test:s=>s.history.some(x=>x.questId==="boss")},
+ {id:"collector",name:"Relic Hunter",copy:"Discover 5 relics.",test:s=>s.discoveredRelics.length>=5},{id:"balanced",name:"Threefold Path",copy:"Reach level 2 in all stats.",test:s=>["strength","endurance","restoration"].every(k=>getLevelData(s.xp[k]).level>=2)},
+ {id:"blackwood",name:"Blackwood Walker",copy:"Travel 12 campaign steps.",test:s=>(s.campaignProgress||0)>=12},{id:"blackwood-hero",name:"Heart of the Wood",copy:"Complete Campaign I.",test:s=>(s.campaignProgress||0)>=CAMPAIGN_GOAL}
+];
+const EQUIPMENT_SLOTS=[{id:"weapon",label:"Weapon"},{id:"armor",label:"Armor"},{id:"charm",label:"Charm"}];
+const EQUIPMENT_RELICS={"forgebound-hammer":{slot:"weapon",bonus:"+5% quest Gold",goldMultiplier:1.05},"cloak-of-endurance":{slot:"armor",bonus:"+5 Endurance XP",xpType:"endurance",xpBonus:5},"lantern-of-guidance":{slot:"charm",bonus:"+2 Gold per quest",flatGold:2},"band-of-inner-focus":{slot:"charm",bonus:"+5 Strength XP",xpType:"strength",xpBonus:5},"chalice-of-renewal":{slot:"charm",bonus:"+5 Restoration XP",xpType:"restoration",xpBonus:5}};
+const RANDOM_ENCOUNTERS=[{glyph:"¤",title:"The Road Merchant",copy:"A hooded trader recognizes the Guild seal and presses a coin purse into your hand.",reward:"gold",amount:8},{glyph:"✦",title:"Shrine of the Old Road",copy:"Moss-covered stones hum as you pass. Something answers your persistence.",reward:"xp",amount:8},{glyph:"◆",title:"Crystal Vein",copy:"A shard of pale light glints beneath a broken root.",reward:"crystals",amount:1},{glyph:"▣",title:"Forgotten Cache",copy:"An old Guild cache survived beneath the ferns.",reward:"gold",amount:12}];
+const NPCS=[{id:"guildmaster",name:"Guildmaster Rowan",role:"Questmaster",glyph:"⚔",dialogue:"The board changes, but the rule does not: return stronger than you left."},{id:"blacksmith",name:"Brunna Ironhand",role:"Blacksmith",glyph:"⚒",dialogue:"Relics aren't decorations. Equip the right one and make it earn its keep."},{id:"archivist",name:"Archivist Elowen",role:"Keeper of Lore",glyph:"✦",dialogue:"Every road leaves a record. Yours is beginning to fill the shelves."},{id:"healer",name:"Sister Moss",role:"Restoration",glyph:"☘",dialogue:"Recovery is not retreat. Even heroes have to mend."}];
+
 
 // =========================================================
 // 6. APP STATE
@@ -836,7 +856,14 @@ function createFreshState() {
       null,
 
     bossRewardsClaimedWeek:
-      null
+      null,
+    campaignProgress: 0,
+    questChainStage: 0,
+    achievements: [],
+    equippedRelics: { weapon:null, armor:null, charm:null },
+    codexDiscoveries: ["guild-hall"],
+    encounterCount: 0,
+    onboardingComplete: false
   };
 }
 
@@ -853,6 +880,9 @@ function migrateState(parsed) {
       ...fresh.xp,
       ...(parsed?.xp || {})
     },
+    equippedRelics: { ...fresh.equippedRelics, ...(parsed?.equippedRelics || {}) },
+    achievements: Array.isArray(parsed?.achievements) ? parsed.achievements : [],
+    codexDiscoveries: Array.isArray(parsed?.codexDiscoveries) ? parsed.codexDiscoveries : fresh.codexDiscoveries,
 
     gold:
       Number(parsed?.gold)
@@ -2137,6 +2167,30 @@ function showNextRelicReveal() {
 }
 
 
+
+function getOverallLevel(s){return Math.floor((Number(s.xp.strength||0)+Number(s.xp.endurance||0)+Number(s.xp.restoration||0))/XP_PER_LEVEL)+1;}
+function getAdventurerTitle(s){const l=getOverallLevel(s);return ADVENTURER_TITLES.filter(x=>l>=x.level).at(-1)?.title||"Wayfarer";}
+function getCampaignLocation(p){return CAMPAIGN_LOCATIONS.filter(x=>p>=x.at).at(-1)||CAMPAIGN_LOCATIONS[0];}
+function getEquipmentBonuses(s){const o={flatGold:0,goldMultiplier:1,xpBonus:{strength:0,endurance:0,restoration:0}};Object.values(s.equippedRelics||{}).forEach(id=>{const b=EQUIPMENT_RELICS[id];if(!b)return;o.flatGold+=Number(b.flatGold||0);o.goldMultiplier*=Number(b.goldMultiplier||1);if(b.xpType)o.xpBonus[b.xpType]+=Number(b.xpBonus||0);});return o;}
+function evaluateAchievements(s){const e=new Set(s.achievements||[]),a=[];ACHIEVEMENTS.forEach(x=>{if(!e.has(x.id)&&x.test(s)){e.add(x.id);a.push(x.id);}});if(a.length){s.achievements=Array.from(e);saveState(s);}return a;}
+function renderCampaign(s){const p=Math.min(CAMPAIGN_GOAL,Math.max(Number(s.campaignProgress||0),Math.min(CAMPAIGN_GOAL,s.history.filter(x=>x.questId!=="boss").length)));s.campaignProgress=p;const c=getCampaignLocation(p);$("#campaignRank").textContent=getAdventurerTitle(s);$("#campaignLocation").textContent=c.name;$("#campaignProgressText").textContent=`${p} / ${CAMPAIGN_GOAL} quests`;$("#campaignNarrative").textContent=p>=CAMPAIGN_GOAL?"The heart of the Blackwood stands open. Campaign I is conquered.":`Current location: ${c.name}. Every completed quest pushes the expedition deeper into the wood.`;$("#campaignMap").innerHTML=CAMPAIGN_LOCATIONS.map((x,i)=>`<div class="campaign-map-stop ${p>=x.at?"is-unlocked":""} ${c.name===x.name?"is-current":""}"><span class="campaign-map-node">${x.glyph}</span><small>${escapeHtml(x.name)}</small></div>${i<CAMPAIGN_LOCATIONS.length-1?'<span class="campaign-map-path"></span>':""}`).join("");}
+function getDailyContracts(){const d=new Date().toISOString().slice(0,10);let seed=Array.from(d).reduce((s,c)=>s+c.charCodeAt(0),0);const p=[...QUESTS],o=[];while(p.length&&o.length<3){seed=(seed*9301+49297)%233280;o.push(p.splice(seed%p.length,1)[0]);}return o;}
+function renderDailyContracts(s){const g=$("#dailyContractGrid");if(!g)return;const d=new Date().toISOString().slice(0,10),done=new Set(s.history.filter(x=>x.completedAt?.startsWith(d)).map(x=>x.questId));g.innerHTML=getDailyContracts().map(q=>`<button class="daily-contract ${done.has(q.id)?"is-complete":""}" type="button" data-quest-id="${q.id}"><span>${done.has(q.id)?"✓":"◆"}</span><div><strong>${escapeHtml(q.title)}</strong><small>${escapeHtml(q.category)} · +${q.gold} Gold</small></div></button>`).join("");}
+function getQuestChainStage(s){let n=Math.max(0,Number(s.questChainStage||0));while(n<QUEST_CHAIN.length&&s.history.some(x=>x.questId===QUEST_CHAIN[n].questId))n++;s.questChainStage=n;return n;}
+function renderQuestChain(s){const n=getQuestChainStage(s);$("#questChainProgress").textContent=`${Math.min(n,QUEST_CHAIN.length)} / ${QUEST_CHAIN.length}`;$("#questChainSteps").innerHTML=QUEST_CHAIN.map((x,i)=>`<span class="quest-chain-step ${i<n?"is-complete":""} ${i===n?"is-active":""}">${i<n?"✓":i+1}</span>`).join("");const b=$("#questChainButton");if(n>=QUEST_CHAIN.length){$("#questChainCopy").textContent="The Briar Warden has fallen. The first Blackwood story is complete.";b.textContent="Story Complete";b.disabled=true;return;}const c=QUEST_CHAIN[n];$("#questChainCopy").textContent=`Next: ${c.title}`;b.textContent=n?"Continue Story":"Begin Story Quest";b.disabled=c.questId==="boss"&&Boolean($("#bossButton")?.disabled);}
+function renderNpcs(){const g=$("#npcGrid");if(g)g.innerHTML=NPCS.map(n=>`<button class="npc-card" type="button" data-npc-id="${n.id}"><span class="npc-glyph">${n.glyph}</span><strong>${escapeHtml(n.name)}</strong><small>${escapeHtml(n.role)}</small></button>`).join("");}
+function renderAchievements(s){const e=new Set(s.achievements||[]);$("#achievementCount").textContent=`${e.size} / ${ACHIEVEMENTS.length}`;$("#achievementGrid").innerHTML=ACHIEVEMENTS.map(a=>{const on=e.has(a.id);return `<article class="achievement-card ${on?"is-unlocked":"is-locked"}"><img src="${on?"badges/quest-completed.webp":"badges/secret-acheivment.webp"}" alt=""><div><strong>${on?escapeHtml(a.name):"Hidden Feat"}</strong><small>${on?escapeHtml(a.copy):"Continue your campaign to reveal this achievement."}</small></div></article>`;}).join("");}
+function renderEquipment(s){const e=s.equippedRelics||{};$("#equipmentSlots").innerHTML=EQUIPMENT_SLOTS.map(x=>{const r=getRelicById(e[x.id]);return `<button class="equipment-slot ${r?"is-equipped":""}" type="button" data-equipment-slot="${x.id}"><span>${x.label}</span><strong>${r?escapeHtml(r.name):"Empty"}</strong><small>${r?escapeHtml(EQUIPMENT_RELICS[r.id]?.bonus||"Relic equipped"):"Equip a discovered relic"}</small></button>`;}).join("");const a=(s.discoveredRelics||[]).map(getRelicById).filter(r=>r&&EQUIPMENT_RELICS[r.id]);$("#equipmentInventory").innerHTML=a.length?a.map(r=>{const c=EQUIPMENT_RELICS[r.id],on=e[c.slot]===r.id;return `<button class="inventory-relic ${on?"is-equipped":""}" type="button" data-equip-relic="${r.id}"><img src="${r.image}" alt=""><span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(c.bonus)}</small></span></button>`;}).join(""):'<p class="muted">Discover equippable relics to build your loadout.</p>';$("#equipmentBonusSummary").textContent=Object.values(e).filter(Boolean).map(id=>EQUIPMENT_RELICS[id]?.bonus).filter(Boolean).join(" · ")||"No bonuses equipped";}
+function renderCodex(s){const d=new Set(s.codexDiscoveries||[]),e=[{id:"guild-hall",name:"Guild Hall",type:"Location"},{id:"old-road",name:"The Old Road",type:"Location",unlock:3},{id:"whispering-pines",name:"Whispering Pines",type:"Location",unlock:6},{id:"mossgate",name:"Mossgate",type:"Location",unlock:10},{id:"briar-warden",name:"The Briar Warden",type:"Bestiary",boss:true},{id:"road-merchant",name:"Road Merchant",type:"Encounter",encounter:true}];e.forEach(x=>{if(x.unlock!==undefined&&Number(s.campaignProgress||0)>=x.unlock)d.add(x.id);if(x.boss&&s.history.some(y=>y.questId==="boss"))d.add(x.id);if(x.encounter&&Number(s.encounterCount||0)>0)d.add(x.id);});s.codexDiscoveries=Array.from(d);$("#codexCount").textContent=`${d.size} / ${e.length} discovered`;$("#codexGrid").innerHTML=e.map(x=>{const on=d.has(x.id);return `<article class="codex-entry ${on?"is-discovered":"is-locked"}"><span>${on?"✦":"?"}</span><div><strong>${on?escapeHtml(x.name):"Unknown"}</strong><small>${on?escapeHtml(x.type):"Undiscovered"}</small></div></article>`;}).join("");}
+function showRewardBurst(t){const e=$("#rewardBurst");if(!e)return;e.textContent=t;e.classList.remove("is-visible");void e.offsetWidth;e.classList.add("is-visible");setTimeout(()=>e.classList.remove("is-visible"),1300);}
+let pendingEncounter=null;
+function maybeTriggerEncounter(){const s=getState(),n=s.history.filter(x=>x.questId!=="boss").length;if(!n||n%3!==0)return;pendingEncounter=RANDOM_ENCOUNTERS[(n+Number(s.encounterCount||0))%RANDOM_ENCOUNTERS.length];$("#encounterGlyph").textContent=pendingEncounter.glyph;$("#encounterTitle").textContent=pendingEncounter.title;$("#encounterCopy").textContent=pendingEncounter.copy;$("#encounterReward").textContent=pendingEncounter.reward==="xp"?`+${pendingEncounter.amount} XP`:`+${pendingEncounter.amount} ${capitalize(pendingEncounter.reward)}`;$("#encounterDialog")?.showModal();}
+function claimEncounter(){if(!pendingEncounter)return;const s=getState();if(pendingEncounter.reward==="gold")s.gold+=pendingEncounter.amount;else if(pendingEncounter.reward==="crystals")s.crystals+=pendingEncounter.amount;else s.xp.restoration+=pendingEncounter.amount;s.encounterCount=Number(s.encounterCount||0)+1;saveState(s);$("#encounterDialog")?.close();showRewardBurst($("#encounterReward")?.textContent||"Treasure claimed");pendingEncounter=null;render();}
+function renderBossCombat(s){const p=$("#bossCombatPanel");if(!p)return;const on=activeQuest?.id==="boss";p.hidden=!on;if(!on)return;const g=Number(getSettings().weeklyGoal)||DEFAULT_WEEKLY_GOAL,c=Math.min(g,s.weeklyCompleted.length),hp=Math.max(10,100-Math.floor(c/Math.max(1,g)*70));$("#bossHpText").textContent=`${hp} / 100 HP`;$("#bossHpBar").style.width=`${hp}%`;}
+function equipRelic(id){const s=getState(),c=EQUIPMENT_RELICS[id];if(!c||!s.discoveredRelics.includes(id))return;s.equippedRelics[c.slot]=s.equippedRelics[c.slot]===id?null:id;saveState(s);render();showToast(s.equippedRelics[c.slot]?"Relic equipped.":"Relic unequipped.");}
+function openCurrentStoryQuest(){const s=getState(),n=getQuestChainStage(s);if(n<QUEST_CHAIN.length)openQuest(QUEST_CHAIN[n].questId);}
+function renderRpgSystems(s){const a=evaluateAchievements(s);renderCampaign(s);renderDailyContracts(s);renderQuestChain(s);renderNpcs();renderAchievements(s);renderEquipment(s);renderCodex(s);$("#characterTitleName").textContent=getAdventurerTitle(s);if(a.length&&appInitialized){const x=ACHIEVEMENTS.find(y=>y.id===a[0]);if(x)showRewardBurst(`Achievement: ${x.name}`);}}
+
 // =========================================================
 // 19. MAIN RENDER
 // =========================================================
@@ -2185,6 +2239,10 @@ function render({ skipParty = false } = {}) {
   );
 
   renderRelicCollection(
+    state
+  );
+
+  renderRpgSystems(
     state
   );
 
@@ -2738,6 +2796,10 @@ function openQuest(id) {
     quest
   );
 
+  renderBossCombat(
+    getState()
+  );
+
   $("#questDialog")
     .showModal();
 }
@@ -2809,13 +2871,9 @@ async function completeQuest() {
     new Date()
       .toISOString();
 
-  const earnedXp =
-    Number(completedQuest.xp)
-    || 0;
-
-  const earnedGold =
-    Number(completedQuest.gold)
-    || 0;
+  const equipmentBonuses = getEquipmentBonuses(state);
+  const earnedXp = (Number(completedQuest.xp) || 0) + (equipmentBonuses.xpBonus[completedQuest.xpType] || 0);
+  const earnedGold = Math.max(0, Math.round((Number(completedQuest.gold) || 0) * equipmentBonuses.goldMultiplier + equipmentBonuses.flatGold));
 
   state.weeklyCompleted.push({
     questId:
@@ -2830,6 +2888,8 @@ async function completeQuest() {
 
   state.gold +=
     earnedGold;
+
+  state.campaignProgress = Math.min(CAMPAIGN_GOAL, Number(state.campaignProgress || 0) + 1);
 
   state.history.unshift({
     questId:
@@ -2946,6 +3006,9 @@ async function completeQuest() {
   queueRelicReveals(
     newlyDiscoveredRelics
   );
+
+  showRewardBurst(`+${earnedXp} XP · +${earnedGold} Gold`);
+  setTimeout(maybeTriggerEncounter, 500);
 }
 
 
@@ -7196,6 +7259,13 @@ $("#savePlayerNameButton")
     savePlayerName
   );
 
+$("#questChainButton")?.addEventListener("click", openCurrentStoryQuest);
+$("#claimEncounterButton")?.addEventListener("click", claimEncounter);
+$("#beginAdventureButton")?.addEventListener("click",()=>{const s=getState();s.onboardingComplete=true;saveState(s);$("#onboardingDialog")?.close();showToast("Campaign I: The Blackwood begins.");});
+$("#npcGrid")?.addEventListener("click",e=>{const b=e.target.closest("[data-npc-id]");if(!b)return;const n=NPCS.find(x=>x.id===b.dataset.npcId);if(!n)return;$("#npcDialogue").innerHTML=`<strong>${escapeHtml(n.name)}</strong><p>${escapeHtml(n.dialogue)}</p>`;playUiSound("open");});
+$("#equipmentInventory")?.addEventListener("click",e=>{const b=e.target.closest("[data-equip-relic]");if(b)equipRelic(b.dataset.equipRelic);});
+$("#equipmentSlots")?.addEventListener("click",e=>{const b=e.target.closest("[data-equipment-slot]");if(!b)return;const id=getState().equippedRelics[b.dataset.equipmentSlot];if(id)equipRelic(id);});
+
 $("#createAccountButton")
   ?.addEventListener(
     "click",
@@ -7748,6 +7818,13 @@ async function initializeApp() {
   }
 
   restorePendingVictory();
+
+  const onboardingState=getState();
+  if(!onboardingState.onboardingComplete&&!$("#weekConqueredDialog")?.open&&!$("#bossDefeatedDialog")?.open){
+    const character=getCharacterConfig();$("#onboardingCharacterArt").src=character.card;$("#onboardingCharacterArt").alt=character.defaultName;
+    $("#onboardingClassIntro").textContent=`${character.defaultName}, ${character.className}. The Guild has marked a road into the Blackwood, and every real-world quest will carry the expedition forward.`;
+    $("#onboardingDialog")?.showModal();
+  }
 
   appInitialized =
     true;
