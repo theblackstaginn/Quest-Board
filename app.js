@@ -6300,6 +6300,86 @@ let pullRefreshing = false;
 
 const PULL_THRESHOLD = 84;
 
+function getCurrentBuildVersion() {
+  return (
+    document.querySelector(
+      'meta[name="quest-board-build"]'
+    )?.content
+    || "0"
+  );
+}
+
+async function checkForNewBuild() {
+  const response =
+    await fetch(
+      `./index.html?update-check=${Date.now()}`,
+      {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache"
+        }
+      }
+    );
+
+  if (!response.ok) {
+    return {
+      checked: false,
+      updateAvailable: false
+    };
+  }
+
+  const html =
+    await response.text();
+
+  const documentCopy =
+    new DOMParser()
+      .parseFromString(
+        html,
+        "text/html"
+      );
+
+  const latestBuild =
+    documentCopy.querySelector(
+      'meta[name="quest-board-build"]'
+    )?.content
+    || "0";
+
+  const currentBuild =
+    getCurrentBuildVersion();
+
+  return {
+    checked: true,
+    currentBuild,
+    latestBuild,
+    updateAvailable:
+      latestBuild !== "0"
+      && latestBuild !== currentBuild
+  };
+}
+
+function reloadLatestBuild(
+  latestBuild
+) {
+  const url =
+    new URL(
+      window.location.href
+    );
+
+  url.searchParams.set(
+    "build",
+    latestBuild
+  );
+
+  url.searchParams.set(
+    "refresh",
+    Date.now()
+  );
+
+  window.location.replace(
+    url.toString()
+  );
+}
+
 function resetPullRefresh() {
   pullStartY = null;
   pullStartX = null;
@@ -6426,6 +6506,32 @@ document.addEventListener(
       "Refreshing…";
 
     try {
+      $("#pullRefreshLabel").textContent =
+        "Checking for updates…";
+
+      const buildCheck =
+        await checkForNewBuild();
+
+      if (
+        buildCheck.updateAvailable
+      ) {
+        $("#pullRefreshLabel").textContent =
+          "Updating Quest Board…";
+
+        showToast(
+          "New Quest Board build found. Updating…"
+        );
+
+        reloadLatestBuild(
+          buildCheck.latestBuild
+        );
+
+        return;
+      }
+
+      $("#pullRefreshLabel").textContent =
+        "Syncing board…";
+
       render({ skipParty: true });
 
       let partySynced = true;
@@ -6444,7 +6550,11 @@ document.addEventListener(
 
       showToast(
         partySynced
-          ? "Quest Board refreshed."
+          ? (
+              buildCheck.checked
+                ? "Quest Board is current."
+                : "Board refreshed. Update check unavailable."
+            )
           : "Board refreshed. Fellowship sync unavailable."
       );
     }
