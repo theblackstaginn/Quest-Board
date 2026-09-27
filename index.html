@@ -20,7 +20,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=59">
+  <link rel="stylesheet" href="styles.css?v=60">
 </head>
 
 <body>
@@ -41,10 +41,36 @@
         <h1 id="screenTitle">Quest Board</h1>
       </div>
 
-      <div class="profile-button" id="profileButton">
+      <button
+        class="profile-button player-hud"
+        id="profileButton"
+        type="button"
+        aria-label="Open character sheet"
+      >
         <span class="profile-avatar" id="profileAvatar">F</span>
-        <span id="profileName">Farmer</span>
-      </div>
+
+        <span class="player-hud-copy">
+          <span class="player-hud-name-row">
+            <strong id="profileName">Farmer</strong>
+            <span class="player-hud-level" id="profileLevel">Lv. 1</span>
+          </span>
+
+          <span class="player-hud-xp-track" aria-hidden="true">
+            <span class="player-hud-xp-fill" id="profileXpBar"></span>
+          </span>
+
+          <span class="player-hud-wallet">
+            <span>
+              <img src="icons/gold-icon.webp" alt="" aria-hidden="true">
+              <b id="profileGold">0</b>
+            </span>
+            <span>
+              <img src="icons/crystal-icon.webp" alt="" aria-hidden="true">
+              <b id="profileCrystals">0</b>
+            </span>
+          </span>
+        </span>
+      </button>
 
     </header>
 

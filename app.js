@@ -1994,7 +1994,8 @@ function render({ skipParty = false } = {}) {
     getSettings();
 
   renderProfile(
-    settings
+    settings,
+    state
   );
 
   renderWeeklyProgress(
@@ -2046,23 +2047,27 @@ function render({ skipParty = false } = {}) {
 // 20. PROFILE DISPLAY
 // =========================================================
 
-function renderProfile(settings) {
-  const character =
-    getCharacterConfig();
+function renderProfile(settings, state) {
+  const character = getCharacterConfig();
+  const name = settings.playerName || character.defaultName;
+  const totalXp =
+    Number(state?.xp?.strength || 0)
+    + Number(state?.xp?.endurance || 0)
+    + Number(state?.xp?.restoration || 0);
+  const overallLevel =
+    Math.floor(totalXp / XP_PER_LEVEL) + 1;
+  const levelProgress =
+    Math.min(100, (totalXp % XP_PER_LEVEL) / XP_PER_LEVEL * 100);
 
-  const name =
-    settings.playerName
-    || character.defaultName;
-
-  $("#profileName")
-    .textContent =
-      name;
-
-  $("#profileAvatar")
-    .textContent =
-      name
-        .charAt(0)
-        .toUpperCase();
+  $("#profileName").textContent = name;
+  $("#profileAvatar").textContent =
+    name.charAt(0).toUpperCase();
+  $("#profileLevel").textContent =
+    `Lv. ${overallLevel}`;
+  $("#profileXpBar").style.width =
+    `${levelProgress}%`;
+  $("#profileGold").textContent = state.gold;
+  $("#profileCrystals").textContent = state.crystals;
 }
 
 
@@ -2199,87 +2204,82 @@ function renderBossBattle(
 // 23. QUEST CARDS
 // =========================================================
 
+function getQuestDifficulty(quest) {
+  const xp = Number(quest?.xp) || 0;
+  if (xp >= 30) return "Hard";
+  if (xp >= 20) return "Standard";
+  return "Light";
+}
+
 function renderQuestCards() {
-  $("#questGrid")
-    .innerHTML =
-      QUESTS
-        .map(
-          quest => `
-            <article
-              class="quest-card"
-              data-quest-id="${quest.id}"
-              tabindex="0"
-              role="button"
-            >
+  const state = normalizeWeek();
+  const completedIds =
+    new Set(
+      state.weeklyCompleted
+        .map(entry => entry?.questId)
+        .filter(Boolean)
+    );
+  const timerState = getSavedTimerState();
 
-              <div
-                class="quest-card-content"
-              >
+  $("#questGrid").innerHTML =
+    QUESTS.map(quest => {
+      const completed =
+        completedIds.has(quest.id);
+      const active =
+        !completed
+        && timerState?.questId === quest.id;
+      const status =
+        completed
+          ? "Complete"
+          : active
+            ? (timerState.paused ? "Paused" : "Active")
+            : "Available";
+      const action =
+        completed
+          ? "Review Quest"
+          : active
+            ? "Resume Quest"
+            : "Begin Quest";
+      const stateClass =
+        completed
+          ? "is-complete"
+          : active
+            ? "is-active"
+            : "is-available";
 
-                <p
-                  class="quest-type"
-                >
-                  ${escapeHtml(
-                    quest.category
-                  )}
-                </p>
+      return `
+        <article
+          class="quest-card ${stateClass}"
+          data-quest-id="${quest.id}"
+          tabindex="0"
+          role="button"
+          aria-label="${escapeHtml(`${quest.title}. ${status}. ${action}.`)}"
+        >
+          <div class="quest-card-status-row">
+            <span class="quest-state-badge">${status}</span>
+            <span class="quest-difficulty">${getQuestDifficulty(quest)}</span>
+          </div>
 
-                <h3>
-                  ${escapeHtml(
-                    quest.title
-                  )}
-                </h3>
+          <div class="quest-card-content">
+            <p class="quest-type">${escapeHtml(quest.category)}</p>
+            <h3>${escapeHtml(quest.title)}</h3>
+            <p>${escapeHtml(quest.description)}</p>
+          </div>
 
-                <p>
-                  ${escapeHtml(
-                    quest.description
-                  )}
-                </p>
+          <div class="quest-card-meta">
+            <span class="quest-duration">${escapeHtml(quest.time)}</span>
+            <span class="quest-gold-reward">
+              <img src="icons/gold-icon.webp" alt="" aria-hidden="true">
+              ${quest.gold}
+            </span>
+            <span class="quest-card-action">${action}</span>
+            <span class="quest-arrow" aria-hidden="true">›</span>
+          </div>
 
-              </div>
-
-
-              <div
-                class="quest-card-meta"
-              >
-
-                <span
-                  class="quest-duration"
-                >
-                  ${escapeHtml(
-                    quest.time
-                  )}
-                </span>
-
-
-                <span
-                  class="quest-gold-reward"
-                >
-
-                  <img
-                    src="icons/gold-icon.webp"
-                    alt=""
-                    aria-hidden="true"
-                  >
-
-                  ${quest.gold}
-
-                </span>
-
-
-                <span
-                  class="quest-arrow"
-                  aria-hidden="true"
-                >
-                  >
-                </span>
-
-              </div>
-
-            </article>
-          `
-        )
-        .join("");
+          ${completed ? '<span class="quest-complete-seal" aria-hidden="true">✓</span>' : ""}
+        </article>
+      `;
+    }).join("");
 }
 
 
@@ -2498,6 +2498,8 @@ function openQuest(id) {
 
   activeQuest =
     quest;
+
+  playUiSound("open");
 
   restoreTimerForQuest(
     quest.id
@@ -2733,6 +2735,15 @@ async function completeQuest() {
         completedQuest,
         completedAt
       );
+  }
+
+  playUiSound("complete");
+
+  if (
+    navigator.vibrate
+    && !getSettings().reducedMotion
+  ) {
+    navigator.vibrate(35);
   }
 
   render();
@@ -3543,6 +3554,7 @@ function startTimer() {
   }
 
   startTimerUiInterval();
+  playUiSound("start");
 }
 
 
@@ -3906,10 +3918,19 @@ const VIEW_HEADERS = {
 // =========================================================
 
 async function setView(view) {
+  const previousView = activeView;
+
   activeView =
     VIEW_HEADERS[view]
       ? view
       : "board";
+
+  if (
+    appInitialized
+    && previousView !== activeView
+  ) {
+    playUiSound("nav");
+  }
 
   localStorage.setItem(
     "questBoardActiveView",
@@ -4164,15 +4185,66 @@ function saveReducedMotion() {
 // 45. SOUND
 // =========================================================
 
+function playUiSound(type = "tap") {
+  const settings = getSettings();
+  if (!settings.soundEnabled) return;
+
+  const AudioContextClass =
+    window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+
+  try {
+    const context = new AudioContextClass();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const frequencies = {
+      tap: 240,
+      nav: 280,
+      open: 360,
+      start: 430,
+      complete: 660
+    };
+
+    oscillator.type =
+      type === "complete" ? "triangle" : "sine";
+    oscillator.frequency.value =
+      frequencies[type] || frequencies.tap;
+
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+      0.055,
+      context.currentTime + 0.015
+    );
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      context.currentTime + (type === "complete" ? 0.24 : 0.11)
+    );
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start();
+    oscillator.stop(
+      context.currentTime + (type === "complete" ? 0.26 : 0.13)
+    );
+    oscillator.addEventListener(
+      "ended",
+      () => context.close()
+    );
+  }
+  catch (error) {
+    console.debug("Quest Board sound unavailable:", error);
+  }
+}
+
 function saveSoundSetting() {
-  const settings =
-    getSettings();
-
+  const settings = getSettings();
   settings.soundEnabled =
-    $("#soundToggle")
-      .checked;
-
+    $("#soundToggle").checked;
   saveSettings(settings);
+
+  if (settings.soundEnabled) {
+    playUiSound("complete");
+  }
 
   showToast(
     settings.soundEnabled
@@ -6445,6 +6517,12 @@ function escapeHtml(value) {
 // =========================================================
 // 69. MAIN EVENTS
 // =========================================================
+
+$("#profileButton")
+  ?.addEventListener(
+    "click",
+    () => setView("character")
+  );
 
 $("#closeQuestButton")
   ?.addEventListener(
