@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="65">
+  <meta name="quest-board-build" content="66">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=65">
+  <link rel="stylesheet" href="styles.css?v=66">
 </head>
 
 <body>
@@ -120,6 +120,73 @@
 
           </div>
 
+        </section>
+
+
+        <section class="campaign-panel" aria-labelledby="campaignTitle">
+          <div class="campaign-heading">
+            <div>
+              <p class="eyebrow">Campaign I</p>
+              <h2 id="campaignTitle">The Blackwood</h2>
+              <p class="muted" id="campaignNarrative">
+                The old road disappears beneath black pines. The Guild has marked a path.
+              </p>
+            </div>
+            <div class="campaign-rank">
+              <span>Adventurer Rank</span>
+              <strong id="campaignRank">Wayfarer</strong>
+            </div>
+          </div>
+
+          <div class="campaign-map" id="campaignMap" aria-label="Blackwood campaign progress"></div>
+
+          <div class="campaign-progress-line">
+            <span id="campaignLocation">Guild Hall</span>
+            <strong id="campaignProgressText">0 / 24 quests</strong>
+          </div>
+        </section>
+
+
+        <section class="daily-contracts-panel" aria-labelledby="dailyContractsTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Daily Contracts</p>
+              <h2 id="dailyContractsTitle">Today's Bounties</h2>
+            </div>
+            <span class="daily-reset" id="dailyResetLabel">Rotates daily</span>
+          </div>
+          <div class="daily-contract-grid" id="dailyContractGrid"></div>
+        </section>
+
+
+        <section class="quest-chain-panel" aria-labelledby="questChainTitle">
+          <p class="eyebrow">Story Quest</p>
+          <div class="quest-chain-header">
+            <div>
+              <h2 id="questChainTitle">The Road Into Blackwood</h2>
+              <p class="muted" id="questChainCopy">The first trail marker waits beyond the Guild gates.</p>
+            </div>
+            <strong id="questChainProgress">0 / 4</strong>
+          </div>
+          <div class="quest-chain-steps" id="questChainSteps"></div>
+          <button class="fantasy-action-button secondary" id="questChainButton" type="button">
+            Begin Story Quest
+          </button>
+        </section>
+
+
+        <section class="guild-hall-panel" aria-labelledby="guildHallTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Guild Hall</p>
+              <h2 id="guildHallTitle">Talk to the Guild</h2>
+            </div>
+          </div>
+          <div class="npc-grid" id="npcGrid"></div>
+          <div class="npc-dialogue" id="npcDialogue" aria-live="polite">
+            <strong>Guildmaster Rowan</strong>
+            <p>The road is open. Choose a quest and make your mark.</p>
+          </div>
         </section>
 
 
@@ -232,6 +299,11 @@
                 id="characterClassName"
               >
                 Half-Orc Wizard
+              </p>
+
+              <p class="character-title-line">
+                <span>Title</span>
+                <strong id="characterTitleName">Wayfarer</strong>
               </p>
             </div>
 
@@ -376,6 +448,37 @@
           </section>
 
 
+          <section class="equipment-panel" aria-labelledby="equipmentTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Loadout</p>
+                <h2 id="equipmentTitle">Equipment</h2>
+              </div>
+              <span class="equipment-bonus-summary" id="equipmentBonusSummary">No bonuses equipped</span>
+            </div>
+
+            <div class="equipment-slots" id="equipmentSlots"></div>
+
+            <div class="inventory-heading">
+              <p class="eyebrow">Inventory</p>
+              <h3>Equippable Relics</h3>
+            </div>
+            <div class="equipment-inventory" id="equipmentInventory"></div>
+          </section>
+
+
+          <section class="achievements-panel" aria-labelledby="achievementsTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Feats</p>
+                <h2 id="achievementsTitle">Achievements</h2>
+              </div>
+              <strong id="achievementCount">0 / 12</strong>
+            </div>
+            <div class="achievement-grid" id="achievementGrid"></div>
+          </section>
+
+
           <section
             class="relic-collection-panel"
             aria-labelledby="relicCollectionTitle"
@@ -484,6 +587,18 @@
               aria-live="polite"
             ></div>
 
+          </section>
+
+
+          <section class="codex-panel" aria-labelledby="codexTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Archive</p>
+                <h2 id="codexTitle">Blackwood Codex</h2>
+              </div>
+              <strong id="codexCount">0 discovered</strong>
+            </div>
+            <div class="codex-grid" id="codexGrid"></div>
           </section>
 
         </section>
@@ -620,6 +735,22 @@
 
             </div>
 
+          </section>
+
+
+          <section class="fellowship-renown">
+            <div>
+              <p class="eyebrow">Fellowship Renown</p>
+              <h2 id="fellowshipLevel">Guild Level 1</h2>
+              <p class="muted" id="fellowshipRenownText">Every companion's quest adds to the guild legend.</p>
+            </div>
+            <div class="progress-meta">
+              <strong id="fellowshipRenownValue">0 Renown</strong>
+              <span id="fellowshipBossThreat">Blackwood threat dormant</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="fellowshipRenownBar"></div>
+            </div>
           </section>
 
 
@@ -1222,6 +1353,23 @@
       class="exercise-list"
       id="exerciseList"
     ></div>
+
+
+    <section class="boss-combat-panel" id="bossCombatPanel" hidden>
+      <div class="boss-combat-heading">
+        <div>
+          <p class="eyebrow">Weekly Boss</p>
+          <h3 id="bossEnemyName">The Briar Warden</h3>
+        </div>
+        <strong id="bossHpText">100 / 100 HP</strong>
+      </div>
+      <div class="boss-hp-track" aria-label="Boss health">
+        <div class="boss-hp-fill" id="bossHpBar"></div>
+      </div>
+      <p class="boss-combat-copy" id="bossCombatCopy">
+        Complete the battle workout to break the Warden's final guard.
+      </p>
+    </section>
 
 
     <section class="quest-timer">
@@ -1923,6 +2071,52 @@
   </dialog>
 
 
+
+  <!-- =====================================================
+       NEW GAME / CAMPAIGN INTRO
+  ====================================================== -->
+
+  <dialog class="rpg-event-dialog onboarding-dialog" id="onboardingDialog">
+    <div class="rpg-event-panel">
+      <p class="eyebrow">Campaign I</p>
+      <h2>Enter the Blackwood</h2>
+      <img class="onboarding-character-art" id="onboardingCharacterArt" src="farmer-card.webp" alt="">
+      <p id="onboardingClassIntro">
+        The Guild has work for an adventurer willing to earn every mile of the road.
+      </p>
+      <div class="onboarding-rules">
+        <span>Quests become training.</span>
+        <span>Training earns XP and treasure.</span>
+        <span>Your legend persists in the cloud.</span>
+      </div>
+      <button class="fantasy-action-button" id="beginAdventureButton" type="button">
+        Begin Adventure
+      </button>
+    </div>
+  </dialog>
+
+
+  <!-- =====================================================
+       RANDOM ENCOUNTER
+  ====================================================== -->
+
+  <dialog class="rpg-event-dialog encounter-dialog" id="encounterDialog">
+    <div class="rpg-event-panel">
+      <p class="eyebrow" id="encounterEyebrow">Random Encounter</p>
+      <div class="encounter-glyph" id="encounterGlyph" aria-hidden="true">✦</div>
+      <h2 id="encounterTitle">A Strange Discovery</h2>
+      <p id="encounterCopy">Something waits beside the road.</p>
+      <div class="encounter-reward" id="encounterReward">+5 Gold</div>
+      <button class="fantasy-action-button" id="claimEncounterButton" type="button">
+        Claim & Continue
+      </button>
+    </div>
+  </dialog>
+
+
+  <div class="reward-burst" id="rewardBurst" aria-live="polite"></div>
+
+
   <!-- =====================================================
        TOAST
   ====================================================== -->
@@ -1940,7 +2134,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=65"></script>
+  <script src="app.js?v=66"></script>
 
 </body>
 </html>
