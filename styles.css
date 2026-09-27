@@ -5671,3 +5671,48 @@ body[data-active-view="party"] .party-activity-item {
     font-size: .65rem;
   }
 }
+
+
+/* =========================================================
+   55. PERSISTENT ADVENTURER ACCOUNT
+========================================================= */
+
+.account-panel {
+  border-color: rgba(213, 166, 86, 0.22);
+}
+
+.account-status {
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+.account-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.account-input {
+  width: 100%;
+}
+
+.account-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.account-actions .fantasy-action-button,
+.account-actions .settings-danger-button {
+  width: 100%;
+  min-height: 48px;
+}
+
+#signOutAccountButton {
+  margin-top: 8px;
+}
+
+@media (max-width: 560px) {
+  .account-actions {
+    grid-template-columns: 1fr;
+  }
+}
