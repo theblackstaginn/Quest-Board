@@ -1022,7 +1022,9 @@ async function saveProgressToCloud() {
   return true;
 }
 
-async function restoreOrSeedCloudProgress() {
+async function restoreOrSeedCloudProgress(
+  { preferCloud = false } = {}
+) {
   if (
     !supabaseReady
     || !supabaseUser
@@ -1058,7 +1060,10 @@ async function restoreOrSeedCloudProgress() {
         localState
       );
 
-    if (!localHasProgress) {
+    if (
+      preferCloud
+      || !localHasProgress
+    ) {
       const restoredState =
         migrateState(
           data.state
@@ -1268,7 +1273,10 @@ async function initializeSupabase() {
       true;
 
     const restoredCloudProgress =
-      await restoreOrSeedCloudProgress();
+      await restoreOrSeedCloudProgress({
+        preferCloud:
+          !supabaseUser.is_anonymous
+      });
 
     cloudProgressReady =
       true;
@@ -4211,6 +4219,8 @@ function renderSettings(settings) {
       .textContent =
         "Party sync is unavailable.";
   }
+
+  renderAccountStatus();
 }
 
 
@@ -4408,6 +4418,329 @@ function saveSoundSetting() {
       ? "Sound effects enabled."
       : "Sound effects disabled."
   );
+}
+
+
+
+
+function renderAccountStatus() {
+  const status =
+    $("#accountStatus");
+
+  const fields =
+    $("#accountFields");
+
+  const signOutButton =
+    $("#signOutAccountButton");
+
+  if (
+    !status
+    || !fields
+    || !signOutButton
+  ) {
+    return;
+  }
+
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    status.textContent =
+      "Cloud account service is unavailable.";
+    fields.hidden = false;
+    signOutButton.hidden = true;
+    return;
+  }
+
+  if (supabaseUser.is_anonymous) {
+    status.textContent =
+      "This save is cloud-backed, but still tied to this device. Protect it with an email and password so it can be restored after reinstalling or switching devices.";
+    fields.hidden = false;
+    signOutButton.hidden = true;
+    return;
+  }
+
+  status.textContent =
+    `Protected as ${supabaseUser.email || "signed-in adventurer"}. Your save can be restored on another device.`;
+  fields.hidden = true;
+  signOutButton.hidden = false;
+}
+
+function getAccountCredentials() {
+  return {
+    email:
+      $("#accountEmailInput")
+        ?.value
+        .trim()
+        .toLowerCase()
+      || "",
+    password:
+      $("#accountPasswordInput")
+        ?.value
+      || ""
+  };
+}
+
+function validateAccountCredentials(
+  email,
+  password
+) {
+  if (
+    !email
+    || !email.includes("@")
+  ) {
+    showToast(
+      "Enter a valid email address."
+    );
+    return false;
+  }
+
+  if (
+    !password
+    || password.length < 8
+  ) {
+    showToast(
+      "Use a password with at least 8 characters."
+    );
+    return false;
+  }
+
+  return true;
+}
+
+async function finishPermanentAccountLogin(
+  session
+) {
+  if (!session?.user) {
+    return false;
+  }
+
+  supabaseUser =
+    session.user;
+
+  supabaseReady =
+    true;
+
+  cloudProgressReady =
+    false;
+
+  const restored =
+    await restoreOrSeedCloudProgress({
+      preferCloud: true
+    });
+
+  cloudProgressReady =
+    true;
+
+  await syncProfileToSupabase();
+  await loadCurrentParty();
+
+  render();
+  renderSettings(
+    getSettings()
+  );
+
+  if (restored) {
+    showToast(
+      "Adventurer save restored."
+    );
+  }
+
+  return true;
+}
+
+async function createPermanentAccount() {
+  if (
+    !supabaseClient
+    || !supabaseReady
+  ) {
+    showToast(
+      "Cloud account service is unavailable."
+    );
+    return;
+  }
+
+  const {
+    email,
+    password
+  } =
+    getAccountCredentials();
+
+  if (
+    !validateAccountCredentials(
+      email,
+      password
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await saveProgressToCloud();
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signUp({
+          email,
+          password
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.session) {
+      await finishPermanentAccountLogin(
+        data.session
+      );
+
+      showToast(
+        "Save protected. Adventurer account created."
+      );
+      return;
+    }
+
+    showToast(
+      "Check your email to confirm the account, then return here and choose Restore Existing Save."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not create adventurer account:",
+      error
+    );
+
+    showToast(
+      "Could not protect this save. If that email already has an account, use Restore Existing Save."
+    );
+  }
+}
+
+async function signInPermanentAccount() {
+  if (!supabaseClient) {
+    showToast(
+      "Cloud account service is unavailable."
+    );
+    return;
+  }
+
+  const {
+    email,
+    password
+  } =
+    getAccountCredentials();
+
+  if (
+    !validateAccountCredentials(
+      email,
+      password
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
+          email,
+          password
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    await finishPermanentAccountLogin(
+      data.session
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not restore adventurer account:",
+      error
+    );
+
+    showToast(
+      "Sign-in failed. Check the email/password and make sure the email was confirmed."
+    );
+  }
+}
+
+async function signOutPermanentAccount() {
+  if (!supabaseClient) {
+    return;
+  }
+
+  if (
+    !confirm(
+      "Sign out of this adventurer account on this device?\n\nYour cloud save will remain protected."
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await saveProgressToCloud();
+    await supabaseClient.auth.signOut();
+
+    supabaseUser =
+      null;
+    supabaseReady =
+      false;
+    cloudProgressReady =
+      false;
+    currentParty =
+      null;
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInAnonymously();
+
+    if (error) {
+      throw error;
+    }
+
+    supabaseUser =
+      data.user;
+    supabaseReady =
+      true;
+
+    await restoreOrSeedCloudProgress();
+    cloudProgressReady =
+      true;
+
+    render();
+    renderSettings(
+      getSettings()
+    );
+
+    showToast(
+      "Signed out. This device is using a temporary account."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not sign out:",
+      error
+    );
+
+    showToast(
+      "Could not sign out."
+    );
+  }
 }
 
 
@@ -6861,6 +7194,24 @@ $("#savePlayerNameButton")
   ?.addEventListener(
     "click",
     savePlayerName
+  );
+
+$("#createAccountButton")
+  ?.addEventListener(
+    "click",
+    createPermanentAccount
+  );
+
+$("#signInAccountButton")
+  ?.addEventListener(
+    "click",
+    signInPermanentAccount
+  );
+
+$("#signOutAccountButton")
+  ?.addEventListener(
+    "click",
+    signOutPermanentAccount
   );
 
 $("#weeklyGoalSelect")
