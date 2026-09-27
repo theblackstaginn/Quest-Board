@@ -580,6 +580,8 @@ let toastTimeout = null;
 let supabaseUser = null;
 let supabaseReady = false;
 let currentParty = null;
+let cloudProgressReady = false;
+let cloudSaveTimer = null;
 let partyRefreshTimer = null;
 
 let giftRecipient = null;
@@ -786,6 +788,8 @@ function saveSettings(settings) {
     getSettingsKey(),
     JSON.stringify(settings)
   );
+
+  queueCloudProgressSave();
 }
 
 
@@ -941,6 +945,146 @@ function saveState(state) {
     getStorageKey(),
     JSON.stringify(state)
   );
+
+  queueCloudProgressSave();
+}
+
+function hasMeaningfulLocalProgress(state) {
+  return Boolean(
+    state.history?.length
+    || state.weeklyCompleted?.length
+    || state.discoveredRelics?.length
+    || Number(state.gold) > 0
+    || Number(state.crystals) > 0
+    || Number(state.xp?.strength) > 0
+    || Number(state.xp?.endurance) > 0
+    || Number(state.xp?.restoration) > 0
+    || state.bossDefeatedWeek
+    || state.bossRewardsClaimedWeek
+  );
+}
+
+function queueCloudProgressSave() {
+  if (
+    !cloudProgressReady
+    || !supabaseReady
+    || !supabaseUser
+  ) {
+    return;
+  }
+
+  clearTimeout(cloudSaveTimer);
+
+  cloudSaveTimer =
+    setTimeout(
+      () => {
+        saveProgressToCloud()
+          .catch(error =>
+            console.error(
+              "Cloud progress backup failed:",
+              error
+            )
+          );
+      },
+      250
+    );
+}
+
+async function saveProgressToCloud() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    return false;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("player_progress")
+      .upsert(
+        {
+          user_id: supabaseUser.id,
+          profile_id: activeProfileId,
+          state: getState(),
+          settings: getSettings(),
+          updated_at:
+            new Date().toISOString()
+        },
+        {
+          onConflict: "user_id"
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
+}
+
+async function restoreOrSeedCloudProgress() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    return false;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("player_progress")
+      .select(
+        "profile_id, state, settings, updated_at"
+      )
+      .eq(
+        "user_id",
+        supabaseUser.id
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const localState =
+    getState();
+
+  if (data?.state) {
+    const localHasProgress =
+      hasMeaningfulLocalProgress(
+        localState
+      );
+
+    if (!localHasProgress) {
+      const restoredState =
+        migrateState(
+          data.state
+        );
+
+      localStorage.setItem(
+        getStorageKey(),
+        JSON.stringify(restoredState)
+      );
+
+      if (data.settings) {
+        localStorage.setItem(
+          getSettingsKey(),
+          JSON.stringify({
+            ...createFreshSettings(),
+            ...data.settings
+          })
+        );
+      }
+
+      return true;
+    }
+  }
+
+  await saveProgressToCloud();
+  return false;
 }
 // =========================================================
 // 13. WEEK HANDLING
@@ -1123,8 +1267,19 @@ async function initializeSupabase() {
     supabaseReady =
       true;
 
+    const restoredCloudProgress =
+      await restoreOrSeedCloudProgress();
+
+    cloudProgressReady =
+      true;
+
     await syncProfileToSupabase();
     await loadCurrentParty();
+
+    if (restoredCloudProgress) {
+      render();
+      await setView(activeView);
+    }
 
     setPartySyncStatus(
       "Guild connection established.",
@@ -1136,6 +1291,8 @@ async function initializeSupabase() {
 
   catch (error) {
     supabaseReady =
+      false;
+    cloudProgressReady =
       false;
 
     console.error(
