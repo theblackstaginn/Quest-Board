@@ -5631,3 +5631,43 @@ body[data-active-view="party"] .party-activity-item {
     height: 42px;
   }
 }
+
+
+/* =========================================================
+   54. HUD CURRENCY ICON SCALE
+========================================================= */
+
+.player-hud-wallet {
+  gap: 13px;
+}
+
+.player-hud-wallet > span {
+  gap: 6px;
+}
+
+.player-hud-wallet img {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+}
+
+.player-hud-wallet b {
+  font-size: .68rem;
+}
+
+@media (max-width: 560px) {
+  .player-hud-wallet {
+    gap: 12px;
+  }
+
+  .player-hud-wallet img {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  .player-hud-wallet b {
+    font-size: .65rem;
+  }
+}
