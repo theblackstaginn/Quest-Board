@@ -5249,6 +5249,48 @@ async function renderParty() {
     "connected"
   );
 
+  const localState =
+    getState();
+
+  const localRenown =
+    localState.history
+      .reduce(
+        (total, item) =>
+          total
+          + Math.max(
+              0,
+              Number(item.xp) || 0
+            ),
+        0
+      );
+
+  const guildLevel =
+    Math.floor(
+      localRenown / 500
+    ) + 1;
+
+  $("#fellowshipLevel")
+    .textContent =
+      `Guild Level ${guildLevel}`;
+
+  $("#fellowshipRenownValue")
+    .textContent =
+      `${localRenown} Renown`;
+
+  $("#fellowshipRenownBar")
+    .style.width =
+      `${Math.min(
+        100,
+        (localRenown % 500) / 5
+      )}%`;
+
+  $("#fellowshipBossThreat")
+    .textContent =
+      localState.bossDefeatedWeek
+        === getWeekKey()
+        ? "Weekly threat defeated"
+        : "Blackwood threat active";
+
   try {
     await ensureWeeklyBossTreasureDrop(false);
 
