@@ -1976,7 +1976,7 @@ function showNextRelicReveal() {
 // 19. MAIN RENDER
 // =========================================================
 
-function render() {
+function render({ skipParty = false } = {}) {
   const state =
     normalizeWeek();
 
@@ -2030,7 +2030,9 @@ function render() {
     renderParty is async. It is safe to trigger
     without blocking the local UI render.
   */
-  void renderParty();
+  if (!skipParty) {
+    void renderParty();
+  }
 
   applyMotionSetting(
     settings
@@ -4534,11 +4536,12 @@ async function leaveParty() {
 async function refreshParty() {
   if (!supabaseReady) {
     await renderParty();
-    return;
+    return false;
   }
 
   try {
     await loadCurrentParty();
+    return true;
   }
 
   catch (error) {
@@ -4551,6 +4554,8 @@ async function refreshParty() {
       "Could not refresh fellowship data.",
       "error"
     );
+
+    return false;
   }
 }
 
@@ -6213,6 +6218,188 @@ function showToast(
 
 
 // =========================================================
+// 67A. PULL TO REFRESH
+// =========================================================
+
+let pullStartY = null;
+let pullStartX = null;
+let pullDistance = 0;
+let pullRefreshing = false;
+
+const PULL_THRESHOLD = 84;
+
+function resetPullRefresh() {
+  pullStartY = null;
+  pullStartX = null;
+  pullDistance = 0;
+
+  const indicator =
+    $("#pullRefresh");
+
+  indicator.classList.remove(
+    "is-pulling",
+    "is-ready"
+  );
+
+  indicator.style.removeProperty(
+    "--pull-distance"
+  );
+}
+
+function canStartPullRefresh(event) {
+  return (
+    !pullRefreshing
+    && event.touches.length === 1
+    && window.scrollY <= 0
+    && !document.querySelector("dialog[open]")
+    && !event.target.closest(
+      "input, textarea, select, [contenteditable]"
+    )
+  );
+}
+
+document.addEventListener(
+  "touchstart",
+  event => {
+    if (!canStartPullRefresh(event)) {
+      return;
+    }
+
+    pullStartY = event.touches[0].clientY;
+    pullStartX = event.touches[0].clientX;
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchmove",
+  event => {
+    if (
+      pullStartY === null
+      || event.touches.length !== 1
+    ) {
+      resetPullRefresh();
+      return;
+    }
+
+    const deltaY =
+      event.touches[0].clientY - pullStartY;
+
+    const deltaX =
+      event.touches[0].clientX - pullStartX;
+
+    if (
+      window.scrollY > 0
+      || Math.abs(deltaX) > Math.abs(deltaY)
+      || deltaY <= 12
+    ) {
+      if (deltaY < 0 || Math.abs(deltaX) > Math.abs(deltaY)) {
+        resetPullRefresh();
+      }
+      return;
+    }
+
+    event.preventDefault();
+
+    pullDistance = deltaY;
+
+    const indicator =
+      $("#pullRefresh");
+
+    indicator.classList.add(
+      "is-pulling"
+    );
+
+    indicator.classList.toggle(
+      "is-ready",
+      pullDistance >= PULL_THRESHOLD
+    );
+
+    indicator.style.setProperty(
+      "--pull-distance",
+      `${Math.min(92, deltaY * 0.7)}px`
+    );
+
+    $("#pullRefreshLabel").textContent =
+      pullDistance >= PULL_THRESHOLD
+        ? "Release to refresh"
+        : "Pull to refresh";
+  },
+  { passive: false }
+);
+
+document.addEventListener(
+  "touchend",
+  async () => {
+    const shouldRefresh =
+      pullDistance >= PULL_THRESHOLD
+      && !pullRefreshing;
+
+    resetPullRefresh();
+
+    if (!shouldRefresh) {
+      return;
+    }
+
+    pullRefreshing = true;
+
+    const indicator =
+      $("#pullRefresh");
+
+    indicator.classList.add(
+      "is-refreshing"
+    );
+
+    $("#pullRefreshLabel").textContent =
+      "Refreshing…";
+
+    try {
+      render({ skipParty: true });
+
+      let partySynced = true;
+
+      if (supabaseReady) {
+        await checkIncomingGifts();
+
+        if (activeView === "party") {
+          partySynced = await refreshParty();
+
+          if ($("#partySyncStatus")?.dataset.state === "error") {
+            partySynced = false;
+          }
+        }
+      }
+
+      showToast(
+        partySynced
+          ? "Quest Board refreshed."
+          : "Board refreshed. Fellowship sync unavailable."
+      );
+    }
+
+    catch (error) {
+      console.error("Pull refresh failed:", error);
+      showToast("Could not refresh. Try again.");
+    }
+
+    finally {
+      pullRefreshing = false;
+      indicator.classList.remove("is-refreshing");
+      $("#pullRefreshLabel").textContent =
+        "Pull to refresh";
+    }
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchcancel",
+  resetPullRefresh,
+  { passive: true }
+);
+
+
+// =========================================================
 // 68. UTILITIES
 // =========================================================
 
@@ -6880,4 +7067,3 @@ initializeApp()
       );
     }
   );
-  
