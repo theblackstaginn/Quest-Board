@@ -5716,3 +5716,499 @@ body[data-active-view="party"] .party-activity-item {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   56. RPG CAMPAIGN EXPANSION
+========================================================= */
+
+.campaign-panel,
+.daily-contracts-panel,
+.quest-chain-panel,
+.guild-hall-panel,
+.equipment-panel,
+.achievements-panel,
+.codex-panel,
+.fellowship-renown {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid rgba(207, 166, 91, .25);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(18, 22, 18, .9), rgba(8, 11, 9, .86));
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+
+.campaign-heading,
+.quest-chain-header,
+.campaign-progress-line,
+.boss-combat-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.campaign-rank {
+  min-width: 110px;
+  text-align: right;
+}
+
+.campaign-rank span,
+.campaign-progress-line span,
+.daily-reset,
+.equipment-bonus-summary {
+  color: var(--muted);
+  font-size: .72rem;
+  letter-spacing: .05em;
+}
+
+.campaign-rank strong {
+  display: block;
+  margin-top: 4px;
+  color: #d7b26a;
+}
+
+.campaign-map {
+  display: flex;
+  align-items: flex-start;
+  margin: 22px 0 14px;
+  overflow-x: auto;
+  padding: 8px 2px 12px;
+}
+
+.campaign-map-stop {
+  flex: 0 0 58px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  opacity: .35;
+  text-align: center;
+}
+
+.campaign-map-stop small {
+  max-width: 62px;
+  font-size: .58rem;
+  line-height: 1.1;
+}
+
+.campaign-map-node {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 189, 120, .35);
+  background: rgba(0,0,0,.42);
+  font-size: 1rem;
+}
+
+.campaign-map-stop.is-unlocked { opacity: .8; }
+.campaign-map-stop.is-current { opacity: 1; }
+.campaign-map-stop.is-current .campaign-map-node {
+  border-color: #d7b26a;
+  box-shadow: 0 0 0 4px rgba(215,178,106,.1), 0 0 18px rgba(215,178,106,.18);
+}
+
+.campaign-map-path {
+  flex: 1 0 18px;
+  height: 1px;
+  margin-top: 19px;
+  background: linear-gradient(90deg, rgba(215,178,106,.15), rgba(215,178,106,.55), rgba(215,178,106,.15));
+}
+
+.daily-contract-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+
+.daily-contract,
+.npc-card,
+.equipment-slot,
+.inventory-relic {
+  border: 1px solid rgba(207,166,91,.18);
+  border-radius: 13px;
+  background: rgba(0,0,0,.28);
+  color: inherit;
+}
+
+.daily-contract {
+  min-height: 72px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+}
+
+.daily-contract > span {
+  color: #d7b26a;
+  font-size: 1.1rem;
+}
+
+.daily-contract div,
+.inventory-relic span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.daily-contract small,
+.npc-card small,
+.equipment-slot small,
+.inventory-relic small {
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.daily-contract.is-complete {
+  border-color: rgba(129, 177, 112, .45);
+  opacity: .72;
+}
+
+.quest-chain-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.quest-chain-step {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(207,166,91,.25);
+  border-radius: 50%;
+  color: var(--muted);
+  background: rgba(0,0,0,.25);
+}
+
+.quest-chain-step.is-active {
+  color: #e8c980;
+  border-color: #d7b26a;
+}
+
+.quest-chain-step.is-complete {
+  color: #b9d6a9;
+  border-color: rgba(129,177,112,.5);
+}
+
+.npc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 9px;
+}
+
+.npc-card {
+  padding: 12px 8px;
+  min-height: 94px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.npc-glyph {
+  color: #d7b26a;
+  font-size: 1.45rem;
+}
+
+.npc-dialogue {
+  margin-top: 12px;
+  padding: 13px;
+  border-left: 2px solid rgba(215,178,106,.55);
+  background: rgba(0,0,0,.2);
+}
+
+.npc-dialogue p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.character-title-line {
+  display: flex;
+  gap: 7px;
+  align-items: baseline;
+  margin: 6px 0 0;
+  font-size: .78rem;
+}
+
+.character-title-line span { color: var(--muted); }
+.character-title-line strong { color: #d7b26a; }
+
+.equipment-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 9px;
+}
+
+.equipment-slot {
+  min-height: 105px;
+  padding: 11px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  text-align: left;
+}
+
+.equipment-slot > span {
+  color: #d7b26a;
+  text-transform: uppercase;
+  font-size: .63rem;
+  letter-spacing: .08em;
+}
+
+.equipment-slot.is-equipped {
+  border-color: rgba(215,178,106,.55);
+  background: rgba(80,59,24,.22);
+}
+
+.inventory-heading {
+  margin-top: 18px;
+}
+
+.inventory-heading h3 { margin-top: 3px; }
+
+.equipment-inventory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.inventory-relic {
+  min-height: 66px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.inventory-relic img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.inventory-relic.is-equipped {
+  border-color: rgba(215,178,106,.55);
+}
+
+.achievement-grid,
+.codex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 9px;
+}
+
+.achievement-card,
+.codex-entry {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(207,166,91,.16);
+  border-radius: 12px;
+  background: rgba(0,0,0,.23);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.achievement-card img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.achievement-card div,
+.codex-entry div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.achievement-card small,
+.codex-entry small { color: var(--muted); }
+
+.achievement-card.is-locked,
+.codex-entry.is-locked {
+  opacity: .42;
+  filter: saturate(.3);
+}
+
+.codex-entry > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(215,178,106,.08);
+  color: #d7b26a;
+}
+
+.boss-combat-panel {
+  margin: 15px 0;
+  padding: 13px;
+  border: 1px solid rgba(159,63,50,.5);
+  border-radius: 13px;
+  background: rgba(74,20,17,.2);
+}
+
+.boss-hp-track {
+  height: 13px;
+  margin: 11px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0,0,0,.5);
+}
+
+.boss-hp-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #69251e, #b64b3e);
+  transition: width .45s ease;
+}
+
+.boss-combat-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+.rpg-event-dialog {
+  width: min(92vw, 430px);
+  border: 1px solid rgba(215,178,106,.4);
+  border-radius: 18px;
+  padding: 0;
+  color: inherit;
+  background: #11140f;
+}
+
+.rpg-event-dialog::backdrop {
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(4px);
+}
+
+.rpg-event-panel {
+  padding: 22px;
+  text-align: center;
+}
+
+.onboarding-character-art {
+  display: block;
+  width: min(250px, 75%);
+  max-height: 320px;
+  object-fit: contain;
+  margin: 12px auto;
+}
+
+.onboarding-rules {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+.encounter-glyph {
+  width: 74px;
+  height: 74px;
+  margin: 10px auto 14px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(215,178,106,.4);
+  border-radius: 50%;
+  color: #d7b26a;
+  font-size: 2rem;
+  background: rgba(215,178,106,.06);
+}
+
+.encounter-reward {
+  margin: 16px 0;
+  color: #e8c980;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.reward-burst {
+  position: fixed;
+  z-index: 9999;
+  left: 50%;
+  top: 22%;
+  max-width: 85vw;
+  transform: translate(-50%, 20px) scale(.92);
+  opacity: 0;
+  pointer-events: none;
+  padding: 10px 15px;
+  border: 1px solid rgba(215,178,106,.55);
+  border-radius: 999px;
+  background: rgba(12,14,11,.94);
+  color: #e8c980;
+  font-weight: 800;
+  text-align: center;
+}
+
+.reward-burst.is-visible {
+  animation: reward-burst 1.25s ease both;
+}
+
+@keyframes reward-burst {
+  0% { opacity: 0; transform: translate(-50%, 22px) scale(.9); }
+  18% { opacity: 1; transform: translate(-50%, 0) scale(1.04); }
+  75% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -24px) scale(.96); }
+}
+
+.fellowship-renown {
+  margin-top: 0;
+}
+
+@media (max-width: 560px) {
+  .daily-contract-grid,
+  .npc-grid,
+  .equipment-slots {
+    grid-template-columns: 1fr;
+  }
+
+  .npc-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .achievement-grid,
+  .codex-grid,
+  .equipment-inventory {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-heading,
+  .quest-chain-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .campaign-rank {
+    text-align: left;
+  }
+
+  .campaign-panel,
+  .daily-contracts-panel,
+  .quest-chain-panel,
+  .guild-hall-panel,
+  .equipment-panel,
+  .achievements-panel,
+  .codex-panel,
+  .fellowship-renown {
+    padding: 14px;
+    border-radius: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-burst.is-visible {
+    animation: none;
+    opacity: 1;
+  }
+}
