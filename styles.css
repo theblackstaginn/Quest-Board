@@ -64,6 +64,7 @@ html {
   min-height: 100%;
   background: #0a0b08;
   color-scheme: dark;
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -77,6 +78,7 @@ body {
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
 }
 
 button,
@@ -5090,4 +5092,150 @@ body[data-active-view="party"] .party-activity-item {
       76px;
   }
 
+}
+
+/* =========================================================
+   51. GUILD UI FINISH
+   Gently shape the existing stone and parchment art like
+   RPG inventory panels, while keeping its illustrated edges.
+========================================================= */
+
+.profile-button,
+.weekly-objective,
+.character-identity-panel,
+.character-summary-panel,
+.party-hero,
+.settings-hero {
+  border-radius: 14px;
+}
+
+.quick-quest,
+.quest-card,
+.party-empty-state,
+.party-banner,
+.party-challenge,
+.party-member-card,
+.party-activity-item,
+.settings-panel {
+  border-radius: 13px;
+}
+
+.stat-card {
+  border-radius: 12px;
+}
+
+.currency-purse,
+.summary-stat {
+  border: 1px solid rgba(220, 177, 105, 0.18);
+  border-radius: 9px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 227, 171, 0.08),
+    inset 0 0 14px rgba(0, 0, 0, 0.16);
+}
+
+.quick-quest,
+.quest-card {
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.quick-quest:hover,
+.quest-card:hover {
+  filter: brightness(1.055);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px rgba(213, 170, 94, 0.24);
+}
+
+.quick-quest:focus-visible,
+.quest-card:focus-visible,
+.profile-button:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+.section-heading {
+  position: relative;
+  padding-bottom: 14px;
+  background:
+    linear-gradient(90deg, rgba(220, 172, 90, 0.7), rgba(220, 172, 90, 0.12) 70%, transparent)
+    left bottom / 100% 1px no-repeat;
+}
+
+.section-heading h2::before {
+  content: "✦";
+  display: inline-block;
+  margin-right: 0.52em;
+  color: var(--gold-light);
+  font-family: Georgia, serif;
+  font-size: 0.56em;
+  vertical-align: 0.18em;
+  text-shadow: 0 0 11px rgba(231, 178, 87, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-quest,
+  .quest-card {
+    transition: none;
+  }
+}
+
+/* A small floating quest marker appears only while pulling at page top. */
+.pull-refresh {
+  position: fixed;
+  z-index: 160;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border: 1px solid rgba(226, 184, 105, 0.52);
+  border-radius: 999px;
+  background: rgba(27, 24, 18, 0.94);
+  color: var(--cream);
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-130% + var(--pull-distance, 0px)));
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.pull-refresh.is-pulling,
+.pull-refresh.is-refreshing {
+  opacity: 1;
+}
+
+.pull-refresh.is-ready {
+  border-color: var(--gold-light);
+  color: var(--gold-light);
+}
+
+.pull-refresh.is-refreshing {
+  --pull-distance: 64px;
+}
+
+.pull-refresh-mark {
+  color: var(--gold-light);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pull-refresh.is-refreshing .pull-refresh-mark {
+  animation: pullRefreshTurn 1.2s linear infinite;
+}
+
+@keyframes pullRefreshTurn {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-refresh { transition: none; }
+  .pull-refresh.is-refreshing .pull-refresh-mark { animation: none; }
 }
