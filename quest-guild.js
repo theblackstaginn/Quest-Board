@@ -485,6 +485,229 @@
     return guildRequests;
   }
 
+  async function fetchGuildFellowshipMembers() {
+    guildFellowshipMembers = [];
+
+    if (
+      !supabaseClient ||
+      !supabaseUser ||
+      !currentParty?.id
+    ) {
+      return guildFellowshipMembers;
+    }
+
+    const { data: memberships, error: membershipError } =
+      await supabaseClient
+        .from("party_members")
+        .select("user_id")
+        .eq("party_id", currentParty.id);
+
+    if (membershipError) {
+      throw membershipError;
+    }
+
+    const userIds = (memberships || [])
+      .map(item => item.user_id)
+      .filter(Boolean);
+
+    if (!userIds.length) {
+      return guildFellowshipMembers;
+    }
+
+    const { data: profiles, error: profileError } =
+      await supabaseClient
+        .from("profiles")
+        .select("user_id,profile_id,display_name,class_name")
+        .in("user_id", userIds);
+
+    if (profileError) {
+      throw profileError;
+    }
+
+    const profileByUserId = new Map(
+      (profiles || []).map(profile => [
+        String(profile.user_id),
+        profile
+      ])
+    );
+
+    guildFellowshipMembers = userIds.map(userId => {
+      const profile =
+        profileByUserId.get(String(userId)) ||
+        {};
+
+      return {
+        user_id: userId,
+        profile_id:
+          profile.profile_id ||
+          null,
+        display_name:
+          profile.display_name ||
+          profile.profile_id ||
+          "Adventurer",
+        class_name:
+          profile.class_name ||
+          ""
+      };
+    });
+
+    return guildFellowshipMembers;
+  }
+
+  async function signedRavenAttachment(attachment) {
+    const { data, error } =
+      await supabaseClient
+        .storage
+        .from("guild-ravens")
+        .createSignedUrl(
+          attachment.storage_path,
+          1800
+        );
+
+    if (error) {
+      console.warn(
+        "Could not sign Guild raven attachment:",
+        error
+      );
+
+      return {
+        ...attachment,
+        signed_url: null
+      };
+    }
+
+    return {
+      ...attachment,
+      signed_url:
+        data?.signedUrl ||
+        null
+    };
+  }
+
+  async function fetchGuildRavens() {
+    guildRavens = [];
+    guildRavenAttachments.clear();
+
+    if (
+      !supabaseClient ||
+      !supabaseUser
+    ) {
+      return guildRavens;
+    }
+
+    const { data, error } =
+      await supabaseClient
+        .from("guild_ravens")
+        .select(
+          "id,party_id,sender_user_id,recipient_user_id,sender_profile_id,recipient_profile_id,message,source,created_at,read_at"
+        )
+        .or(
+          "sender_user_id.eq." +
+          supabaseUser.id +
+          ",recipient_user_id.eq." +
+          supabaseUser.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+        .limit(30);
+
+    if (error) {
+      throw error;
+    }
+
+    guildRavens = data || [];
+
+    const ravenIds =
+      guildRavens
+        .map(item => item.id)
+        .filter(Boolean);
+
+    if (ravenIds.length) {
+      const {
+        data: attachments,
+        error: attachmentError
+      } =
+        await supabaseClient
+          .from("guild_raven_attachments")
+          .select(
+            "id,raven_id,storage_path,file_name,mime_type,size_bytes,created_at"
+          )
+          .in("raven_id", ravenIds)
+          .order(
+            "created_at",
+            {
+              ascending: true
+            }
+          );
+
+      if (attachmentError) {
+        throw attachmentError;
+      }
+
+      const signed =
+        await Promise.all(
+          (attachments || []).map(
+            signedRavenAttachment
+          )
+        );
+
+      signed.forEach(attachment => {
+        const list =
+          guildRavenAttachments.get(
+            attachment.raven_id
+          ) ||
+          [];
+
+        list.push(attachment);
+
+        guildRavenAttachments.set(
+          attachment.raven_id,
+          list
+        );
+      });
+    }
+
+    const unreadIds =
+      guildRavens
+        .filter(item =>
+          item.recipient_user_id ===
+            supabaseUser.id &&
+          !item.read_at
+        )
+        .map(item => item.id);
+
+    if (unreadIds.length) {
+      const { error: readError } =
+        await supabaseClient
+          .from("guild_ravens")
+          .update({
+            read_at:
+              new Date().toISOString()
+          })
+          .eq(
+            "recipient_user_id",
+            supabaseUser.id
+          )
+          .in(
+            "id",
+            unreadIds
+          );
+
+      if (readError) {
+        console.warn(
+          "Could not mark Guild ravens read:",
+          readError
+        );
+      }
+    }
+
+    return guildRavens;
+  }
+
   async function fetchGuildArtifacts() {
     if (!supabaseClient || !supabaseUser) {
       return [];
