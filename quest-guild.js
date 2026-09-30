@@ -1279,71 +1279,92 @@
       !files.length ||
       !currentParty?.id
     ) {
-      return;
+      return [];
     }
 
-    for (const file of files) {
-      const storagePath =
-        currentParty.id +
-        "/" +
-        ravenId +
-        "/" +
-        crypto.randomUUID() +
-        "-" +
-        safeRavenFileName(
-          file.name
-        );
+    const uploadedPaths = [];
 
-      const { error: uploadError } =
-        await supabaseClient
-          .storage
-          .from("guild-ravens")
-          .upload(
-            storagePath,
-            file,
-            {
-              contentType:
-                file.type ||
-                "application/octet-stream",
-              upsert:
-                false
-            }
+    try {
+      for (const file of files) {
+        const storagePath =
+          currentParty.id +
+          "/" +
+          ravenId +
+          "/" +
+          crypto.randomUUID() +
+          "-" +
+          safeRavenFileName(
+            file.name
           );
 
-      if (uploadError) {
-        throw uploadError;
+        const { error: uploadError } =
+          await supabaseClient
+            .storage
+            .from("guild-ravens")
+            .upload(
+              storagePath,
+              file,
+              {
+                contentType:
+                  file.type ||
+                  "application/octet-stream",
+                upsert:
+                  false
+              }
+            );
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        uploadedPaths.push(
+          storagePath
+        );
+
+        const { error: metadataError } =
+          await supabaseClient
+            .from("guild_raven_attachments")
+            .insert({
+              raven_id:
+                ravenId,
+              storage_path:
+                storagePath,
+              file_name:
+                file.name ||
+                "Attachment",
+              mime_type:
+                file.type ||
+                null,
+              size_bytes:
+                file.size
+            });
+
+        if (metadataError) {
+          throw metadataError;
+        }
       }
 
-      const { error: metadataError } =
-        await supabaseClient
-          .from("guild_raven_attachments")
-          .insert({
-            raven_id:
-              ravenId,
-            storage_path:
-              storagePath,
-            file_name:
-              file.name ||
-              "Attachment",
-            mime_type:
-              file.type ||
-              null,
-            size_bytes:
-              file.size
-          });
-
-      if (metadataError) {
+      return uploadedPaths;
+    } catch (error) {
+      if (uploadedPaths.length) {
         try {
           await supabaseClient
             .storage
             .from("guild-ravens")
-            .remove([
-              storagePath
-            ]);
-        } catch {}
-
-        throw metadataError;
+            .remove(
+              uploadedPaths
+            );
+        } catch (
+          cleanupError
+        ) {
+          console.warn(
+            "Could not clean up failed Guild raven uploads:",
+            cleanupError
+          );
+        }
       }
+
+      throw error;
     }
   }
 
@@ -1480,6 +1501,9 @@
         "Binding the note to the raven…";
     }
 
+    let createdRavenId =
+      null;
+
     try {
       const {
         data: raven,
@@ -1512,6 +1536,9 @@
         throw error;
       }
 
+      createdRavenId =
+        raven.id;
+
       await uploadGuildRavenAttachments(
         raven.id,
         files
@@ -1538,6 +1565,29 @@
 
       await refreshGuildLoop();
     } catch (error) {
+      if (createdRavenId) {
+        try {
+          await supabaseClient
+            .from("guild_ravens")
+            .delete()
+            .eq(
+              "id",
+              createdRavenId
+            )
+            .eq(
+              "sender_user_id",
+              supabaseUser.id
+            );
+        } catch (
+          cleanupError
+        ) {
+          console.warn(
+            "Could not roll back failed Guild raven:",
+            cleanupError
+          );
+        }
+      }
+
       console.error(
         "Could not send Guild raven:",
         error
@@ -1545,8 +1595,11 @@
 
       if (status) {
         status.textContent =
-          error?.message ||
-          "The raven could not be sent.";
+          "Raven not sent: " +
+          (
+            error?.message ||
+            "attachment delivery failed."
+          );
       }
 
       if (
