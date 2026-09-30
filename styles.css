@@ -613,6 +613,25 @@ p {
   background-image: url("icons/moonlit-mobility-v73.webp");
 }
 
+
+.quest-card[data-quest-id="iron-gate"]::before,
+.quest-card[data-quest-id="smiths-circuit"]::before,
+.quest-card[data-quest-id="sentinels-stand"]::before,
+.quest-card[data-quest-id="unbinding-ritual"]::before,
+.quest-card[data-quest-id="wayfarers-reset"]::before,
+.quest-card[data-quest-id="moonlit-mobility"]::before {
+  background-size: 112% 112%;
+}
+
+.quest-dialog-art[data-quest-id="iron-gate"],
+.quest-dialog-art[data-quest-id="smiths-circuit"],
+.quest-dialog-art[data-quest-id="sentinels-stand"],
+.quest-dialog-art[data-quest-id="unbinding-ritual"],
+.quest-dialog-art[data-quest-id="wayfarers-reset"],
+.quest-dialog-art[data-quest-id="moonlit-mobility"] {
+  background-size: 112% 112%;
+}
+
 /* =========================================================
    14. QUEST CARD CONTENT
 ========================================================= */
