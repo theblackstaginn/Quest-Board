@@ -590,27 +590,27 @@ p {
 }
 
 .quest-card[data-quest-id="iron-gate"]::before {
-  background-image: url("icons/iron-gate-v72.webp");
+  background-image: url("icons/iron-gate-v73.webp");
 }
 
 .quest-card[data-quest-id="smiths-circuit"]::before {
-  background-image: url("icons/smiths-circuit-v72.webp");
+  background-image: url("icons/smiths-circuit-v73.webp");
 }
 
 .quest-card[data-quest-id="sentinels-stand"]::before {
-  background-image: url("icons/sentinels-stand-v72.webp");
+  background-image: url("icons/sentinels-stand-v73.webp");
 }
 
 .quest-card[data-quest-id="unbinding-ritual"]::before {
-  background-image: url("icons/unbinding-ritual-v72.webp");
+  background-image: url("icons/unbinding-ritual-v73.webp");
 }
 
 .quest-card[data-quest-id="wayfarers-reset"]::before {
-  background-image: url("icons/wayfarers-reset-v72.webp");
+  background-image: url("icons/wayfarers-reset-v73.webp");
 }
 
 .quest-card[data-quest-id="moonlit-mobility"]::before {
-  background-image: url("icons/moonlit-mobility-v72.webp");
+  background-image: url("icons/moonlit-mobility-v73.webp");
 }
 
 /* =========================================================
