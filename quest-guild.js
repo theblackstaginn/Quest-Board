@@ -1254,6 +1254,320 @@
     );
   }
 
+  function safeRavenFileName(value) {
+    return String(value || "attachment")
+      .replace(
+        /[^a-zA-Z0-9._-]+/g,
+        "-"
+      )
+      .replace(
+        /^-+|-+$/g,
+        ""
+      )
+      .slice(
+        0,
+        120
+      ) ||
+      "attachment";
+  }
+
+  async function uploadGuildRavenAttachments(
+    ravenId,
+    files
+  ) {
+    if (
+      !files.length ||
+      !currentParty?.id
+    ) {
+      return;
+    }
+
+    for (const file of files) {
+      const storagePath =
+        currentParty.id +
+        "/" +
+        ravenId +
+        "/" +
+        crypto.randomUUID() +
+        "-" +
+        safeRavenFileName(
+          file.name
+        );
+
+      const { error: uploadError } =
+        await supabaseClient
+          .storage
+          .from("guild-ravens")
+          .upload(
+            storagePath,
+            file,
+            {
+              contentType:
+                file.type ||
+                "application/octet-stream",
+              upsert:
+                false
+            }
+          );
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { error: metadataError } =
+        await supabaseClient
+          .from("guild_raven_attachments")
+          .insert({
+            raven_id:
+              ravenId,
+            storage_path:
+              storagePath,
+            file_name:
+              file.name ||
+              "Attachment",
+            mime_type:
+              file.type ||
+              null,
+            size_bytes:
+              file.size
+          });
+
+      if (metadataError) {
+        try {
+          await supabaseClient
+            .storage
+            .from("guild-ravens")
+            .remove([
+              storagePath
+            ]);
+        } catch {}
+
+        throw metadataError;
+      }
+    }
+  }
+
+  async function sendDirectGuildRaven() {
+    const recipient =
+      document.querySelector(
+        "#guildRavenRecipient"
+      );
+
+    const messageInput =
+      document.querySelector(
+        "#guildRavenMessage"
+      );
+
+    const fileInput =
+      document.querySelector(
+        "#guildRavenFiles"
+      );
+
+    const sendButton =
+      document.querySelector(
+        "#guildRavenSend"
+      );
+
+    const status =
+      document.querySelector(
+        "#guildRavenStatus"
+      );
+
+    const recipientUserId =
+      String(
+        recipient?.value ||
+        ""
+      );
+
+    const recipientMember =
+      guildFellowshipMembers.find(
+        member =>
+          String(member.user_id) ===
+          recipientUserId
+      );
+
+    const message =
+      String(
+        messageInput?.value ||
+        ""
+      ).trim();
+
+    const files =
+      Array.from(
+        fileInput?.files ||
+        []
+      );
+
+    if (
+      !recipientMember ||
+      !currentParty?.id
+    ) {
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          "No fellowship recipient is available."
+        );
+      }
+
+      return;
+    }
+
+    if (
+      !message &&
+      !files.length
+    ) {
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          "Write a note or attach a file."
+        );
+      }
+
+      return;
+    }
+
+    if (
+      files.length >
+      4
+    ) {
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          "A raven can carry up to 4 attachments."
+        );
+      }
+
+      return;
+    }
+
+    const oversized =
+      files.find(
+        file =>
+          file.size >
+          10485760
+      );
+
+    if (oversized) {
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          oversized.name +
+          " is larger than 10 MB."
+        );
+      }
+
+      return;
+    }
+
+    if (sendButton) {
+      sendButton.disabled =
+        true;
+
+      sendButton.textContent =
+        "Sending…";
+    }
+
+    if (status) {
+      status.textContent =
+        "Binding the note to the raven…";
+    }
+
+    try {
+      const {
+        data: raven,
+        error
+      } =
+        await supabaseClient
+          .from("guild_ravens")
+          .insert({
+            party_id:
+              currentParty.id,
+            sender_user_id:
+              supabaseUser.id,
+            recipient_user_id:
+              recipientMember.user_id,
+            sender_profile_id:
+              activeProfileId,
+            recipient_profile_id:
+              recipientMember.profile_id ||
+              "adventurer",
+            message,
+            source:
+              "player"
+          })
+          .select(
+            "id"
+          )
+          .single();
+
+      if (error) {
+        throw error;
+      }
+
+      await uploadGuildRavenAttachments(
+        raven.id,
+        files
+      );
+
+      if (messageInput) {
+        messageInput.value =
+          "";
+      }
+
+      if (fileInput) {
+        fileInput.value =
+          "";
+      }
+
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          "Raven sent."
+        );
+      }
+
+      await refreshGuildLoop();
+    } catch (error) {
+      console.error(
+        "Could not send Guild raven:",
+        error
+      );
+
+      if (status) {
+        status.textContent =
+          error?.message ||
+          "The raven could not be sent.";
+      }
+
+      if (
+        typeof showToast ===
+        "function"
+      ) {
+        showToast(
+          "Could not send raven."
+        );
+      }
+    } finally {
+      if (sendButton) {
+        sendButton.disabled =
+          false;
+
+        sendButton.textContent =
+          "Send Raven";
+      }
+    }
+  }
+
   function renderGuildLoop() {
     const host = document.querySelector("#guildLoopPanel");
 
