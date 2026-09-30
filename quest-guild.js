@@ -966,6 +966,212 @@
     await refreshGuildLoop();
   }
 
+  function ravenMemberByUserId(userId) {
+    return (
+      guildFellowshipMembers.find(
+        member =>
+          String(member.user_id) ===
+          String(userId)
+      ) ||
+      null
+    );
+  }
+
+  function ravenAttachmentMarkup(attachment) {
+    const href =
+      attachment.signed_url
+        ? qbEscape(attachment.signed_url)
+        : "";
+
+    const name =
+      qbEscape(
+        attachment.file_name ||
+        "Attachment"
+      );
+
+    if (!href) {
+      return (
+        "<span class='guild-raven-file unavailable'>" +
+          name +
+        "</span>"
+      );
+    }
+
+    if (
+      String(
+        attachment.mime_type ||
+        ""
+      ).startsWith("image/")
+    ) {
+      return (
+        "<a class='guild-raven-image-link' href='" +
+          href +
+          "' target='_blank' rel='noopener'>" +
+          "<img class='guild-raven-image' src='" +
+            href +
+            "' alt='" +
+            name +
+          "'>" +
+          "<span>" +
+            name +
+          "</span>" +
+        "</a>"
+      );
+    }
+
+    return (
+      "<a class='guild-raven-file' href='" +
+        href +
+        "' target='_blank' rel='noopener'>📎 " +
+        name +
+      "</a>"
+    );
+  }
+
+  function guildRavenCard(raven) {
+    const outgoing =
+      raven.sender_user_id ===
+      supabaseUser?.id;
+
+    const otherUserId =
+      outgoing
+        ? raven.recipient_user_id
+        : raven.sender_user_id;
+
+    const otherMember =
+      ravenMemberByUserId(
+        otherUserId
+      );
+
+    const otherName =
+      otherMember?.display_name ||
+      (
+        outgoing
+          ? raven.recipient_profile_id
+          : raven.sender_profile_id
+      ) ||
+      "Adventurer";
+
+    const attachments =
+      guildRavenAttachments.get(
+        raven.id
+      ) ||
+      [];
+
+    const sourceNote =
+      raven.source === "guild_ai"
+        ? "<small class='guild-raven-source'>carried by Ember</small>"
+        : "";
+
+    return (
+      "<article class='guild-raven-card " +
+        (outgoing ? "outgoing" : "incoming") +
+      "'>" +
+        "<div class='guild-raven-heading'>" +
+          "<strong>" +
+            (outgoing ? "To " : "From ") +
+            qbEscape(otherName) +
+          "</strong>" +
+          sourceNote +
+        "</div>" +
+        (
+          raven.message
+            ? "<p>" +
+                qbEscape(raven.message) +
+              "</p>"
+            : ""
+        ) +
+        (
+          attachments.length
+            ? "<div class='guild-raven-attachments'>" +
+                attachments
+                  .map(ravenAttachmentMarkup)
+                  .join("") +
+              "</div>"
+            : ""
+        ) +
+      "</article>"
+    );
+  }
+
+  function ravenInboxMarkup() {
+    const otherMembers =
+      guildFellowshipMembers.filter(
+        member =>
+          member.user_id !==
+          supabaseUser?.id
+      );
+
+    const recipientOptions =
+      otherMembers
+        .map(member =>
+          "<option value='" +
+            qbEscape(member.user_id) +
+          "'>" +
+            qbEscape(
+              member.display_name ||
+              member.profile_id ||
+              "Adventurer"
+            ) +
+          "</option>"
+        )
+        .join("");
+
+    return (
+      "<section class='guild-raven-post'>" +
+        "<div class='section-heading compact'>" +
+          "<div>" +
+            "<span class='eyebrow'>Raven Post</span>" +
+            "<h3>Fellowship Ravens</h3>" +
+          "</div>" +
+        "</div>" +
+        (
+          currentParty?.id
+            ? (
+              "<div class='guild-raven-compose'>" +
+                "<label class='guild-raven-recipient'>" +
+                  "<span>Send to</span>" +
+                  "<select id='guildRavenRecipient' " +
+                    (recipientOptions ? "" : "disabled") +
+                  ">" +
+                    (
+                      recipientOptions ||
+                      "<option>No companion available</option>"
+                    ) +
+                  "</select>" +
+                "</label>" +
+                "<label class='guild-chat-field'>" +
+                  "<span>Message</span>" +
+                  "<textarea id='guildRavenMessage' rows='3' maxlength='8000' placeholder='Tie a note beneath the raven&#39;s wing…'></textarea>" +
+                "</label>" +
+                "<label class='guild-raven-file-input'>" +
+                  "<span>Attachments</span>" +
+                  "<input id='guildRavenFiles' type='file' multiple accept='image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx'>" +
+                  "<small>Up to 4 files, 10 MB each.</small>" +
+                "</label>" +
+                "<div class='guild-raven-compose-actions'>" +
+                  "<button type='button' class='guild-mini-action primary' id='guildRavenSend' " +
+                    (recipientOptions ? "" : "disabled") +
+                  ">Send Raven</button>" +
+                  "<span class='muted' id='guildRavenStatus'>Private to your fellowship.</span>" +
+                "</div>" +
+              "</div>"
+            )
+            : "<p class='muted guild-empty-copy'>Join a fellowship before sending ravens.</p>"
+        ) +
+        "<div class='guild-raven-list'>" +
+          (
+            guildRavens.length
+              ? guildRavens
+                  .map(guildRavenCard)
+                  .join("")
+              : "<p class='muted guild-empty-copy'>No fellowship ravens yet.</p>"
+          ) +
+        "</div>" +
+      "</section>"
+    );
+  }
+
   function latestResponseMarkup() {
     const answered = guildRequests.find(
       request =>
