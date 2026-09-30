@@ -6297,7 +6297,7 @@ body[data-active-view="character"] .world-overlay {
       rgba(9, 7, 5, 0.05),
       rgba(6, 5, 4, 0.18)
     ),
-    url("character-bg-v77.webp");
+    url("quest-board-character-bg.webp");
 
   background-size: cover;
   background-position: center top;
