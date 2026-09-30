@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="86">
+  <meta name="quest-board-build" content="87">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=86">
+  <link rel="stylesheet" href="styles.css?v=87">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
@@ -1262,26 +1262,28 @@
       aria-label="Primary navigation"
     >
 
-      <button
-        class="nav-item active"
-        type="button"
-        data-view="board"
-        aria-label="Quest Board"
-      >
-        Board
-      </button>
+      <div class="nav-cluster nav-cluster-left">
+        <button
+          class="nav-item active"
+          type="button"
+          data-view="board"
+          aria-label="Quest Board"
+        >
+          Board
+        </button>
+
+        <button
+          class="nav-item"
+          type="button"
+          data-view="character"
+          aria-label="Character"
+        >
+          Character
+        </button>
+      </div>
 
       <button
-        class="nav-item"
-        type="button"
-        data-view="character"
-        aria-label="Character"
-      >
-        Character
-      </button>
-
-      <button
-        class="nav-item"
+        class="nav-item nav-item-map"
         type="button"
         data-view="map"
         aria-label="Blackwood Map"
@@ -1289,23 +1291,25 @@
         Map
       </button>
 
-      <button
-        class="nav-item"
-        type="button"
-        data-view="party"
-        aria-label="Party"
-      >
-        Party
-      </button>
+      <div class="nav-cluster nav-cluster-right">
+        <button
+          class="nav-item"
+          type="button"
+          data-view="party"
+          aria-label="Party"
+        >
+          Party
+        </button>
 
-      <button
-        class="nav-item"
-        type="button"
-        data-view="settings"
-        aria-label="Settings"
-      >
-        Settings
-      </button>
+        <button
+          class="nav-item"
+          type="button"
+          data-view="settings"
+          aria-label="Settings"
+        >
+          Settings
+        </button>
+      </div>
 
     </nav>
 
