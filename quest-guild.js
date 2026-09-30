@@ -20,6 +20,7 @@
   let guildFellowshipMembers = [];
   let guildQuestCache = new Map();
   let guildUiReady = false;
+  let guildRavenPickerActive = false;
 
   const GUILD_MODES = {
     counsel: {
@@ -1691,8 +1692,22 @@
     host.querySelector("#guildRavenSend")
       ?.addEventListener("click", sendDirectGuildRaven);
 
-    host.querySelector("#guildRavenFiles")
+    const ravenFileInput =
+      host.querySelector(
+        "#guildRavenFiles"
+      );
+
+    ravenFileInput
+      ?.addEventListener("click", () => {
+        guildRavenPickerActive =
+          true;
+      });
+
+    ravenFileInput
       ?.addEventListener("change", event => {
+        guildRavenPickerActive =
+          false;
+
         const files =
           Array.from(
             event.target?.files ||
@@ -2035,11 +2050,34 @@
       );
 
     return Boolean(
+      guildRavenPickerActive ||
       input?.files?.length
     );
   }
 
   function refreshGuildLoopAfterPickerReturn() {
+    if (guildRavenPickerActive) {
+      window.setTimeout(() => {
+        const input =
+          document.querySelector(
+            "#guildRavenFiles"
+          );
+
+        guildRavenPickerActive =
+          false;
+
+        if (
+          input?.files?.length
+        ) {
+          return;
+        }
+
+        refreshGuildLoop();
+      }, 1400);
+
+      return;
+    }
+
     window.setTimeout(() => {
       if (
         ravenFileSelectionPending()
