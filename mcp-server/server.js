@@ -116,7 +116,7 @@ function buildServer() {
   const server =
     new McpServer({
       name: "quest-board-guild",
-      version: "0.1.0"
+      version: "0.2.0"
     });
 
   server.registerTool(
@@ -200,6 +200,58 @@ function buildServer() {
                 artifact_type,
               supplied_payload:
                 payload
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        return jsonResult(data);
+      } catch (error) {
+        return errorResult(error);
+      }
+    }
+  );
+
+  server.registerTool(
+    "send_guild_raven",
+    {
+      title: "Send Guild Raven",
+      description:
+        "Deliver one capability-scoped player-to-player Guild raven to another adventurer in the same fellowship. Quest Board validates the request capability, party membership, sender identity, and recipient before storing the message. Do not claim delivery unless this tool succeeds.",
+      inputSchema: {
+        ...requestSchema,
+        recipient_profile_id:
+          z.string()
+            .min(1)
+            .max(80),
+        message:
+          z.string()
+            .max(8000)
+            .default("")
+      },
+      ...writeToolMetadata
+    },
+    async ({
+      request_id,
+      return_capability,
+      recipient_profile_id,
+      message
+    }) => {
+      try {
+        const { data, error } =
+          await supabase.rpc(
+            "guild_send_raven",
+            {
+              requested_request_id:
+                request_id,
+              supplied_capability:
+                return_capability,
+              supplied_recipient_profile_id:
+                recipient_profile_id,
+              supplied_message:
+                message || ""
             }
           );
 
