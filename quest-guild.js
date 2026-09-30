@@ -15,6 +15,9 @@
   let selectedGuildNpc = "ember";
   let guildArtifacts = [];
   let guildRequests = [];
+  let guildRavens = [];
+  let guildRavenAttachments = new Map();
+  let guildFellowshipMembers = [];
   let guildQuestCache = new Map();
   let guildUiReady = false;
 
