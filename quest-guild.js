@@ -21,6 +21,7 @@
   let guildQuestCache = new Map();
   let guildUiReady = false;
   let guildRavenPickerActive = false;
+  let guildRavenPendingFiles = [];
 
   const GUILD_MODES = {
     counsel: {
@@ -1415,10 +1416,14 @@
       ).trim();
 
     const files =
-      Array.from(
-        fileInput?.files ||
-        []
-      );
+      guildRavenPendingFiles.length
+        ? [
+            ...guildRavenPendingFiles
+          ]
+        : Array.from(
+            fileInput?.files ||
+            []
+          );
 
     if (
       !recipientMember ||
@@ -1549,6 +1554,9 @@
         messageInput.value =
           "";
       }
+
+      guildRavenPendingFiles =
+        [];
 
       if (fileInput) {
         fileInput.value =
@@ -1697,18 +1705,38 @@
         "#guildRavenFiles"
       );
 
+    const markRavenPickerActive = () => {
+      guildRavenPickerActive =
+        true;
+    };
+
     ravenFileInput
-      ?.addEventListener("click", () => {
-        guildRavenPickerActive =
-          true;
-      });
+      ?.addEventListener(
+        "pointerdown",
+        markRavenPickerActive
+      );
+
+    ravenFileInput
+      ?.addEventListener(
+        "touchstart",
+        markRavenPickerActive,
+        {
+          passive: true
+        }
+      );
+
+    ravenFileInput
+      ?.addEventListener(
+        "click",
+        markRavenPickerActive
+      );
 
     ravenFileInput
       ?.addEventListener("change", event => {
         guildRavenPickerActive =
           false;
 
-        const files =
+        guildRavenPendingFiles =
           Array.from(
             event.target?.files ||
             []
@@ -1723,16 +1751,16 @@
           return;
         }
 
-        if (!files.length) {
+        if (!guildRavenPendingFiles.length) {
           status.textContent =
             "Private to your fellowship.";
           return;
         }
 
         status.textContent =
-          files.length === 1
-            ? files[0].name + " ready to fly."
-            : files.length + " attachments ready to fly.";
+          guildRavenPendingFiles.length === 1
+            ? guildRavenPendingFiles[0].name + " ready to fly."
+            : guildRavenPendingFiles.length + " attachments ready to fly.";
       });
 
     host.querySelectorAll("[data-guild-mode]")
@@ -1996,6 +2024,12 @@
   }
 
   async function refreshGuildLoop() {
+    if (
+      ravenFileSelectionPending()
+    ) {
+      return true;
+    }
+
     if (!supabaseClient || !supabaseUser) {
       ensureGuildUi();
       renderGuildLoop();
@@ -2051,53 +2085,18 @@
 
     return Boolean(
       guildRavenPickerActive ||
+      guildRavenPendingFiles.length ||
       input?.files?.length
     );
   }
 
-  function refreshGuildLoopAfterPickerReturn() {
-    if (guildRavenPickerActive) {
-      window.setTimeout(() => {
-        const input =
-          document.querySelector(
-            "#guildRavenFiles"
-          );
-
-        guildRavenPickerActive =
-          false;
-
-        if (
-          input?.files?.length
-        ) {
-          return;
-        }
-
-        refreshGuildLoop();
-      }, 1400);
-
-      return;
-    }
-
-    window.setTimeout(() => {
-      if (
-        ravenFileSelectionPending()
-      ) {
-        return;
-      }
-
-      refreshGuildLoop();
-    }, 350);
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      refreshGuildLoopAfterPickerReturn();
-    }
-  });
-
-  window.addEventListener("focus", () => {
-    refreshGuildLoopAfterPickerReturn();
-  });
+  /*
+    Do not auto-refresh the Guild panel on focus/visibility.
+    iOS returns from Photos/Files through those events, and
+    rebuilding the panel there destroys native file selection.
+    Manual Refresh and questboard:guild-refresh still update
+    the Guild normally.
+  */
 
   window.addEventListener("questboard:guild-refresh", () => {
     refreshGuildLoop();
