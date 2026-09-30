@@ -288,14 +288,14 @@ const QUEST_ICON_PATHS = {
   "there-back": "icons/there-and-back.webp",
   "keep": "icons/the-keep.webp",
   "dragonstrength": "icons/dragonstrength.webp",
-  "iron-gate": "icons/the-iron-gate.webp",
-  "smiths-circuit": "icons/the-smiths-circuit.webp",
-  "sentinels-stand": "icons/sentinels-stand.webp",
+  "iron-gate": "icons/iron-gate-v72.webp",
+  "smiths-circuit": "icons/smiths-circuit-v72.webp",
+  "sentinels-stand": "icons/sentinels-stand-v72.webp",
   "rogue": "icons/rogue-mode.webp",
   "restoration": "icons/restoration.webp",
-  "unbinding-ritual": "icons/the-unbinding-ritual.webp",
-  "wayfarers-reset": "icons/wayfarers-reset.webp",
-  "moonlit-mobility": "icons/moonlit-mobility.webp",
+  "unbinding-ritual": "icons/unbinding-ritual-v72.webp",
+  "wayfarers-reset": "icons/wayfarers-reset-v72.webp",
+  "moonlit-mobility": "icons/moonlit-mobility-v72.webp",
   "ranger": "icons/ranger-training.webp"
 };
 
