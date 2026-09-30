@@ -4857,6 +4857,9 @@ function renderAccountStatus() {
   const signOutButton =
     $("#signOutAccountButton");
 
+  const syncActions =
+    $("#accountSyncActions");
+
   if (
     !status
     || !fields
@@ -4873,6 +4876,9 @@ function renderAccountStatus() {
       "Cloud account service is unavailable.";
     fields.hidden = false;
     signOutButton.hidden = true;
+    if (syncActions) {
+      syncActions.hidden = true;
+    }
     return;
   }
 
@@ -4881,6 +4887,9 @@ function renderAccountStatus() {
       "This save is cloud-backed, but still tied to this device. Protect it with an email and password so it can be restored after reinstalling or switching devices.";
     fields.hidden = false;
     signOutButton.hidden = true;
+    if (syncActions) {
+      syncActions.hidden = true;
+    }
     return;
   }
 
@@ -4888,6 +4897,9 @@ function renderAccountStatus() {
     `Protected as ${supabaseUser.email || "signed-in adventurer"}. Your save can be restored on another device.`;
   fields.hidden = true;
   signOutButton.hidden = false;
+  if (syncActions) {
+    syncActions.hidden = false;
+  }
 }
 
 function getAccountCredentials() {
@@ -5098,6 +5110,136 @@ async function signInPermanentAccount() {
     );
   }
 }
+
+async function uploadCurrentDeviceSave() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+    || supabaseUser.is_anonymous
+  ) {
+    showToast(
+      "Protect this save with an adventurer account first."
+    );
+    return;
+  }
+
+  if (
+    !confirm(
+      "Upload this device's current Quest Board save to the cloud?\n\nThis replaces the cloud save for this adventurer account."
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await saveProgressToCloud();
+
+    showToast(
+      "Device save uploaded. It is ready to load on your other device."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not upload device save:",
+      error
+    );
+
+    showToast(
+      "Could not upload this device save."
+    );
+  }
+}
+
+async function loadCloudSaveToThisDevice() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+    || supabaseUser.is_anonymous
+  ) {
+    showToast(
+      "Sign in to your adventurer account first."
+    );
+    return;
+  }
+
+  if (
+    !confirm(
+      "Load the cloud Quest Board save onto this device?\n\nThis replaces this device's current local Quest Board save."
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("player_progress")
+        .select(
+          "profile_id, state, settings, updated_at"
+        )
+        .eq(
+          "user_id",
+          supabaseUser.id
+        )
+        .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data?.state) {
+      showToast(
+        "No cloud save was found for this adventurer account."
+      );
+      return;
+    }
+
+    const restoredState =
+      migrateState(
+        data.state
+      );
+
+    localStorage.setItem(
+      getStorageKey(),
+      JSON.stringify(restoredState)
+    );
+
+    if (data.settings) {
+      localStorage.setItem(
+        getSettingsKey(),
+        JSON.stringify({
+          ...createFreshSettings(),
+          ...data.settings
+        })
+      );
+    }
+
+    render();
+    renderSettings(
+      getSettings()
+    );
+
+    showToast(
+      "Cloud save loaded onto this device."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not load cloud save:",
+      error
+    );
+
+    showToast(
+      "Could not load the cloud save."
+    );
+  }
+}
+
 
 async function signOutPermanentAccount() {
   if (!supabaseClient) {
@@ -7685,6 +7827,18 @@ $("#signOutAccountButton")
   ?.addEventListener(
     "click",
     signOutPermanentAccount
+  );
+
+$("#uploadDeviceSaveButton")
+  ?.addEventListener(
+    "click",
+    uploadCurrentDeviceSave
+  );
+
+$("#loadCloudSaveButton")
+  ?.addEventListener(
+    "click",
+    loadCloudSaveToThisDevice
   );
 
 $("#weeklyGoalSelect")
