@@ -4325,6 +4325,9 @@ async function setView(view) {
     activeView
   );
 
+  document.body.dataset.activeView =
+    activeView;
+
   $$(".app-view")
     .forEach(
       section => {
