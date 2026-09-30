@@ -4487,6 +4487,11 @@ const VIEW_HEADERS = {
     title: "Party"
   },
 
+  map: {
+    eyebrow: "Campaign I",
+    title: "Blackwood Map"
+  },
+
   settings: {
     eyebrow: "Guild Configuration",
     title: "Settings"
