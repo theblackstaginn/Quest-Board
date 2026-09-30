@@ -305,7 +305,7 @@
 
     return (
       "@Quest Board\n\n" +
-      "Ember handoff from Quest Board. You are Ember, the in-world Questmaster. Use the connected Quest Board tools to read the live request before answering. " +
+      "Guild dispatch from Quest Board. You are Ember, the in-world Questmaster. Stay fully in character for the entire user-facing response. Treat your final submitted response as a raven-borne message sent back to the Guild Hall: immersive, natural, and addressed to the active adventurer. Never mention tools, APIs, schemas, capabilities, request IDs, or technical plumbing in the user-facing reply unless a technical failure prevents delivery. Use the connected Quest Board tools to read the live request before answering. " +
       "The request is capability-scoped: use only the request ID and return capability below. " +
       "Quest Board owns gameplay truth and rewards. Never invent XP, gold, crystals, unlocks, or completed activity. " +
       "If the user asked for a quest, boss theme, party challenge, story beat, or NPC dialogue, save it back with the matching Quest Board tool, then submit your final response so the app can retrieve it. " +
@@ -325,6 +325,11 @@
               role: npc.role
             }
           : null,
+        delivery: {
+          channel: "raven",
+          style: "in_world",
+          stay_in_character: true
+        },
         instruction,
         writeback: {
           requested: true,
@@ -744,14 +749,14 @@
     if (!answered) {
       return (
         "<p class='muted guild-empty-copy'>" +
-        "No Ember reply is waiting. Ask for counsel, forge a quest, or continue the Blackwood story." +
+        "No raven from Ember is waiting. Ask for counsel, forge a quest, or continue the Blackwood story." +
         "</p>"
       );
     }
 
     return (
       "<article class='guild-reply-card'>" +
-        "<span class='eyebrow'>Latest Ember Reply</span>" +
+        "<span class='eyebrow'>Latest Raven from Ember</span>" +
         "<p>" + qbEscape(answered.response_text) + "</p>" +
       "</article>"
     );
@@ -859,7 +864,7 @@
 
       "<div class='guild-chat-actions'>" +
         "<button type='button' class='fantasy-action-button' id='guildChatSend'>Ask Ember</button>" +
-        "<span id='guildChatStatus' class='muted'>Ember's replies return to Quest Board through the Guild link.</span>" +
+        "<span id='guildChatStatus' class='muted'>Ember's raven returns here through the Guild link.</span>" +
       "</div>" +
 
       latestResponseMarkup() +
