@@ -6506,3 +6506,33 @@ body[data-active-view="map"] .map-view::before {
     padding: 14px 14px;
   }
 }
+
+
+/* =========================================================
+   CROSS-DEVICE SAVE
+========================================================= */
+
+.account-sync-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(78, 49, 25, 0.22);
+}
+
+.account-sync-actions[hidden] {
+  display: none !important;
+}
+
+.account-sync-actions .eyebrow {
+  margin-bottom: 0;
+  color: #6f4c27;
+  text-shadow: none;
+}
+
+.account-sync-copy {
+  margin: 0;
+  color: #5b4734 !important;
+  font-size: .9rem !important;
+  line-height: 1.45 !important;
+}
