@@ -12,7 +12,7 @@
   const MAX_RECENT_HISTORY = 12;
 
   let selectedGuildMode = "counsel";
-  let selectedGuildNpc = "guildmaster";
+  let selectedGuildNpc = "ember";
   let guildArtifacts = [];
   let guildRequests = [];
   let guildQuestCache = new Map();
@@ -32,7 +32,7 @@
     boss_quest: {
       label: "Boss Forge",
       requestType: "boss_quest",
-      placeholder: "Ask the Guild to theme your unlocked weekly Boss Battle."
+      placeholder: "Ask Ember to theme your unlocked weekly Boss Battle."
     },
     party_challenge: {
       label: "Party Challenge",
@@ -47,6 +47,7 @@
   };
 
   const NPC_MODE = {
+    ember: "counsel",
     guildmaster: "counsel",
     blacksmith: "personal_quest",
     archivist: "story",
@@ -127,6 +128,12 @@
       ? state.weeklyCompleted.length
       : 0;
 
+    const world =
+      state?.world &&
+      typeof state.world === "object"
+        ? state.world
+        : {};
+
     return {
       profile: {
         id: typeof activeProfileId !== "undefined" ? activeProfileId : profile?.profileId,
@@ -176,7 +183,43 @@
             id: currentParty.id,
             name: currentParty.name || "The Fellowship"
           }
-        : null
+        : null,
+      world: {
+        schema_version:
+          Math.max(1, Number(world.schemaVersion) || 1),
+        campaign_id:
+          world.campaignId || null,
+        current_chapter_id:
+          world.currentChapterId || null,
+        known_npc_ids:
+          Array.isArray(world.knownNpcIds)
+            ? world.knownNpcIds.slice(0, 40)
+            : [],
+        unlocked_location_ids:
+          Array.isArray(world.unlockedLocationIds)
+            ? world.unlockedLocationIds.slice(0, 40)
+            : [],
+        story_flags:
+          world.storyFlags &&
+          typeof world.storyFlags === "object"
+            ? world.storyFlags
+            : {},
+        discovered_secret_ids:
+          Array.isArray(world.discoveredSecretIds)
+            ? world.discoveredSecretIds.slice(0, 80)
+            : [],
+        active_events:
+          Array.isArray(world.activeEvents)
+            ? world.activeEvents.slice(0, 20)
+            : [],
+        npc_relationships:
+          world.npcRelationships &&
+          typeof world.npcRelationships === "object"
+            ? world.npcRelationships
+            : {},
+        last_story_beat:
+          world.lastStoryBeat || null
+      }
     };
   }
 
@@ -196,6 +239,8 @@
       snapshot: getQuestBoardSnapshot(),
       guardrails: {
         quest_board_owns_game_state: true,
+        ember_is_in_world_questmaster: true,
+        world_state_is_context_not_reward_authority: true,
         ai_never_awards_currency_directly: true,
         ai_generated_quest_rewards_are_server_calculated: true,
         normal_boss_unlock_rules_still_apply: true,
@@ -260,7 +305,7 @@
 
     return (
       "@Quest Board\n\n" +
-      "Guild handoff from Quest Board. Use the connected Quest Board tools to read the live request before answering. " +
+      "Ember handoff from Quest Board. You are Ember, the in-world Questmaster. Use the connected Quest Board tools to read the live request before answering. " +
       "The request is capability-scoped: use only the request ID and return capability below. " +
       "Quest Board owns gameplay truth and rewards. Never invent XP, gold, crystals, unlocks, or completed activity. " +
       "If the user asked for a quest, boss theme, party challenge, story beat, or NPC dialogue, save it back with the matching Quest Board tool, then submit your final response so the app can retrieve it. " +
@@ -404,7 +449,7 @@
     } finally {
       if (button) {
         button.disabled = false;
-        button.textContent = "Ask the Guild";
+        button.textContent = "Ask Ember";
       }
     }
   }
@@ -699,14 +744,14 @@
     if (!answered) {
       return (
         "<p class='muted guild-empty-copy'>" +
-        "No Guild reply is waiting. Ask for counsel, forge a quest, or continue the Blackwood story." +
+        "No Ember reply is waiting. Ask for counsel, forge a quest, or continue the Blackwood story." +
         "</p>"
       );
     }
 
     return (
       "<article class='guild-reply-card'>" +
-        "<span class='eyebrow'>Latest Guild Reply</span>" +
+        "<span class='eyebrow'>Latest Ember Reply</span>" +
         "<p>" + qbEscape(answered.response_text) + "</p>" +
       "</article>"
     );
@@ -788,8 +833,8 @@
     host.innerHTML =
       "<div class='guild-loop-heading'>" +
         "<div>" +
-          "<span class='eyebrow'>Guild Link</span>" +
-          "<h3>Ask the Guild</h3>" +
+          "<span class='eyebrow'>Questmaster Link</span>" +
+          "<h3>Ask Ember</h3>" +
           "<p class='muted'>" +
             qbEscape(
               npc
@@ -813,8 +858,8 @@
       "</label>" +
 
       "<div class='guild-chat-actions'>" +
-        "<button type='button' class='fantasy-action-button' id='guildChatSend'>Ask the Guild</button>" +
-        "<span id='guildChatStatus' class='muted'>Replies return to Quest Board through the Guild link.</span>" +
+        "<button type='button' class='fantasy-action-button' id='guildChatSend'>Ask Ember</button>" +
+        "<span id='guildChatStatus' class='muted'>Ember's replies return to Quest Board through the Guild link.</span>" +
       "</div>" +
 
       latestResponseMarkup() +
