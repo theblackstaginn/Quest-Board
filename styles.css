@@ -6285,3 +6285,21 @@ body[data-active-view="party"] .party-activity-item {
     opacity: 1;
   }
 }
+
+
+/* =========================================================
+   CHARACTER HERO ENVIRONMENT
+========================================================= */
+
+body[data-active-view="character"] .world-overlay {
+  background-image:
+    linear-gradient(
+      rgba(9, 7, 5, 0.05),
+      rgba(6, 5, 4, 0.18)
+    ),
+    url("character-bg-v76.webp");
+
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
