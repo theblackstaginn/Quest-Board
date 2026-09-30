@@ -1,0 +1,236 @@
+/* =========================================================
+   QUEST BOARD — GUILD CHAT LOOP
+========================================================= */
+
+.guild-loop-panel {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(201, 154, 80, 0.24);
+  background:
+    linear-gradient(rgba(7, 8, 6, 0.88), rgba(7, 8, 6, 0.92)),
+    url("mossy-stone.webp") center / cover no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.guild-loop-heading,
+.guild-chat-actions,
+.guild-artifact-heading,
+.guild-artifact-actions,
+.guild-artifact-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.guild-loop-heading {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.guild-loop-heading h3,
+.guild-dispatches h3,
+.guild-artifact-card h3 {
+  margin: 0;
+}
+
+.guild-loop-heading p {
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+.guild-refresh-button,
+.guild-mode-button,
+.guild-mini-action {
+  border: 1px solid rgba(201, 154, 80, 0.35);
+  background: rgba(0, 0, 0, 0.46);
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.guild-refresh-button {
+  min-height: 38px;
+  padding: 7px 11px;
+  border-radius: 8px;
+}
+
+.guild-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.guild-mode-button {
+  min-height: 42px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.guild-mode-button.active {
+  border-color: var(--gold-light);
+  background: rgba(128, 83, 28, 0.52);
+  color: var(--gold-light);
+  box-shadow: inset 0 0 16px rgba(220, 168, 77, 0.12);
+}
+
+.guild-chat-field {
+  display: grid;
+  gap: 7px;
+}
+
+.guild-chat-field > span {
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.guild-chat-field textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 92px;
+  padding: 12px;
+  border: 1px solid rgba(201, 154, 80, 0.32);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.58);
+  color: var(--cream);
+  outline: none;
+}
+
+.guild-chat-field textarea:focus {
+  border-color: var(--gold-light);
+  box-shadow: 0 0 0 2px rgba(201, 154, 80, 0.11);
+}
+
+.guild-chat-actions {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.guild-chat-actions .fantasy-action-button {
+  flex: 0 0 auto;
+}
+
+#guildChatStatus {
+  flex: 1 1 220px;
+  font-size: 0.86rem;
+}
+
+.guild-reply-card,
+.guild-artifact-card {
+  border: 1px solid rgba(201, 154, 80, 0.24);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.guild-reply-card {
+  padding: 14px;
+}
+
+.guild-reply-card p {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.guild-dispatches {
+  display: grid;
+  gap: 10px;
+}
+
+.section-heading.compact {
+  margin-bottom: 0;
+}
+
+.guild-artifact-card {
+  display: grid;
+  gap: 9px;
+  padding: 14px;
+}
+
+.guild-artifact-heading {
+  justify-content: space-between;
+}
+
+.guild-artifact-heading > span {
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guild-artifact-heading small {
+  color: var(--cream-soft);
+  text-transform: capitalize;
+}
+
+.guild-artifact-card p {
+  margin: 0;
+  color: var(--cream-soft);
+  line-height: 1.42;
+}
+
+.guild-artifact-meta {
+  flex-wrap: wrap;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.guild-artifact-meta span {
+  padding: 4px 7px;
+  border: 1px solid rgba(201, 154, 80, 0.24);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.guild-artifact-actions {
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.guild-mini-action {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-weight: 700;
+}
+
+.guild-mini-action.primary {
+  border-color: rgba(230, 189, 115, 0.56);
+  background: rgba(131, 85, 30, 0.62);
+  color: var(--gold-light);
+}
+
+.guild-mini-action.ghost {
+  opacity: 0.78;
+}
+
+.guild-empty-copy {
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .guild-mode-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .guild-loop-panel {
+    padding: 15px;
+  }
+
+  .guild-chat-actions {
+    align-items: stretch;
+  }
+
+  .guild-chat-actions .fantasy-action-button {
+    width: 100%;
+  }
+}
