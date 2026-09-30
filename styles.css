@@ -589,6 +589,30 @@ p {
   background-image: url("icons/ranger-training.webp");
 }
 
+.quest-card[data-quest-id="iron-gate"]::before {
+  background-image: url("icons/the-iron-gate.webp");
+}
+
+.quest-card[data-quest-id="smiths-circuit"]::before {
+  background-image: url("icons/the-smiths-circuit.webp");
+}
+
+.quest-card[data-quest-id="sentinels-stand"]::before {
+  background-image: url("icons/sentinels-stand.webp");
+}
+
+.quest-card[data-quest-id="unbinding-ritual"]::before {
+  background-image: url("icons/the-unbinding-ritual.webp");
+}
+
+.quest-card[data-quest-id="wayfarers-reset"]::before {
+  background-image: url("icons/wayfarers-reset.webp");
+}
+
+.quest-card[data-quest-id="moonlit-mobility"]::before {
+  background-image: url("icons/moonlit-mobility.webp");
+}
+
 /* =========================================================
    14. QUEST CARD CONTENT
 ========================================================= */
@@ -664,11 +688,17 @@ p {
 }
 
 .quest-card[data-quest-id="keep"] .quest-type,
-.quest-card[data-quest-id="dragonstrength"] .quest-type {
+.quest-card[data-quest-id="dragonstrength"] .quest-type,
+.quest-card[data-quest-id="iron-gate"] .quest-type,
+.quest-card[data-quest-id="smiths-circuit"] .quest-type,
+.quest-card[data-quest-id="sentinels-stand"] .quest-type {
   color: var(--strength);
 }
 
-.quest-card[data-quest-id="restoration"] .quest-type {
+.quest-card[data-quest-id="restoration"] .quest-type,
+.quest-card[data-quest-id="unbinding-ritual"] .quest-type,
+.quest-card[data-quest-id="wayfarers-reset"] .quest-type,
+.quest-card[data-quest-id="moonlit-mobility"] .quest-type {
   color: var(--restoration);
 }
 
