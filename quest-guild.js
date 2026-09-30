@@ -1027,13 +1027,89 @@
     await refreshGuildLoop();
   }
 
+  function guildRavenRecipientMembers() {
+    const membersByUserId =
+      new Map();
+
+    guildFellowshipMembers
+      .filter(member =>
+        member?.user_id &&
+        member.user_id !==
+          supabaseUser?.id
+      )
+      .forEach(member => {
+        membersByUserId.set(
+          String(member.user_id),
+          member
+        );
+      });
+
+    guildRavens.forEach(raven => {
+      const outgoing =
+        raven.sender_user_id ===
+        supabaseUser?.id;
+
+      const otherUserId =
+        outgoing
+          ? raven.recipient_user_id
+          : raven.sender_user_id;
+
+      if (
+        !otherUserId ||
+        otherUserId ===
+          supabaseUser?.id
+      ) {
+        return;
+      }
+
+      const key =
+        String(otherUserId);
+
+      if (
+        membersByUserId.has(
+          key
+        )
+      ) {
+        return;
+      }
+
+      const profileId =
+        outgoing
+          ? raven.recipient_profile_id
+          : raven.sender_profile_id;
+
+      membersByUserId.set(
+        key,
+        {
+          user_id:
+            otherUserId,
+          profile_id:
+            profileId ||
+            null,
+          display_name:
+            profileId
+              ? profileId.charAt(0).toUpperCase() +
+                profileId.slice(1)
+              : "Adventurer",
+          class_name:
+            ""
+        }
+      );
+    });
+
+    return Array.from(
+      membersByUserId.values()
+    );
+  }
+
   function ravenMemberByUserId(userId) {
     return (
-      guildFellowshipMembers.find(
-        member =>
-          String(member.user_id) ===
-          String(userId)
-      ) ||
+      guildRavenRecipientMembers()
+        .find(
+          member =>
+            String(member.user_id) ===
+            String(userId)
+        ) ||
       null
     );
   }
@@ -1157,11 +1233,7 @@
 
   function ravenInboxMarkup() {
     const otherMembers =
-      guildFellowshipMembers.filter(
-        member =>
-          member.user_id !==
-          supabaseUser?.id
-      );
+      guildRavenRecipientMembers();
 
     const recipientOptions =
       otherMembers
@@ -1462,11 +1534,12 @@
       );
 
     const recipientMember =
-      guildFellowshipMembers.find(
-        member =>
-          String(member.user_id) ===
-          recipientUserId
-      );
+      guildRavenRecipientMembers()
+        .find(
+          member =>
+            String(member.user_id) ===
+            recipientUserId
+        );
 
     const message =
       String(
