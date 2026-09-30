@@ -875,6 +875,184 @@
       });
   }
 
+
+  async function markGuildArtifactCompleted(id) {
+    if (
+      !id ||
+      !supabaseClient ||
+      !supabaseUser
+    ) {
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("guild_artifacts")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id)
+      .eq("user_id", supabaseUser.id);
+
+    if (error) {
+      console.warn(
+        "Could not mark Guild artifact complete:",
+        error
+      );
+      return;
+    }
+
+    await refreshGuildLoop();
+  }
+
+  function patchQuestCompletion() {
+    if (
+      typeof completeQuest !== "function" ||
+      completeQuest.__guildPatched
+    ) {
+      return;
+    }
+
+    const originalCompleteQuest =
+      completeQuest;
+
+    const patched =
+      async function() {
+        const artifactId =
+          activeQuest?.guildArtifactId ||
+          null;
+
+        await originalCompleteQuest();
+
+        if (artifactId) {
+          await markGuildArtifactCompleted(
+            artifactId
+          );
+        }
+      };
+
+    patched.__guildPatched =
+      true;
+
+    completeQuest =
+      patched;
+  }
+
+  function applyGuildNpcDialogue(npcId) {
+    const dialogue =
+      guildArtifacts.find(item => {
+        if (
+          item.artifact_type !==
+            "npc_dialogue" ||
+          item.status !== "active"
+        ) {
+          return false;
+        }
+
+        const artifactNpc =
+          item.payload?.npc_id ||
+          "";
+
+        return (
+          !artifactNpc ||
+          artifactNpc === npcId
+        );
+      });
+
+    if (!dialogue) {
+      return false;
+    }
+
+    const npc =
+      typeof NPCS !== "undefined"
+        ? NPCS.find(
+            item =>
+              item.id === npcId
+          )
+        : null;
+
+    const host =
+      document.querySelector(
+        "#npcDialogue"
+      );
+
+    if (!host) {
+      return false;
+    }
+
+    host.innerHTML =
+      `<strong>${qbEscape(
+        npc?.name ||
+        dialogue.title ||
+        "Guild"
+      )}</strong><p>${qbEscape(
+        dialogue.payload?.dialogue ||
+        ""
+      )}</p>`;
+
+    return true;
+  }
+
+  function applyLatestStoryBeat() {
+    const story =
+      guildArtifacts.find(
+        item =>
+          item.artifact_type ===
+            "story_beat" &&
+          item.status ===
+            "active"
+      );
+
+    if (!story) {
+      return false;
+    }
+
+    const narrative =
+      document.querySelector(
+        "#campaignNarrative"
+      );
+
+    if (
+      narrative &&
+      story.payload?.text
+    ) {
+      narrative.textContent =
+        story.payload.text;
+
+      return true;
+    }
+
+    return false;
+  }
+
+  function patchCampaignRendering() {
+    if (
+      typeof renderCampaign !== "function" ||
+      renderCampaign.__guildPatched
+    ) {
+      return;
+    }
+
+    const originalRenderCampaign =
+      renderCampaign;
+
+    const patched =
+      function(state) {
+        originalRenderCampaign(
+          state
+        );
+
+        applyLatestStoryBeat();
+      };
+
+    patched.__guildPatched =
+      true;
+
+    renderCampaign =
+      patched;
+  }
+
   function ensureGuildUi() {
     if (guildUiReady) {
       return;
@@ -903,6 +1081,15 @@
         selectedGuildNpc = button.dataset.npcId || "guildmaster";
         selectedGuildMode = NPC_MODE[selectedGuildNpc] || selectedGuildMode;
         renderGuildLoop();
+
+        window.setTimeout(
+          () => {
+            applyGuildNpcDialogue(
+              selectedGuildNpc
+            );
+          },
+          0
+        );
       });
 
     guildUiReady = true;
@@ -924,8 +1111,14 @@
 
       patchQuestLookup();
       patchPartyChallenge();
+      patchQuestCompletion();
+      patchCampaignRendering();
       ensureGuildUi();
       renderGuildLoop();
+      applyLatestStoryBeat();
+      applyGuildNpcDialogue(
+        selectedGuildNpc
+      );
 
       if (
         typeof activeView !== "undefined" &&
@@ -966,6 +1159,8 @@
   const start = async () => {
     patchQuestLookup();
     patchPartyChallenge();
+    patchQuestCompletion();
+    patchCampaignRendering();
     ensureGuildUi();
 
     let attempts = 0;
