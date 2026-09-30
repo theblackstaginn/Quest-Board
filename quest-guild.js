@@ -18,6 +18,7 @@
   let guildRavens = [];
   let guildRavenAttachments = new Map();
   let guildFellowshipMembers = [];
+  let guildFellowshipPartyId = null;
   let guildQuestCache = new Map();
   let guildUiReady = false;
   let guildRavenPickerActive = false;
@@ -489,6 +490,7 @@
 
   async function fetchGuildFellowshipMembers() {
     guildFellowshipMembers = [];
+    guildFellowshipPartyId = null;
 
     if (
       !supabaseClient ||
@@ -556,6 +558,8 @@
     if (!fellowshipPartyId) {
       return guildFellowshipMembers;
     }
+
+    guildFellowshipPartyId = fellowshipPartyId;
 
     const { data: memberships, error: membershipError } =
       await supabaseClient
@@ -1027,6 +1031,14 @@
     await refreshGuildLoop();
   }
 
+  function activeGuildPartyId() {
+    return (
+      guildFellowshipPartyId ||
+      currentParty?.id ||
+      null
+    );
+  }
+
   function guildRavenRecipientMembers() {
     const membersByUserId =
       new Map();
@@ -1259,7 +1271,7 @@
           "</div>" +
         "</div>" +
         (
-          currentParty?.id
+          activeGuildPartyId()
             ? (
               "<div class='guild-raven-compose'>" +
                 "<label class='guild-raven-recipient'>" +
@@ -1408,9 +1420,12 @@
     ravenId,
     files
   ) {
+    const partyId =
+      activeGuildPartyId();
+
     if (
       !files.length ||
-      !currentParty?.id
+      !partyId
     ) {
       return [];
     }
@@ -1420,7 +1435,7 @@
     try {
       for (const file of files) {
         const storagePath =
-          currentParty.id +
+          partyId +
           "/" +
           ravenId +
           "/" +
@@ -1557,9 +1572,12 @@
             []
           );
 
+    const partyId =
+      activeGuildPartyId();
+
     if (
       !recipientMember ||
-      !currentParty?.id
+      !partyId
     ) {
       if (
         typeof showToast ===
@@ -1651,7 +1669,7 @@
           .from("guild_ravens")
           .insert({
             party_id:
-              currentParty.id,
+              partyId,
             sender_user_id:
               supabaseUser.id,
             recipient_user_id:
