@@ -515,7 +515,7 @@ p {
 .quest-card {
   position: relative;
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr) auto;
+  grid-template-columns: 112px minmax(0, 1fr) auto;
   align-items: center;
   gap: 13px;
   min-height: 125px;
@@ -555,8 +555,8 @@ p {
   position: relative;
   z-index: 2;
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 102px;
+  height: 102px;
   grid-column: 1;
   grid-row: 1;
   background-repeat: no-repeat;
@@ -1837,6 +1837,28 @@ body[data-character-theme="amethyst"] .character-class-name {
 }
 
 /* =========================================================
+   31A. QUEST ART SHOWCASE
+========================================================= */
+
+.quest-dialog-art {
+  width: min(72vw, 330px);
+  aspect-ratio: 1 / 1;
+  margin: 10px auto 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 16px 24px rgba(52, 31, 12, 0.34));
+}
+
+@media (max-width: 560px) {
+  .quest-dialog-art {
+    width: min(74vw, 290px);
+    margin-top: 6px;
+    margin-bottom: 14px;
+  }
+}
+
+/* =========================================================
    32. QUEST DIALOG CONTENT
 ========================================================= */
 
@@ -2197,7 +2219,7 @@ body[data-character-theme="amethyst"] .character-class-name {
   }
 
   .quest-card {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
     padding: 15px;
   }
 
@@ -2396,12 +2418,12 @@ body[data-character-theme="amethyst"] .character-class-name {
   }
 
   .quest-card {
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
   }
 
   .quest-card::before {
-    width: 58px;
-    height: 58px;
+    width: 82px;
+    height: 82px;
   }
 
   .character-identity-panel {
@@ -5580,6 +5602,8 @@ body[data-active-view="party"] .party-activity-item {
     grid-column: 1;
     grid-row: 1 / 3;
     align-self: center;
+    width: 90px;
+    height: 90px;
   }
 
   .quest-card-status-row {
