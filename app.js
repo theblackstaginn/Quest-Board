@@ -284,6 +284,22 @@ const QUESTS = [
   }
 ];
 
+const QUEST_ICON_PATHS = {
+  "there-back": "icons/there-and-back.webp",
+  "keep": "icons/the-keep.webp",
+  "dragonstrength": "icons/dragonstrength.webp",
+  "iron-gate": "icons/the-iron-gate.webp",
+  "smiths-circuit": "icons/the-smiths-circuit.webp",
+  "sentinels-stand": "icons/sentinels-stand.webp",
+  "rogue": "icons/rogue-mode.webp",
+  "restoration": "icons/restoration.webp",
+  "unbinding-ritual": "icons/the-unbinding-ritual.webp",
+  "wayfarers-reset": "icons/wayfarers-reset.webp",
+  "moonlit-mobility": "icons/moonlit-mobility.webp",
+  "ranger": "icons/ranger-training.webp"
+};
+
+
 
 // =========================================================
 // 3. SPECIAL QUESTS
@@ -2865,6 +2881,25 @@ function openQuest(id) {
   $("#dialogTime")
     .textContent =
       quest.time;
+
+  const questArt =
+    $("#questDialogArt");
+
+  const questIconPath =
+    QUEST_ICON_PATHS[
+      quest.id
+    ];
+
+  if (questArt) {
+    questArt.hidden =
+      !questIconPath;
+
+    questArt.style
+      .backgroundImage =
+        questIconPath
+          ? `url("${questIconPath}")`
+          : "";
+  }
 
   if (
     quest.id === "boss"
