@@ -1691,6 +1691,35 @@
     host.querySelector("#guildRavenSend")
       ?.addEventListener("click", sendDirectGuildRaven);
 
+    host.querySelector("#guildRavenFiles")
+      ?.addEventListener("change", event => {
+        const files =
+          Array.from(
+            event.target?.files ||
+            []
+          );
+
+        const status =
+          host.querySelector(
+            "#guildRavenStatus"
+          );
+
+        if (!status) {
+          return;
+        }
+
+        if (!files.length) {
+          status.textContent =
+            "Private to your fellowship.";
+          return;
+        }
+
+        status.textContent =
+          files.length === 1
+            ? files[0].name + " ready to fly."
+            : files.length + " attachments ready to fly.";
+      });
+
     host.querySelectorAll("[data-guild-mode]")
       .forEach(button => {
         button.addEventListener("click", () => {
@@ -1999,14 +2028,37 @@
     }
   }
 
+  function ravenFileSelectionPending() {
+    const input =
+      document.querySelector(
+        "#guildRavenFiles"
+      );
+
+    return Boolean(
+      input?.files?.length
+    );
+  }
+
+  function refreshGuildLoopAfterPickerReturn() {
+    window.setTimeout(() => {
+      if (
+        ravenFileSelectionPending()
+      ) {
+        return;
+      }
+
+      refreshGuildLoop();
+    }, 350);
+  }
+
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-      refreshGuildLoop();
+      refreshGuildLoopAfterPickerReturn();
     }
   });
 
   window.addEventListener("focus", () => {
-    refreshGuildLoop();
+    refreshGuildLoopAfterPickerReturn();
   });
 
   window.addEventListener("questboard:guild-refresh", () => {
