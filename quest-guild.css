@@ -217,6 +217,160 @@
   margin: 0;
 }
 
+.guild-raven-post {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(201, 154, 80, 0.18);
+}
+
+.guild-raven-post h3 {
+  margin: 0;
+}
+
+.guild-raven-compose {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(201, 154, 80, 0.24);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.36);
+}
+
+.guild-raven-recipient,
+.guild-raven-file-input {
+  display: grid;
+  gap: 6px;
+}
+
+.guild-raven-recipient > span,
+.guild-raven-file-input > span {
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.guild-raven-recipient select,
+.guild-raven-file-input input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid rgba(201, 154, 80, 0.3);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.56);
+  color: var(--cream);
+}
+
+.guild-raven-file-input small {
+  color: var(--cream-soft);
+  font-size: 0.76rem;
+}
+
+.guild-raven-compose-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#guildRavenStatus {
+  flex: 1 1 180px;
+  font-size: 0.82rem;
+}
+
+.guild-raven-list {
+  display: grid;
+  gap: 9px;
+}
+
+.guild-raven-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px 13px;
+  border: 1px solid rgba(201, 154, 80, 0.22);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.guild-raven-card.incoming {
+  border-left: 3px solid rgba(224, 181, 104, 0.72);
+}
+
+.guild-raven-card.outgoing {
+  margin-left: 18px;
+  background: rgba(88, 61, 28, 0.22);
+}
+
+.guild-raven-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.guild-raven-heading strong {
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+}
+
+.guild-raven-source {
+  color: var(--cream-soft);
+  font-size: 0.68rem;
+  font-style: italic;
+}
+
+.guild-raven-card p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.guild-raven-attachments {
+  display: grid;
+  gap: 8px;
+}
+
+.guild-raven-image-link {
+  display: grid;
+  gap: 5px;
+  color: var(--cream-soft);
+  text-decoration: none;
+}
+
+.guild-raven-image {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border: 1px solid rgba(201, 154, 80, 0.22);
+  border-radius: 8px;
+}
+
+.guild-raven-image-link span {
+  overflow-wrap: anywhere;
+  font-size: 0.74rem;
+}
+
+.guild-raven-file {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 9px;
+  border: 1px solid rgba(201, 154, 80, 0.24);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--gold-light);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+
+.guild-raven-file.unavailable {
+  color: var(--cream-soft);
+  opacity: 0.72;
+}
+
 @media (max-width: 520px) {
   .guild-mode-grid {
     grid-template-columns: 1fr 1fr;
