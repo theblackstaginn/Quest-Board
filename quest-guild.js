@@ -492,9 +492,68 @@
 
     if (
       !supabaseClient ||
-      !supabaseUser ||
-      !currentParty?.id
+      !supabaseUser
     ) {
+      return guildFellowshipMembers;
+    }
+
+    let fellowshipPartyId =
+      currentParty?.id ||
+      null;
+
+    if (!fellowshipPartyId) {
+      const {
+        data: ownMembership,
+        error: ownMembershipError
+      } =
+        await supabaseClient
+          .from("party_members")
+          .select("party_id,joined_at")
+          .eq(
+            "user_id",
+            supabaseUser.id
+          )
+          .order(
+            "joined_at",
+            {
+              ascending: false
+            }
+          )
+          .limit(1)
+          .maybeSingle();
+
+      if (ownMembershipError) {
+        throw ownMembershipError;
+      }
+
+      fellowshipPartyId =
+        ownMembership?.party_id ||
+        null;
+
+      if (fellowshipPartyId) {
+        const {
+          data: party,
+          error: partyError
+        } =
+          await supabaseClient
+            .from("parties")
+            .select("*")
+            .eq(
+              "id",
+              fellowshipPartyId
+            )
+            .single();
+
+        if (partyError) {
+          throw partyError;
+        }
+
+        currentParty =
+          party;
+      }
+    }
+
+    if (!fellowshipPartyId) {
       return guildFellowshipMembers;
     }
 
@@ -502,7 +561,7 @@
       await supabaseClient
         .from("party_members")
         .select("user_id")
-        .eq("party_id", currentParty.id);
+        .eq("party_id", fellowshipPartyId);
 
     if (membershipError) {
       throw membershipError;
@@ -2084,7 +2143,6 @@
       );
 
     return Boolean(
-      guildRavenPickerActive ||
       guildRavenPendingFiles.length ||
       input?.files?.length
     );
