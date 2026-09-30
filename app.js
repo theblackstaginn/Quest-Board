@@ -2894,6 +2894,9 @@ function openQuest(id) {
     questArt.hidden =
       !questIconPath;
 
+    questArt.dataset.questId =
+      quest.id;
+
     questArt.style
       .backgroundImage =
         questIconPath
