@@ -335,7 +335,7 @@
         writeback: {
           requested: true,
           rule:
-            "Read the live request first. Only write supported guild artifacts. Rewards for generated quests are server-calculated by Quest Board. Submit a final guild response after any artifact writes."
+            "Read the live request first. Only write supported guild artifacts. For player-to-player raven requests, use the Guild raven delivery tool and only claim delivery after it succeeds. Rewards for generated quests are server-calculated by Quest Board. Submit a final guild response after any artifact or raven writes."
         }
       }, null, 2)
     );
