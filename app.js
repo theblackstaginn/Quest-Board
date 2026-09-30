@@ -104,6 +104,65 @@ const QUESTS = [
   },
 
   {
+    id: "iron-gate",
+    title: "The Iron Gate",
+    category: "Strength",
+    time: "20-30 min",
+    xpType: "strength",
+    xp: 30,
+    gold: 20,
+    description:
+      "A power-cage and dumbbell quest built for either adventurer. Choose your own working weight and keep two or three solid reps in reserve.",
+    exercises: [
+      "Power-cage squat - 3 sets of 6-10 reps",
+      "Dumbbell bench press - 3 sets of 8-12 reps",
+      "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+      "Dumbbell Romanian deadlift - 2 sets of 8-12 reps",
+      "Rest as needed between sets"
+    ]
+  },
+
+  {
+    id: "smiths-circuit",
+    title: "The Smith's Circuit",
+    category: "Strength",
+    time: "12-18 min",
+    xpType: "strength",
+    xp: 25,
+    gold: 15,
+    description:
+      "A compact dumbbell circuit for days when you want real strength work without a long session. Each player scales the weight independently.",
+    exercises: [
+      "Dumbbell goblet squat - 10 reps",
+      "Dumbbell floor or bench press - 10 reps",
+      "One-arm dumbbell row - 10 reps each side",
+      "Dumbbell shoulder press - 8-10 reps",
+      "Dumbbell Romanian deadlift - 10 reps",
+      "Complete 2-3 controlled rounds"
+    ]
+  },
+
+  {
+    id: "sentinels-stand",
+    title: "Sentinel's Stand",
+    category: "Strength",
+    time: "15-25 min",
+    xpType: "strength",
+    xp: 25,
+    gold: 15,
+    description:
+      "A steady full-body power-cage session emphasizing controlled strength rather than speed. Use the same quest with whatever load suits you.",
+    exercises: [
+      "Power-cage squat or box squat - 8-10 reps",
+      "Bench press or dumbbell bench press - 8-10 reps",
+      "Dumbbell split squat - 8 reps each side",
+      "One-arm dumbbell row - 10 reps each side",
+      "Farmer carry or static dumbbell hold - 30-45 seconds",
+      "Complete 2-3 rounds"
+    ]
+  },
+
+  {
     id: "rogue",
     title: "Rogue Mode",
     category: "Mixed",
@@ -139,6 +198,69 @@ const QUESTS = [
       "Back mobility",
       "Shoulder mobility",
       "Chest opening"
+    ]
+  },
+
+  {
+    id: "unbinding-ritual",
+    title: "The Unbinding Ritual",
+    category: "Recovery",
+    time: "8-12 min",
+    xpType: "restoration",
+    xp: 15,
+    gold: 8,
+    description:
+      "A gentle full-body stretching quest for stiff or low-energy days. Move slowly and never force range of motion.",
+    exercises: [
+      "Standing calf stretch - 30 seconds each side",
+      "Hamstring stretch - 30 seconds each side",
+      "Hip-flexor stretch - 30 seconds each side",
+      "Figure-four or glute stretch - 30 seconds each side",
+      "Doorway chest stretch - 30 seconds each side",
+      "Upper-back reach and shoulder stretch - 30 seconds each side",
+      "Repeat any tight area once"
+    ]
+  },
+
+  {
+    id: "wayfarers-reset",
+    title: "Wayfarer's Reset",
+    category: "Recovery",
+    time: "10-15 min",
+    xpType: "restoration",
+    xp: 20,
+    gold: 10,
+    description:
+      "A lower-body mobility reset for walking days, lifting days, or long hours on your feet.",
+    exercises: [
+      "Ankle rocks - 8-10 each side",
+      "Calf stretch - 30 seconds each side",
+      "Hamstring stretch - 30 seconds each side",
+      "Half-kneeling hip-flexor stretch - 30 seconds each side",
+      "Adductor rock-back - 8 slow reps each side",
+      "Figure-four or glute stretch - 30 seconds each side",
+      "Easy spinal rotation - 5 slow reps each side"
+    ]
+  },
+
+  {
+    id: "moonlit-mobility",
+    title: "Moonlit Mobility",
+    category: "Recovery",
+    time: "10-15 min",
+    xpType: "restoration",
+    xp: 20,
+    gold: 10,
+    description:
+      "An upper-body and spine mobility quest for unwinding shoulders, chest, and back after training or work.",
+    exercises: [
+      "Shoulder rolls - 10 each direction",
+      "Wall or doorway chest stretch - 30 seconds each side",
+      "Cross-body shoulder stretch - 30 seconds each side",
+      "Thread-the-needle - 6 slow reps each side",
+      "Cat-cow - 8 slow reps",
+      "Gentle thoracic rotation - 6 reps each side",
+      "Child's pose or supported lat stretch - 45 seconds"
     ]
   },
 
