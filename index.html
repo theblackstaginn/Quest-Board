@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="83">
+  <meta name="quest-board-build" content="84">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=83">
+  <link rel="stylesheet" href="styles.css?v=84">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
@@ -910,6 +910,38 @@
 
 
       <!-- =====================================================
+           MAP VIEW
+      ====================================================== -->
+
+      <section
+        class="app-view"
+        id="mapView"
+        data-app-view="map"
+        hidden
+      >
+
+        <section class="world-map-shell" aria-labelledby="worldMapTitle">
+          <div class="world-map-heading">
+            <p class="eyebrow">Campaign I</p>
+            <h2 id="worldMapTitle">The Blackwood</h2>
+            <p class="muted">
+              The Fellowship's road through Blackwood will be revealed here as the campaign advances.
+            </p>
+          </div>
+
+          <div class="world-map-frame">
+            <img
+              class="world-map-art"
+              src="blackwood-map.webp"
+              alt="Illustrated map of the Blackwood campaign"
+            >
+          </div>
+        </section>
+
+      </section>
+
+
+      <!-- =====================================================
            SETTINGS VIEW
       ====================================================== -->
 
@@ -1265,6 +1297,15 @@
         aria-label="Character"
       >
         Character
+      </button>
+
+      <button
+        class="nav-item"
+        type="button"
+        data-view="map"
+        aria-label="Blackwood Map"
+      >
+        Map
       </button>
 
       <button
@@ -2142,7 +2183,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=83"></script>
+  <script src="app.js?v=84"></script>
   <script src="quest-guild.js?v=5"></script>
 
 </body>
