@@ -695,9 +695,12 @@ const BOSS_GOLD = 100;
 const BOSS_CRYSTALS = 3;
 
 const CAMPAIGN_GOAL = 24;
+const WORLD_STATE_SCHEMA_VERSION = 1;
+const WORLD_CAMPAIGN_ID = "blackwood-i";
+const WORLD_CHAPTER_ID = "blackwood-i-chapter-1";
 const CAMPAIGN_LOCATIONS = [
-  { at:0,name:"Guild Hall",glyph:"⌂" },{ at:3,name:"Old Road",glyph:"Ⅰ" },{ at:6,name:"Whispering Pines",glyph:"♠" },
-  { at:10,name:"Mossgate",glyph:"◇" },{ at:15,name:"Warden's Crossing",glyph:"⚔" },{ at:20,name:"Blackwood Ruins",glyph:"♜" },{ at:24,name:"Heart of the Wood",glyph:"★" }
+  { at:0,id:"guild-hall",name:"Guild Hall",glyph:"⌂" },{ at:3,id:"old-road",name:"Old Road",glyph:"Ⅰ" },{ at:6,id:"whispering-pines",name:"Whispering Pines",glyph:"♠" },
+  { at:10,id:"mossgate",name:"Mossgate",glyph:"◇" },{ at:15,id:"wardens-crossing",name:"Warden's Crossing",glyph:"⚔" },{ at:20,id:"blackwood-ruins",name:"Blackwood Ruins",glyph:"♜" },{ at:24,id:"heart-of-the-wood",name:"Heart of the Wood",glyph:"★" }
 ];
 const ADVENTURER_TITLES = [{level:1,title:"Wayfarer"},{level:3,title:"Adventurer"},{level:5,title:"Pathfinder"},{level:8,title:"Vanguard"},{level:12,title:"Champion"},{level:18,title:"Warden"},{level:25,title:"Legend of the Guild"}];
 const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:"ranger",title:"Follow the Blackwood Trail"},{questId:"keep",title:"Break the Mossgate Guard"},{questId:"boss",title:"Defeat the Briar Warden"}];
@@ -955,6 +958,189 @@ function saveSettings(settings) {
 // 12. PERSONAL QUEST STATE
 // =========================================================
 
+function createFreshWorldState({
+  campaignProgress = 0
+} = {}) {
+  const safeCampaignProgress =
+    Math.max(
+      0,
+      Number(campaignProgress) || 0
+    );
+
+  const unlockedLocationIds =
+    CAMPAIGN_LOCATIONS
+      .filter(
+        location =>
+          safeCampaignProgress
+          >= location.at
+      )
+      .map(
+        location =>
+          location.id
+      );
+
+  const knownNpcIds =
+    NPCS.map(
+      npc =>
+        npc.id
+    );
+
+  const npcRelationships =
+    Object.fromEntries(
+      knownNpcIds.map(
+        npcId => [
+          npcId,
+          {
+            standing: "known",
+            interactionCount: 0,
+            lastInteractionAt: null,
+            memoryFlags: []
+          }
+        ]
+      )
+    );
+
+  return {
+    schemaVersion:
+      WORLD_STATE_SCHEMA_VERSION,
+
+    campaignId:
+      WORLD_CAMPAIGN_ID,
+
+    currentChapterId:
+      WORLD_CHAPTER_ID,
+
+    knownNpcIds,
+
+    unlockedLocationIds,
+
+    storyFlags:
+      {},
+
+    discoveredSecretIds:
+      [],
+
+    activeEvents:
+      [],
+
+    npcRelationships,
+
+    lastStoryBeat:
+      null
+  };
+}
+
+
+function migrateWorldState(
+  parsedWorld,
+  legacyState = {}
+) {
+  const fresh =
+    createFreshWorldState({
+      campaignProgress:
+        legacyState?.campaignProgress
+    });
+
+  const world =
+    parsedWorld
+    && typeof parsedWorld === "object"
+      ? parsedWorld
+      : {};
+
+  const relationshipSource =
+    world.npcRelationships
+    && typeof world.npcRelationships === "object"
+      ? world.npcRelationships
+      : {};
+
+  const npcRelationships = {
+    ...relationshipSource
+  };
+
+  for (
+    const [
+      npcId,
+      defaults
+    ]
+    of Object.entries(
+      fresh.npcRelationships
+    )
+  ) {
+    npcRelationships[npcId] = {
+      ...defaults,
+      ...(
+        relationshipSource[npcId]
+        || {}
+      ),
+
+      memoryFlags:
+        Array.isArray(
+          relationshipSource[npcId]
+            ?.memoryFlags
+        )
+          ? relationshipSource[npcId]
+              .memoryFlags
+          : defaults.memoryFlags
+    };
+  }
+
+  return {
+    ...fresh,
+    ...world,
+
+    schemaVersion:
+      WORLD_STATE_SCHEMA_VERSION,
+
+    knownNpcIds:
+      Array.isArray(
+        world.knownNpcIds
+      )
+        ? Array.from(
+            new Set([
+              ...fresh.knownNpcIds,
+              ...world.knownNpcIds
+            ])
+          )
+        : fresh.knownNpcIds,
+
+    unlockedLocationIds:
+      Array.isArray(
+        world.unlockedLocationIds
+      )
+        ? Array.from(
+            new Set([
+              ...fresh.unlockedLocationIds,
+              ...world.unlockedLocationIds
+            ])
+          )
+        : fresh.unlockedLocationIds,
+
+    storyFlags:
+      world.storyFlags
+      && typeof world.storyFlags
+        === "object"
+        ? world.storyFlags
+        : fresh.storyFlags,
+
+    discoveredSecretIds:
+      Array.isArray(
+        world.discoveredSecretIds
+      )
+        ? world.discoveredSecretIds
+        : fresh.discoveredSecretIds,
+
+    activeEvents:
+      Array.isArray(
+        world.activeEvents
+      )
+        ? world.activeEvents
+        : fresh.activeEvents,
+
+    npcRelationships
+  };
+}
+
+
 function createFreshState() {
   return {
     weekKey:
@@ -1001,7 +1187,8 @@ function createFreshState() {
     equippedRelics: { weapon:null, armor:null, charm:null },
     codexDiscoveries: ["guild-hall"],
     encounterCount: 0,
-    onboardingComplete: false
+    onboardingComplete: false,
+    world: createFreshWorldState()
   };
 }
 
@@ -1021,6 +1208,12 @@ function migrateState(parsed) {
     equippedRelics: { ...fresh.equippedRelics, ...(parsed?.equippedRelics || {}) },
     achievements: Array.isArray(parsed?.achievements) ? parsed.achievements : [],
     codexDiscoveries: Array.isArray(parsed?.codexDiscoveries) ? parsed.codexDiscoveries : fresh.codexDiscoveries,
+
+    world:
+      migrateWorldState(
+        parsed?.world,
+        parsed
+      ),
 
     gold:
       Number(parsed?.gold)
