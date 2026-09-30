@@ -1616,6 +1616,8 @@
 
       latestResponseMarkup() +
 
+      ravenInboxMarkup() +
+
       "<div class='guild-dispatches'>" +
         "<div class='section-heading compact'>" +
           "<div><span class='eyebrow'>Dispatches</span><h3>Guild-Forged Content</h3></div>" +
@@ -1632,6 +1634,9 @@
 
     host.querySelector("#guildRefreshButton")
       ?.addEventListener("click", refreshGuildLoop);
+
+    host.querySelector("#guildRavenSend")
+      ?.addEventListener("click", sendDirectGuildRaven);
 
     host.querySelectorAll("[data-guild-mode]")
       .forEach(button => {
@@ -1903,7 +1908,9 @@
     try {
       await Promise.all([
         fetchGuildRequests(),
-        fetchGuildArtifacts()
+        fetchGuildArtifacts(),
+        fetchGuildFellowshipMembers(),
+        fetchGuildRavens()
       ]);
 
       patchQuestLookup();
