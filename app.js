@@ -5403,11 +5403,16 @@ async function setView(view) {
     try {
       await Promise.all([
         pullDeviceSync(),
-        refreshDeviceSyncIdentityContext({
-          syncParty:
-            false
-        })
+        refreshDeviceSyncIdentityContext()
       ]);
+
+      await loadCurrentParty();
+
+      window.dispatchEvent(
+        new Event(
+          "questboard:guild-refresh"
+        )
+      );
     }
 
     catch (error) {
