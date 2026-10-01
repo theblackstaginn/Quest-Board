@@ -3,6 +3,9 @@ import SwiftUI
 struct RogueWitchHomeView: View {
     @StateObject private var store = RogueWitchStore()
 
+    @State private var showingQuestPicker = false
+    @State private var rewardText: String?
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -20,6 +23,9 @@ struct RogueWitchHomeView: View {
         }
         .task {
             await store.bootstrap()
+        }
+        .sheet(isPresented: $showingQuestPicker) {
+            QuestPickerView(store: store)
         }
     }
 
@@ -66,11 +72,9 @@ struct RogueWitchHomeView: View {
                             .font(.caption2)
                             .foregroundStyle(.purple)
 
-                        Text(
-                            "\(store.snapshot.completedThisWeek)/\(store.snapshot.weeklyGoal) quests"
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        Text("\(store.snapshot.completedThisWeek)/\(store.snapshot.weeklyGoal) quests")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer(minLength: 0)
@@ -78,26 +82,45 @@ struct RogueWitchHomeView: View {
 
                 statusCard
 
+                if let rewardText {
+                    rewardCard(rewardText)
+                }
+
+                if store.activeSession != nil {
+                    QuestTimerView(store: store) { response in
+                        var message = "+\(response.earnedXp) XP · +\(response.earnedGold) Gold"
+
+                        if response.weekConquered {
+                            message += " · Week Conquered!"
+                        }
+
+                        if response.duplicate {
+                            message = "Quest already sealed."
+                        }
+
+                        rewardText = message
+                    }
+                } else {
+                    Button {
+                        rewardText = nil
+                        showingQuestPicker = true
+                    } label: {
+                        Label("Begin Quest", systemImage: "moon.stars.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+                }
+
                 HStack {
-                    Label(
-                        "\(store.snapshot.gold)",
-                        systemImage: "circle.fill"
-                    )
-
+                    Label("\(store.snapshot.gold)", systemImage: "circle.fill")
                     Spacer()
-
-                    Label(
-                        "\(store.snapshot.crystals)",
-                        systemImage: "diamond.fill"
-                    )
+                    Label("\(store.snapshot.crystals)", systemImage: "diamond.fill")
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
                 Button {
-                    Task {
-                        try? await store.refresh()
-                    }
+                    Task { try? await store.refresh() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
@@ -120,10 +143,7 @@ struct RogueWitchHomeView: View {
                         colors: [.purple, .white, .purple],
                         center: .center
                     ),
-                    style: StrokeStyle(
-                        lineWidth: 5,
-                        lineCap: .round
-                    )
+                    style: StrokeStyle(lineWidth: 5, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
 
@@ -136,29 +156,19 @@ struct RogueWitchHomeView: View {
     private var statusCard: some View {
         Group {
             if store.snapshot.bossDefeated {
-                Label(
-                    "Boss vanquished",
-                    systemImage: "checkmark.seal.fill"
-                )
-                .foregroundStyle(.green)
+                Label("Boss vanquished", systemImage: "checkmark.seal.fill")
+                    .foregroundStyle(.green)
             } else if store.snapshot.bossUnlocked {
-                Label(
-                    "Boss battle unlocked",
-                    systemImage: "crown.fill"
-                )
-                .foregroundStyle(.purple)
+                Label("Boss battle unlocked", systemImage: "crown.fill")
+                    .foregroundStyle(.purple)
             } else {
                 let remaining = max(
                     0,
-                    store.snapshot.weeklyGoal
-                        - store.snapshot.completedThisWeek
+                    store.snapshot.weeklyGoal - store.snapshot.completedThisWeek
                 )
 
-                Label(
-                    "\(remaining) until the Boss",
-                    systemImage: "sparkles"
-                )
-                .foregroundStyle(.secondary)
+                Label("\(remaining) until the Boss", systemImage: "sparkles")
+                    .foregroundStyle(.secondary)
             }
         }
         .font(.caption)
@@ -167,6 +177,24 @@ struct RogueWitchHomeView: View {
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white.opacity(0.06))
+        )
+    }
+
+    private func rewardCard(_ text: String) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(.purple)
+
+            Text(text)
+                .font(.caption2)
+                .multilineTextAlignment(.leading)
+
+            Spacer(minLength: 0)
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.purple.opacity(0.12))
         )
     }
 
@@ -182,9 +210,7 @@ struct RogueWitchHomeView: View {
             }
 
             Button("Try Again") {
-                Task {
-                    await store.bootstrap()
-                }
+                Task { await store.bootstrap() }
             }
             .buttonStyle(.borderedProminent)
             .tint(.purple)

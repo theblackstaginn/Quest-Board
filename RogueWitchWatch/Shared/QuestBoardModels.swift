@@ -58,6 +58,24 @@ struct DeviceSyncRow: Decodable {
     }
 }
 
+struct WatchQuestCompletionResponse: Decodable {
+    let duplicate: Bool
+    let state: QuestBoardState
+    let settings: QuestBoardSettings
+    let earnedXp: Int
+    let earnedGold: Int
+    let weekConquered: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case duplicate
+        case state
+        case settings
+        case earnedXp = "earned_xp"
+        case earnedGold = "earned_gold"
+        case weekConquered = "week_conquered"
+    }
+}
+
 struct RogueWitchSnapshot: Codable, Hashable {
     let displayName: String
     let className: String
@@ -89,10 +107,7 @@ struct RogueWitchSnapshot: Codable, Hashable {
 
 enum QuestBoardWeek {
     static func currentKey(for date: Date = Date()) -> String {
-        let localParts = Calendar.current.dateComponents(
-            [.year, .month, .day],
-            from: date
-        )
+        let localParts = Calendar.current.dateComponents([.year, .month, .day], from: date)
 
         var iso = Calendar(identifier: .iso8601)
         iso.timeZone = TimeZone(secondsFromGMT: 0)!
