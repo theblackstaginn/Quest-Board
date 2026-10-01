@@ -1862,6 +1862,12 @@ async function pullDeviceSync({
     );
 
     renderDeviceSyncStatus();
+
+    window.dispatchEvent(
+      new Event(
+        "questboard:guild-refresh"
+      )
+    );
   }
 
   finally {
@@ -2156,17 +2162,51 @@ function startDeviceSyncPolling() {
     return;
   }
 
+  deviceSyncIdentityPollTick =
+    0;
+
   deviceSyncPollTimer =
     setInterval(
       () => {
         if (
           document.visibilityState
-          === "visible"
+          !== "visible"
         ) {
-          pullDeviceSync()
+          return;
+        }
+
+        pullDeviceSync()
+          .catch(error =>
+            console.error(
+              "Device sync refresh failed:",
+              error
+            )
+          );
+
+        deviceSyncIdentityPollTick +=
+          1;
+
+        if (
+          deviceSyncIdentityPollTick
+            % 4
+          === 0
+        ) {
+          refreshDeviceSyncIdentityContext()
+            .then(
+              () =>
+                loadCurrentParty()
+            )
+            .then(
+              () =>
+                window.dispatchEvent(
+                  new Event(
+                    "questboard:guild-refresh"
+                  )
+                )
+            )
             .catch(error =>
               console.error(
-                "Device sync refresh failed:",
+                "Device identity sync refresh failed:",
                 error
               )
             );
@@ -2558,9 +2598,9 @@ async function loadCurrentParty() {
       .select(
         "party_id, joined_at"
       )
-      .eq(
+      .in(
         "user_id",
-        supabaseUser.id
+        getLogicalUserIds()
       )
       .order(
         "joined_at",
@@ -5317,6 +5357,29 @@ async function setView(view) {
     VIEW_HEADERS[view]
       ? view
       : "board";
+
+  if (
+    supabaseReady
+    && supabaseUser
+    && getDeviceSyncId()
+  ) {
+    try {
+      await Promise.all([
+        pullDeviceSync(),
+        refreshDeviceSyncIdentityContext({
+          syncParty:
+            false
+        })
+      ]);
+    }
+
+    catch (error) {
+      console.warn(
+        "View sync refresh failed:",
+        error
+      );
+    }
+  }
 
   if (
     appInitialized
