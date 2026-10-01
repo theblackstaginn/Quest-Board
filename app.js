@@ -7257,6 +7257,9 @@ function openPartyCharacterDialog(userId) {
 
   if (!dialog) return;
 
+  dialog.dataset.profileId =
+    profileId || "";
+
   const nameEl = $("#partyCharacterDialogName");
   const classEl = $("#partyCharacterDialogClass");
   const descEl = $("#partyCharacterDialogDescription");
@@ -7314,7 +7317,9 @@ function openPartyCharacterDialog(userId) {
 function closePartyCharacterDialog() {
   const dialog = $("#partyCharacterDialog");
 
-  if (dialog?.open) dialog.close();
+  if (dialog?.open) {
+    dialog.close();
+  }
 }
 
 
