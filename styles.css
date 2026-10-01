@@ -6812,3 +6812,171 @@ body[data-active-view="map"] .topbar::before {
     background-position: center 41%;
   }
 }
+
+
+/* =========================================================
+   SAFE MAP AMBIENCE
+   CSS-only: no scripting, no interaction layer.
+========================================================= */
+
+.map-ambient-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.map-ambient-glow,
+.map-ambient-mist {
+  position: absolute;
+  pointer-events: none;
+}
+
+.map-ambient-glow {
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.map-ambient-glow-guild {
+  left: 4%;
+  top: 74%;
+  width: 38%;
+  height: 20%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 176, 77, .24),
+      rgba(193, 94, 28, .08) 46%,
+      transparent 74%
+    );
+  animation:
+    safeMapGuildGlow
+    3.6s
+    ease-in-out
+    infinite;
+}
+
+.map-ambient-glow-heart {
+  left: 38%;
+  top: 0%;
+  width: 36%;
+  height: 18%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 224, 129, .24),
+      rgba(116, 187, 128, .10) 44%,
+      transparent 74%
+    );
+  animation:
+    safeMapHeartGlow
+    4.5s
+    ease-in-out
+    infinite;
+}
+
+.map-ambient-mist {
+  height: 8%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(229, 235, 227, .15),
+      rgba(202, 214, 210, .05) 48%,
+      transparent 76%
+    );
+  filter: blur(7px);
+  opacity: .32;
+}
+
+.map-ambient-mist-one {
+  left: -36%;
+  top: 20%;
+  width: 78%;
+  animation:
+    safeMapMistOne
+    18s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+.map-ambient-mist-two {
+  right: -40%;
+  top: 51%;
+  width: 86%;
+  opacity: .24;
+  animation:
+    safeMapMistTwo
+    24s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+@keyframes safeMapGuildGlow {
+  0%,
+  100% {
+    opacity: .40;
+    transform: scale(.97);
+  }
+
+  50% {
+    opacity: .72;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes safeMapHeartGlow {
+  0%,
+  100% {
+    opacity: .36;
+    transform: scale(.96);
+  }
+
+  50% {
+    opacity: .74;
+    transform: scale(1.07);
+  }
+}
+
+@keyframes safeMapMistOne {
+  from {
+    transform:
+      translateX(0)
+      scaleX(.92);
+  }
+
+  to {
+    transform:
+      translateX(105%)
+      scaleX(1.12);
+  }
+}
+
+@keyframes safeMapMistTwo {
+  from {
+    transform:
+      translateX(0)
+      scaleX(1.05);
+  }
+
+  to {
+    transform:
+      translateX(-88%)
+      scaleX(.90);
+  }
+}
+
+body.reduce-motion
+  .map-ambient-layer * {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-ambient-layer * {
+    animation: none !important;
+  }
+}
