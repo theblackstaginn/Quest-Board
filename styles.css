@@ -6400,40 +6400,129 @@ body[data-active-view="character"] .world-overlay {
 ========================================================= */
 
 .map-view {
-  min-height: calc(
-    100vh
-    - env(safe-area-inset-top)
-    - var(--nav-height)
-    - 96px
-  );
+  position: fixed;
+  z-index: 1;
+  top: calc(env(safe-area-inset-top) + var(--map-cover-height));
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 body[data-active-view="map"] .world-overlay {
-  background-image: url("blackwood-map.webp");
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  background: #120d08;
 }
 
 body[data-active-view="map"] .world-overlay::after {
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 58%,
-      rgba(0, 0, 0, .12) 82%,
-      rgba(0, 0, 0, .28) 100%
-    );
+  display: none;
 }
 
-@supports (height: 100dvh) {
-  .map-view {
-    min-height: calc(
-      100dvh
-      - env(safe-area-inset-top)
-      - var(--nav-height)
-      - 96px
+body[data-active-view="map"] .map-view::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      rgba(8, 5, 3, .04),
+      rgba(8, 5, 3, .14)
+    ),
+    url("map-page-true-bg.webp");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.map-table-stage {
+  position: absolute;
+  z-index: 1;
+  inset:
+    clamp(46px, 6.5vh, 86px)
+    clamp(44px, 10vw, 120px)
+    calc(
+      max(92px, env(safe-area-inset-bottom) + 78px)
     );
-  }
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+}
+
+.map-sheet {
+  position: relative;
+  width: min(70vw, 500px);
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 941 / 1672;
+  transform:
+    translateY(-1.5%)
+    rotate(-0.35deg);
+  transform-origin: center center;
+  filter:
+    drop-shadow(0 18px 20px rgba(0, 0, 0, .46))
+    drop-shadow(0 4px 7px rgba(0, 0, 0, .30));
+}
+
+.map-sheet-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 7px 6px 9px 8px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 231, 183, .12);
+}
+
+/*
+  Small paper-lift shadows and warm folds keep the map feeling
+  physically laid on the table without covering any map detail.
+*/
+.map-sheet::before,
+.map-sheet::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  bottom: 2px;
+  width: 44px;
+  height: 38px;
+  pointer-events: none;
+  opacity: .72;
+}
+
+.map-sheet::before {
+  left: 1px;
+  border-bottom-left-radius: 9px;
+  background:
+    linear-gradient(
+      145deg,
+      transparent 0 43%,
+      rgba(239, 213, 164, .16) 45% 58%,
+      rgba(67, 42, 22, .24) 60% 100%
+    );
+  transform:
+    translate(-2px, 2px)
+    rotate(-2deg)
+    skewY(-5deg);
+  transform-origin: bottom left;
+}
+
+.map-sheet::after {
+  right: 1px;
+  border-bottom-right-radius: 9px;
+  background:
+    linear-gradient(
+      215deg,
+      transparent 0 43%,
+      rgba(239, 213, 164, .15) 45% 58%,
+      rgba(67, 42, 22, .23) 60% 100%
+    );
+  transform:
+    translate(2px, 2px)
+    rotate(2deg)
+    skewY(5deg);
+  transform-origin: bottom right;
 }
 
 /* =========================================================
@@ -6474,29 +6563,6 @@ body[data-active-view="map"] .topbar::before {
   display: none;
 }
 
-body[data-active-view="map"] .world-overlay {
-  background: #080806;
-}
-
-body[data-active-view="map"] .world-overlay::after {
-  display: none;
-}
-
-body[data-active-view="map"] .map-view::before {
-  content: "";
-  position: fixed;
-  z-index: -1;
-  top: calc(env(safe-area-inset-top) + var(--map-cover-height));
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: url("blackwood-map.webp");
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  pointer-events: none;
-}
-
 @media (max-width: 560px) {
   :root {
     --map-cover-height: 108px;
@@ -6505,8 +6571,41 @@ body[data-active-view="map"] .map-view::before {
   body[data-active-view="map"] .topbar {
     padding: 14px 14px;
   }
+
+  .map-table-stage {
+    inset:
+      clamp(38px, 5.4vh, 64px)
+      clamp(38px, 9vw, 54px)
+      calc(
+        max(88px, env(safe-area-inset-bottom) + 72px)
+      );
+  }
+
+  .map-sheet {
+    width: min(69vw, 360px);
+  }
 }
 
+@media (max-width: 390px) {
+  .map-table-stage {
+    inset:
+      34px
+      34px
+      calc(
+        max(84px, env(safe-area-inset-bottom) + 68px)
+      );
+  }
+
+  .map-sheet {
+    width: 68vw;
+  }
+}
+
+@supports (height: 100dvh) {
+  .map-view {
+    top: calc(env(safe-area-inset-top) + var(--map-cover-height));
+  }
+}
 
 /* =========================================================
    CROSS-DEVICE SAVE
