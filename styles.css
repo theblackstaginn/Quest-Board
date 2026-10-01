@@ -6430,8 +6430,8 @@ body[data-active-view="map"] .map-view::before {
       rgba(8, 5, 3, .14)
     ),
     url("map-page-true-bg.webp");
-  background-size: cover;
-  background-position: center center;
+  background-size: 122% auto;
+  background-position: center 44%;
   background-repeat: no-repeat;
   pointer-events: none;
 }
@@ -6792,4 +6792,23 @@ body[data-active-view="map"] .topbar::before {
   box-shadow:
     0 0 0 1px rgba(160, 106, 205, .22),
     0 0 16px rgba(112, 52, 160, .18);
+}
+
+
+/* =========================================================
+   MAP TRUE BACKGROUND ZOOM TUNING
+========================================================= */
+
+@media (max-width: 560px) {
+  body[data-active-view="map"] .map-view::before {
+    background-size: 132% auto;
+    background-position: center 42%;
+  }
+}
+
+@media (max-width: 390px) {
+  body[data-active-view="map"] .map-view::before {
+    background-size: 138% auto;
+    background-position: center 41%;
+  }
 }
