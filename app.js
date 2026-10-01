@@ -745,6 +745,11 @@ let cloudProgressReady = false;
 let cloudSaveTimer = null;
 let partyRefreshTimer = null;
 
+let deviceSyncSaveTimer = null;
+let deviceSyncPollTimer = null;
+let deviceSyncLastUpdatedAt = null;
+let applyingDeviceSyncRemote = false;
+
 let giftRecipient = null;
 let giftSending = false;
 let checkingIncomingGifts = false;
@@ -892,6 +897,39 @@ function getSettingsKey() {
 }
 
 
+function getDeviceSyncIdKey() {
+  return (
+    `questBoardDeviceSyncId-${getLegacyProfileName()}`
+  );
+}
+
+
+function getDeviceSyncId() {
+  return (
+    localStorage.getItem(
+      getDeviceSyncIdKey()
+    )
+    || ""
+  );
+}
+
+
+function setDeviceSyncId(syncId) {
+  if (syncId) {
+    localStorage.setItem(
+      getDeviceSyncIdKey(),
+      syncId
+    );
+  }
+
+  else {
+    localStorage.removeItem(
+      getDeviceSyncIdKey()
+    );
+  }
+}
+
+
 // =========================================================
 // 11. SETTINGS
 // =========================================================
@@ -951,6 +989,7 @@ function saveSettings(settings) {
   );
 
   queueCloudProgressSave();
+  queueDeviceSyncSave();
 }
 
 
@@ -1308,6 +1347,7 @@ function saveState(state) {
   );
 
   queueCloudProgressSave();
+  queueDeviceSyncSave();
 }
 
 function hasMeaningfulLocalProgress(state) {
@@ -1452,6 +1492,595 @@ async function restoreOrSeedCloudProgress(
   await saveProgressToCloud();
   return false;
 }
+// =========================================================
+// LIVE DEVICE SYNC
+// =========================================================
+
+function renderDeviceSyncStatus(
+  {
+    statusText = null,
+    pairCode = null
+  } = {}
+) {
+  const status =
+    $("#deviceSyncStatus");
+
+  const codeWrap =
+    $("#deviceSyncCodeWrap");
+
+  const code =
+    $("#deviceSyncCode");
+
+  if (!status) {
+    return;
+  }
+
+  const syncId =
+    getDeviceSyncId();
+
+  status.textContent =
+    statusText
+    || (
+      syncId
+        ? "Live sync is connected. Changes made on either paired device will stay current automatically."
+        : "This device is not paired yet. Generate a code on the device with your current save, then enter it on the other device."
+    );
+
+  if (
+    codeWrap
+    && code
+  ) {
+    if (pairCode) {
+      code.textContent =
+        pairCode;
+
+      codeWrap.hidden =
+        false;
+    }
+
+    else {
+      codeWrap.hidden =
+        true;
+    }
+  }
+}
+
+
+function queueDeviceSyncSave() {
+  if (
+    applyingDeviceSyncRemote
+    || !supabaseReady
+    || !supabaseUser
+    || !getDeviceSyncId()
+  ) {
+    return;
+  }
+
+  clearTimeout(
+    deviceSyncSaveTimer
+  );
+
+  deviceSyncSaveTimer =
+    setTimeout(
+      () => {
+        pushDeviceSync()
+          .catch(error =>
+            console.error(
+              "Device sync upload failed:",
+              error
+            )
+          );
+      },
+      350
+    );
+}
+
+
+async function pushDeviceSync() {
+  const syncId =
+    getDeviceSyncId();
+
+  if (
+    !syncId
+    || !supabaseReady
+    || !supabaseUser
+  ) {
+    return false;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("device_sync")
+      .update({
+        profile_id:
+          activeProfileId,
+
+        state:
+          getState(),
+
+        settings:
+          getSettings(),
+
+        updated_at:
+          new Date().toISOString()
+      })
+      .eq(
+        "sync_id",
+        syncId
+      )
+      .select(
+        "updated_at"
+      )
+      .single();
+
+  if (error) {
+    throw error;
+  }
+
+  deviceSyncLastUpdatedAt =
+    data?.updated_at
+    || deviceSyncLastUpdatedAt;
+
+  renderDeviceSyncStatus();
+
+  return true;
+}
+
+
+async function pullDeviceSync({
+  force = false
+} = {}) {
+  const syncId =
+    getDeviceSyncId();
+
+  if (
+    !syncId
+    || !supabaseReady
+    || !supabaseUser
+  ) {
+    return false;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("device_sync")
+      .select(
+        "profile_id, state, settings, updated_at"
+      )
+      .eq(
+        "sync_id",
+        syncId
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data?.state) {
+    setDeviceSyncId(
+      null
+    );
+
+    deviceSyncLastUpdatedAt =
+      null;
+
+    renderDeviceSyncStatus({
+      statusText:
+        "This device is no longer connected to a live sync."
+    });
+
+    return false;
+  }
+
+  if (
+    data.profile_id
+    !== activeProfileId
+  ) {
+    return false;
+  }
+
+  const remoteTime =
+    data.updated_at
+      ? new Date(
+          data.updated_at
+        ).getTime()
+      : 0;
+
+  const knownTime =
+    deviceSyncLastUpdatedAt
+      ? new Date(
+          deviceSyncLastUpdatedAt
+        ).getTime()
+      : 0;
+
+  if (
+    !force
+    && remoteTime
+      <= knownTime
+  ) {
+    return false;
+  }
+
+  applyingDeviceSyncRemote =
+    true;
+
+  try {
+    localStorage.setItem(
+      getStorageKey(),
+      JSON.stringify(
+        migrateState(
+          data.state
+        )
+      )
+    );
+
+    if (
+      data.settings
+      && typeof data.settings
+        === "object"
+    ) {
+      localStorage.setItem(
+        getSettingsKey(),
+        JSON.stringify({
+          ...createFreshSettings(),
+          ...data.settings
+        })
+      );
+    }
+
+    deviceSyncLastUpdatedAt =
+      data.updated_at
+      || null;
+
+    render();
+    renderSettings(
+      getSettings()
+    );
+
+    renderDeviceSyncStatus();
+  }
+
+  finally {
+    applyingDeviceSyncRemote =
+      false;
+  }
+
+  return true;
+}
+
+
+async function generateDeviceSyncPairCode() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    showToast(
+      "Guild connection is not ready yet."
+    );
+
+    return;
+  }
+
+  try {
+    let syncId =
+      getDeviceSyncId();
+
+    let pairCode =
+      null;
+
+    if (!syncId) {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .rpc(
+            "create_device_sync_channel",
+            {
+              p_profile_id:
+                activeProfileId,
+
+              p_state:
+                getState(),
+
+              p_settings:
+                getSettings()
+            }
+          )
+          .single();
+
+      if (error) {
+        throw error;
+      }
+
+      syncId =
+        data.sync_id;
+
+      pairCode =
+        data.pair_code;
+
+      setDeviceSyncId(
+        syncId
+      );
+
+      await pullDeviceSync({
+        force: true
+      });
+    }
+
+    else {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .rpc(
+            "refresh_device_sync_pair_code",
+            {
+              p_sync_id:
+                syncId
+            }
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      pairCode =
+        data;
+    }
+
+    renderDeviceSyncStatus({
+      pairCode
+    });
+
+    startDeviceSyncPolling();
+
+    showToast(
+      "Pairing code ready."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not generate device sync code:",
+      error
+    );
+
+    showToast(
+      "Could not create a pairing code."
+    );
+  }
+}
+
+
+async function joinDeviceSync() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+  ) {
+    showToast(
+      "Guild connection is not ready yet."
+    );
+
+    return;
+  }
+
+  const input =
+    $("#deviceSyncCodeInput");
+
+  const pairCode =
+    String(
+      input?.value
+      || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  if (
+    pairCode.length
+    !== 8
+  ) {
+    showToast(
+      "Enter the 8-character pairing code."
+    );
+
+    return;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .rpc(
+          "claim_device_sync_channel",
+          {
+            p_pair_code:
+              pairCode,
+
+            p_profile_id:
+              activeProfileId
+          }
+        )
+        .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (
+      !confirm(
+        "Connect this device to the shared Quest Board save?\n\nThe paired save will replace this device's current local quest progress and settings."
+      )
+    ) {
+      return;
+    }
+
+    setDeviceSyncId(
+      data.sync_id
+    );
+
+    applyingDeviceSyncRemote =
+      true;
+
+    try {
+      localStorage.setItem(
+        getStorageKey(),
+        JSON.stringify(
+          migrateState(
+            data.state
+          )
+        )
+      );
+
+      if (
+        data.settings
+        && typeof data.settings
+          === "object"
+      ) {
+        localStorage.setItem(
+          getSettingsKey(),
+          JSON.stringify({
+            ...createFreshSettings(),
+            ...data.settings
+          })
+        );
+      }
+
+      deviceSyncLastUpdatedAt =
+        data.updated_at
+        || null;
+
+      render();
+      renderSettings(
+        getSettings()
+      );
+    }
+
+    finally {
+      applyingDeviceSyncRemote =
+        false;
+    }
+
+    if (input) {
+      input.value =
+        "";
+    }
+
+    renderDeviceSyncStatus();
+
+    startDeviceSyncPolling();
+
+    showToast(
+      "Live device sync connected."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not join device sync:",
+      error
+    );
+
+    showToast(
+      "That pairing code is invalid, expired, or belongs to the other adventurer."
+    );
+  }
+}
+
+
+function startDeviceSyncPolling() {
+  clearInterval(
+    deviceSyncPollTimer
+  );
+
+  if (
+    !getDeviceSyncId()
+  ) {
+    return;
+  }
+
+  deviceSyncPollTimer =
+    setInterval(
+      () => {
+        if (
+          document.visibilityState
+          === "visible"
+        ) {
+          pullDeviceSync()
+            .catch(error =>
+              console.error(
+                "Device sync refresh failed:",
+                error
+              )
+            );
+        }
+      },
+      4000
+    );
+}
+
+
+async function initializeDeviceSync() {
+  renderDeviceSyncStatus();
+
+  if (
+    !getDeviceSyncId()
+  ) {
+    return;
+  }
+
+  try {
+    await pullDeviceSync({
+      force: true
+    });
+
+    startDeviceSyncPolling();
+  }
+
+  catch (error) {
+    console.error(
+      "Could not initialize device sync:",
+      error
+    );
+
+    renderDeviceSyncStatus({
+      statusText:
+        "Live sync could not connect. Your local save is still intact."
+    });
+  }
+}
+
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState
+      === "visible"
+      && getDeviceSyncId()
+    ) {
+      pullDeviceSync()
+        .catch(error =>
+          console.error(
+            "Device sync visibility refresh failed:",
+            error
+          )
+        );
+    }
+  }
+);
+
+
 // =========================================================
 // 13. WEEK HANDLING
 // =========================================================
@@ -1644,6 +2273,7 @@ async function initializeSupabase() {
 
     await syncProfileToSupabase();
     await loadCurrentParty();
+    await initializeDeviceSync();
 
     if (restoredCloudProgress) {
       render();
@@ -7839,6 +8469,31 @@ $("#loadCloudSaveButton")
   ?.addEventListener(
     "click",
     loadCloudSaveToThisDevice
+  );
+
+$("#startDeviceSyncButton")
+  ?.addEventListener(
+    "click",
+    generateDeviceSyncPairCode
+  );
+
+$("#joinDeviceSyncButton")
+  ?.addEventListener(
+    "click",
+    joinDeviceSync
+  );
+
+$("#deviceSyncCodeInput")
+  ?.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key
+        === "Enter"
+      ) {
+        joinDeviceSync();
+      }
+    }
   );
 
 $("#weeklyGoalSelect")
