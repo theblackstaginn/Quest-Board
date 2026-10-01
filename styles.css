@@ -6536,3 +6536,67 @@ body[data-active-view="map"] .map-view::before {
   font-size: .9rem !important;
   line-height: 1.45 !important;
 }
+
+
+/* =========================================================
+   LIVE DEVICE SYNC
+========================================================= */
+
+.device-sync-panel {
+  border-color: rgba(207, 166, 91, .3);
+}
+
+.device-sync-status {
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+.device-sync-code {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid rgba(207, 166, 91, .28);
+  border-radius: 12px;
+  background: rgba(80, 59, 24, .12);
+  text-align: center;
+}
+
+.device-sync-code[hidden] {
+  display: none !important;
+}
+
+.device-sync-code span,
+.device-sync-code small {
+  color: #66523b;
+  font-size: .78rem;
+}
+
+.device-sync-code strong {
+  color: #563719;
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  letter-spacing: .18em;
+}
+
+.device-sync-join {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.device-sync-join .settings-danger-button {
+  min-width: 138px;
+}
+
+@media (max-width: 560px) {
+  .device-sync-join {
+    grid-template-columns: 1fr;
+  }
+
+  .device-sync-join .settings-danger-button {
+    width: 100%;
+  }
+}
