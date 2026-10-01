@@ -86,6 +86,18 @@ struct RogueWitchHomeView: View {
                     rewardCard(rewardText)
                 }
 
+                if store.pendingEncounter != nil {
+                    WatchEncounterView(store: store) { response in
+                        if response.duplicate {
+                            rewardText = "Encounter already claimed."
+                        } else if let encounter = response.encounter {
+                            rewardText = "Claimed \(encounter.rewardLabel)"
+                        } else {
+                            rewardText = "Encounter claimed."
+                        }
+                    }
+                }
+
                 if store.activeSession != nil {
                     QuestTimerView(store: store) { response in
                         var message = "+\(response.earnedXp) XP · +\(response.earnedGold) Gold"
@@ -94,13 +106,17 @@ struct RogueWitchHomeView: View {
                             message += " · Week Conquered!"
                         }
 
+                        if response.encounterQueued {
+                            message += " · The road stirs…"
+                        }
+
                         if response.duplicate {
                             message = "Quest already sealed."
                         }
 
                         rewardText = message
                     }
-                } else {
+                } else if store.pendingEncounter == nil {
                     Button {
                         rewardText = nil
                         showingQuestPicker = true

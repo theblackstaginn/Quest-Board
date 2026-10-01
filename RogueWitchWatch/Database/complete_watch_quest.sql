@@ -1,17 +1,12 @@
--- Rogue Witch Watch: server-authoritative normal quest completion.
--- This function is already installed in the live Quest Board project.
--- Keep this file as the repository-owned source for the watch-specific RPC.
+-- Rogue Witch Watch: server-authoritative normal quest completion and encounter queueing.
+-- This definition is synchronized from the live Quest Board project.
 
-create or replace function public.complete_watch_quest(
-  p_sync_id uuid,
-  p_quest_id text,
-  p_idempotency_key uuid
-)
-returns jsonb
-language plpgsql
-security definer
-set search_path = ''
-as $function$
+CREATE OR REPLACE FUNCTION public.complete_watch_quest(p_sync_id uuid, p_quest_id text, p_idempotency_key uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
   v_user_id uuid := auth.uid();
   v_state jsonb;
@@ -43,6 +38,11 @@ declare
   v_party_id uuid;
   v_display_name text;
   v_conquered_week boolean := false;
+  v_nonboss_history_count integer := 0;
+  v_encounter_count integer := 0;
+  v_encounter_index integer := 0;
+  v_encounter jsonb;
+  v_encounter_queued boolean := false;
 begin
   if v_user_id is null then
     raise exception 'Authentication required';
@@ -103,7 +103,9 @@ begin
       'settings', v_settings,
       'earned_xp', 0,
       'earned_gold', 0,
-      'week_conquered', false
+      'week_conquered', false,
+      'encounter_queued', false,
+      'encounter', v_state -> 'watchEncounter'
     );
   end if;
 
@@ -176,6 +178,64 @@ begin
     v_conquered_week := true;
   end if;
 
+  select count(*)::integer
+    into v_nonboss_history_count
+  from jsonb_array_elements(v_state -> 'history') as entry
+  where coalesce(entry ->> 'questId', '') <> 'boss';
+
+  if v_nonboss_history_count > 0
+     and mod(v_nonboss_history_count, 3) = 0
+     and coalesce(jsonb_typeof(v_state -> 'watchEncounter'), 'null') = 'null' then
+    v_encounter_count := greatest(0, coalesce((v_state ->> 'encounterCount')::integer, 0));
+    v_encounter_index := mod(v_nonboss_history_count + v_encounter_count, 4);
+
+    case v_encounter_index
+      when 0 then
+        v_encounter := jsonb_build_object(
+          'id', p_idempotency_key::text,
+          'milestone', v_nonboss_history_count,
+          'glyph', '¤',
+          'title', 'The Road Merchant',
+          'copy', 'A hooded trader recognizes the Guild seal and presses a coin purse into your hand.',
+          'reward', 'gold',
+          'amount', 8
+        );
+      when 1 then
+        v_encounter := jsonb_build_object(
+          'id', p_idempotency_key::text,
+          'milestone', v_nonboss_history_count,
+          'glyph', '✦',
+          'title', 'Shrine of the Old Road',
+          'copy', 'Moss-covered stones hum as you pass. Something answers your persistence.',
+          'reward', 'xp',
+          'amount', 8
+        );
+      when 2 then
+        v_encounter := jsonb_build_object(
+          'id', p_idempotency_key::text,
+          'milestone', v_nonboss_history_count,
+          'glyph', '◆',
+          'title', 'Crystal Vein',
+          'copy', 'A shard of pale light glints beneath a broken root.',
+          'reward', 'crystals',
+          'amount', 1
+        );
+      else
+        v_encounter := jsonb_build_object(
+          'id', p_idempotency_key::text,
+          'milestone', v_nonboss_history_count,
+          'glyph', '▣',
+          'title', 'Forgotten Cache',
+          'copy', 'An old Guild cache survived beneath the ferns.',
+          'reward', 'gold',
+          'amount', 12
+        );
+    end case;
+
+    v_state := jsonb_set(v_state, '{watchEncounter}', v_encounter, true);
+    v_encounter_queued := true;
+  end if;
+
   v_state := jsonb_set(v_state, '{watchCompletionIds}', v_ids || jsonb_build_array(p_idempotency_key::text), true);
 
   update public.device_sync
@@ -224,7 +284,9 @@ begin
     'settings', v_settings,
     'earned_xp', v_earned_xp,
     'earned_gold', v_earned_gold,
-    'week_conquered', v_conquered_week
+    'week_conquered', v_conquered_week,
+    'encounter_queued', v_encounter_queued,
+    'encounter', v_state -> 'watchEncounter'
   );
 end;
 $function$;

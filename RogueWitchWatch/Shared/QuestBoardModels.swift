@@ -11,6 +11,29 @@ struct QuestXPState: Codable, Hashable {
     let restoration: Int?
 }
 
+struct WatchEncounter: Codable, Hashable {
+    let id: UUID
+    let milestone: Int
+    let glyph: String
+    let title: String
+    let copy: String
+    let reward: String
+    let amount: Int
+
+    var rewardLabel: String {
+        switch reward {
+        case "gold":
+            return "+\(amount) Gold"
+        case "crystals":
+            return "+\(amount) \(amount == 1 ? "Crystal" : "Crystals")"
+        case "xp":
+            return "+\(amount) Restoration XP"
+        default:
+            return "+\(amount)"
+        }
+    }
+}
+
 struct QuestBoardState: Codable, Hashable {
     let weekKey: String?
     let weeklyCompleted: [QuestCompletion]?
@@ -19,6 +42,7 @@ struct QuestBoardState: Codable, Hashable {
     let crystals: Int?
     let bossDefeatedWeek: String?
     let bossRewardsClaimedWeek: String?
+    let watchEncounter: WatchEncounter?
 }
 
 struct QuestBoardSettings: Codable, Hashable {
@@ -65,6 +89,8 @@ struct WatchQuestCompletionResponse: Decodable {
     let earnedXp: Int
     let earnedGold: Int
     let weekConquered: Bool
+    let encounterQueued: Bool
+    let encounter: WatchEncounter?
 
     enum CodingKeys: String, CodingKey {
         case duplicate
@@ -73,7 +99,16 @@ struct WatchQuestCompletionResponse: Decodable {
         case earnedXp = "earned_xp"
         case earnedGold = "earned_gold"
         case weekConquered = "week_conquered"
+        case encounterQueued = "encounter_queued"
+        case encounter
     }
+}
+
+struct WatchEncounterClaimResponse: Decodable {
+    let duplicate: Bool
+    let state: QuestBoardState
+    let settings: QuestBoardSettings
+    let encounter: WatchEncounter?
 }
 
 struct RogueWitchSnapshot: Codable, Hashable {

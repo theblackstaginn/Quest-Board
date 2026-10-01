@@ -18,6 +18,11 @@ private struct CompleteWatchQuestParams: Encodable {
     let p_idempotency_key: UUID
 }
 
+private struct ClaimWatchEncounterParams: Encodable {
+    let p_sync_id: UUID
+    let p_encounter_id: UUID
+}
+
 @MainActor
 final class RogueWitchStore: ObservableObject {
     enum Phase: Equatable {
@@ -31,7 +36,9 @@ final class RogueWitchStore: ObservableObject {
     @Published private(set) var phase: Phase = .starting
     @Published private(set) var snapshot = RogueWitchSharedState.load()
     @Published private(set) var activeSession: WatchQuestSession?
+    @Published private(set) var pendingEncounter: WatchEncounter?
     @Published private(set) var isCompleting = false
+    @Published private(set) var isClaimingEncounter = false
     @Published var pairingCode = ""
 
     private let client = QuestBoardConfig.client
@@ -162,7 +169,7 @@ final class RogueWitchStore: ObservableObject {
     }
 
     func startQuest(_ quest: WatchQuest) {
-        guard activeSession == nil else {
+        guard activeSession == nil, pendingEncounter == nil else {
             return
         }
 
@@ -239,9 +246,41 @@ final class RogueWitchStore: ObservableObject {
         return response
     }
 
+    func claimPendingEncounter() async throws -> WatchEncounterClaimResponse {
+        guard let syncID else {
+            throw RogueWitchError.notPaired
+        }
+
+        guard let encounter = pendingEncounter else {
+            throw RogueWitchError.noPendingEncounter
+        }
+
+        isClaimingEncounter = true
+        defer { isClaimingEncounter = false }
+
+        try await ensureSession()
+
+        let response: WatchEncounterClaimResponse = try await client
+            .rpc(
+                "claim_watch_encounter",
+                params: ClaimWatchEncounterParams(
+                    p_sync_id: syncID,
+                    p_encounter_id: encounter.id
+                )
+            )
+            .execute()
+            .value
+
+        apply(state: response.state, settings: response.settings)
+        phase = .connected
+
+        return response
+    }
+
     func clearLocalPairing() {
         syncID = nil
         pairingCode = ""
+        pendingEncounter = nil
         phase = .needsPairing
     }
 
@@ -294,6 +333,8 @@ final class RogueWitchStore: ObservableObject {
             name = "Jess"
         }
 
+        pendingEncounter = state.watchEncounter
+
         let next = RogueWitchSnapshot(
             displayName: name,
             className: "Rogue Witch Assassin",
@@ -321,6 +362,7 @@ enum RogueWitchError: LocalizedError {
     case wrongProfile
     case notPaired
     case noActiveQuest
+    case noPendingEncounter
     case unsupportedQuest
 
     var errorDescription: String? {
@@ -331,6 +373,8 @@ enum RogueWitchError: LocalizedError {
             return "Pair this watch with Jess's Quest Board first."
         case .noActiveQuest:
             return "There is no active quest to complete."
+        case .noPendingEncounter:
+            return "There is no road encounter waiting to be claimed."
         case .unsupportedQuest:
             return "That quest cannot be completed from the watch."
         }
