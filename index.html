@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="89">
+  <meta name="quest-board-build" content="90">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=89">
+  <link rel="stylesheet" href="styles.css?v=90">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
@@ -1069,40 +1069,65 @@
           >
             Sign Out
           </button>
+        </section>
+
+        <section class="settings-panel device-sync-panel">
+
+          <p class="eyebrow">
+            Live Device Sync
+          </p>
+
+          <h2>
+            Keep Devices Current
+          </h2>
+
+          <p
+            class="muted device-sync-status"
+            id="deviceSyncStatus"
+          >
+            Checking sync status...
+          </p>
 
           <div
-            class="account-sync-actions"
-            id="accountSyncActions"
+            class="device-sync-code"
+            id="deviceSyncCodeWrap"
             hidden
           >
-            <p class="eyebrow">
-              Cross-Device Save
-            </p>
+            <span>Pairing Code</span>
+            <strong id="deviceSyncCode">--------</strong>
+            <small>Enter this code on the other device within 15 minutes.</small>
+          </div>
 
-            <p class="muted account-sync-copy">
-              Upload this device's Quest Board save, then load it on another device signed into the same adventurer account.
-            </p>
+          <button
+            class="fantasy-action-button"
+            id="startDeviceSyncButton"
+            type="button"
+          >
+            Generate Pairing Code
+          </button>
 
-            <div class="account-actions">
-              <button
-                class="fantasy-action-button"
-                id="uploadDeviceSaveButton"
-                type="button"
-              >
-                Upload This Device Save
-              </button>
+          <div class="device-sync-join">
+            <input
+              class="setting-input"
+              id="deviceSyncCodeInput"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              maxlength="8"
+              placeholder="ENTER 8-CHARACTER CODE"
+            >
 
-              <button
-                class="settings-danger-button"
-                id="loadCloudSaveButton"
-                type="button"
-              >
-                Load Cloud Save
-              </button>
-            </div>
+            <button
+              class="settings-danger-button"
+              id="joinDeviceSyncButton"
+              type="button"
+            >
+              Connect This Device
+            </button>
           </div>
 
         </section>
+
 
         <section class="settings-panel">
 
@@ -2200,7 +2225,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=85"></script>
+  <script src="app.js?v=90"></script>
   <script src="quest-guild.js?v=5"></script>
 
 </body>
