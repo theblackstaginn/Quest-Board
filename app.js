@@ -1782,7 +1782,7 @@ async function generateDeviceSyncPairCode() {
       } =
         await supabaseClient
           .rpc(
-            "create_device_sync_channel",
+            "create_device_sync_channel_fixed",
             {
               p_profile_id:
                 activeProfileId,
@@ -1793,18 +1793,28 @@ async function generateDeviceSyncPairCode() {
               p_settings:
                 getSettings()
             }
-          )
-          .single();
+          );
 
       if (error) {
         throw error;
       }
 
       syncId =
-        data.sync_id;
+        data?.sync_id
+        || null;
 
       pairCode =
-        data.pair_code;
+        data?.pair_code
+        || null;
+
+      if (
+        !syncId
+        || !pairCode
+      ) {
+        throw new Error(
+          "Pairing service did not return a sync channel."
+        );
+      }
 
       setDeviceSyncId(
         syncId
