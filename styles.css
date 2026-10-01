@@ -6815,8 +6815,8 @@ body[data-active-view="map"] .topbar::before {
 
 
 /* =========================================================
-   SAFE MAP AMBIENCE — BUILD 101
-   CSS-only: dramatic atmosphere with zero interaction capture.
+   SAFE MAP AMBIENCE — BUILD 102
+   CSS-only: localized mountain fog + existing map glows.
 ========================================================= */
 
 .map-ambient-layer {
@@ -6829,32 +6829,110 @@ body[data-active-view="map"] .topbar::before {
 }
 
 .map-ambient-layer::before,
+.map-ambient-layer::after,
 .map-ambient-glow,
 .map-ambient-mist {
   position: absolute;
   pointer-events: none;
 }
 
+/*
+  Fog is intentionally broken into four isolated banks instead
+  of one map-wide sheet. Each bank sits over a mountain/forest
+  corridor and rises gently outward from the terrain.
+*/
+
 .map-ambient-layer::before {
   content: "";
-  left: -46%;
-  top: 34%;
-  width: 142%;
-  height: 18%;
-  border-radius: 50%;
+  left: -8%;
+  top: 4%;
+  width: 60%;
+  height: 25%;
+  transform-origin: 24% 80%;
+  clip-path: polygon(
+    0 6%,
+    31% 18%,
+    65% 34%,
+    100% 52%,
+    91% 79%,
+    62% 70%,
+    30% 58%,
+    0 46%
+  );
   background:
     radial-gradient(
-      ellipse at center,
-      rgba(237, 241, 233, .22),
-      rgba(208, 220, 214, .10) 48%,
-      transparent 78%
+      ellipse at 18% 68%,
+      rgba(239, 243, 239, .44) 0 18%,
+      rgba(218, 226, 221, .22) 38%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse at 52% 54%,
+      rgba(235, 240, 236, .34) 0 16%,
+      rgba(205, 216, 210, .16) 42%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse at 84% 40%,
+      rgba(242, 245, 242, .27) 0 14%,
+      rgba(205, 216, 210, .12) 40%,
+      transparent 70%
     );
-  filter: blur(12px);
-  opacity: .34;
+  background-repeat: no-repeat;
+  background-size: 118% 100%, 126% 106%, 116% 96%;
+  filter: blur(6px);
+  opacity: .46;
   animation:
-    safeMapMistThree
-    11s
-    linear
+    safeMapMistUpperLeft
+    9.5s
+    ease-in-out
+    infinite;
+}
+
+.map-ambient-layer::after {
+  content: "";
+  right: -7%;
+  top: 15%;
+  width: 54%;
+  height: 22%;
+  transform-origin: 78% 82%;
+  clip-path: polygon(
+    100% 3%,
+    68% 16%,
+    38% 35%,
+    0 58%,
+    8% 84%,
+    41% 73%,
+    70% 57%,
+    100% 42%
+  );
+  background:
+    radial-gradient(
+      ellipse at 86% 66%,
+      rgba(240, 244, 240, .40) 0 18%,
+      rgba(214, 224, 218, .20) 39%,
+      transparent 69%
+    ),
+    radial-gradient(
+      ellipse at 53% 52%,
+      rgba(236, 241, 237, .31) 0 17%,
+      rgba(207, 218, 212, .15) 42%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse at 18% 45%,
+      rgba(242, 245, 242, .23) 0 14%,
+      rgba(205, 216, 210, .10) 40%,
+      transparent 70%
+    );
+  background-repeat: no-repeat;
+  background-size: 118% 100%, 124% 104%, 116% 96%;
+  filter: blur(6px);
+  opacity: .43;
+  animation:
+    safeMapMistUpperRight
+    10.5s
+    ease-in-out
     infinite;
 }
 
@@ -6910,40 +6988,76 @@ body[data-active-view="map"] .topbar::before {
 }
 
 .map-ambient-mist {
-  height: 14%;
-  border-radius: 50%;
+  border-radius: 46%;
   background:
     radial-gradient(
-      ellipse at center,
-      rgba(239, 243, 237, .30),
-      rgba(208, 220, 214, .14) 46%,
-      rgba(190, 205, 199, .05) 66%,
-      transparent 80%
+      ellipse at 14% 66%,
+      rgba(241, 245, 241, .42) 0 16%,
+      rgba(215, 225, 219, .20) 38%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse at 48% 53%,
+      rgba(236, 241, 237, .32) 0 16%,
+      rgba(207, 218, 212, .14) 41%,
+      transparent 71%
+    ),
+    radial-gradient(
+      ellipse at 83% 38%,
+      rgba(242, 245, 242, .24) 0 13%,
+      rgba(202, 214, 208, .10) 39%,
+      transparent 69%
     );
-  filter: blur(9px);
-  opacity: .56;
+  background-repeat: no-repeat;
+  background-size: 116% 100%, 124% 104%, 112% 94%;
+  filter: blur(6px);
 }
 
 .map-ambient-mist-one {
-  left: -58%;
-  top: 17%;
-  width: 104%;
+  left: -6%;
+  top: 31%;
+  width: 66%;
+  height: 21%;
+  transform-origin: 22% 82%;
+  clip-path: polygon(
+    0 18%,
+    28% 26%,
+    58% 40%,
+    100% 69%,
+    88% 94%,
+    55% 80%,
+    24% 63%,
+    0 57%
+  );
+  opacity: .45;
   animation:
-    safeMapMistOne
-    8.5s
-    linear
+    safeMapMistMidLeft
+    11.5s
+    ease-in-out
     infinite;
 }
 
 .map-ambient-mist-two {
-  right: -62%;
-  top: 49%;
-  width: 112%;
-  opacity: .48;
+  left: -8%;
+  top: 45%;
+  width: 64%;
+  height: 23%;
+  transform-origin: 21% 82%;
+  clip-path: polygon(
+    0 12%,
+    30% 23%,
+    60% 39%,
+    100% 66%,
+    88% 91%,
+    56% 78%,
+    25% 59%,
+    0 52%
+  );
+  opacity: .40;
   animation:
-    safeMapMistTwo
-    10.5s
-    linear
+    safeMapMistLowerLeft
+    13s
+    ease-in-out
     infinite;
 }
 
@@ -6978,70 +7092,162 @@ body[data-active-view="map"] .topbar::before {
   }
 }
 
-@keyframes safeMapMistOne {
-  from {
+@keyframes safeMapMistUpperLeft {
+  0% {
     transform:
-      translateX(-12%)
-      scaleX(.96)
-      scaleY(.96);
+      translate3d(-3%, 7%, 0)
+      scale(.92, .80);
+    background-position:
+      0% 66%,
+      12% 54%,
+      28% 44%;
+    opacity: .18;
   }
 
-  to {
+  48% {
     transform:
-      translateX(142%)
-      scaleX(1.08)
-      scaleY(1.04);
+      translate3d(1%, -2%, 0)
+      scale(1.00, .94);
+    background-position:
+      24% 54%,
+      40% 43%,
+      55% 35%;
+    opacity: .50;
+  }
+
+  100% {
+    transform:
+      translate3d(6%, -11%, 0)
+      scale(1.08, 1.06);
+    background-position:
+      48% 42%,
+      66% 31%,
+      82% 25%;
+    opacity: .16;
   }
 }
 
-@keyframes safeMapMistTwo {
-  from {
+@keyframes safeMapMistUpperRight {
+  0% {
     transform:
-      translateX(12%)
-      scaleX(1.06)
-      scaleY(.96);
-  }
-
-  to {
-    transform:
-      translateX(-132%)
-      scaleX(.96)
-      scaleY(1.04);
-  }
-}
-
-@keyframes safeMapMistThree {
-  from {
-    transform:
-      translateX(-22%)
-      scaleX(.98);
-    opacity: .28;
+      translate3d(4%, 7%, 0)
+      scale(.93, .80);
+    background-position:
+      100% 66%,
+      88% 54%,
+      72% 45%;
+    opacity: .17;
   }
 
   50% {
+    transform:
+      translate3d(0, -2%, 0)
+      scale(1.00, .94);
+    background-position:
+      78% 53%,
+      61% 42%,
+      45% 35%;
+    opacity: .47;
+  }
+
+  100% {
+    transform:
+      translate3d(-6%, -11%, 0)
+      scale(1.08, 1.05);
+    background-position:
+      54% 40%,
+      35% 30%,
+      18% 24%;
+    opacity: .15;
+  }
+}
+
+@keyframes safeMapMistMidLeft {
+  0% {
+    transform:
+      translate3d(-4%, 8%, 0)
+      scale(.92, .78);
+    background-position:
+      0% 68%,
+      14% 56%,
+      32% 46%;
+    opacity: .17;
+  }
+
+  46% {
+    transform:
+      translate3d(1%, -1%, 0)
+      scale(1.00, .93);
+    background-position:
+      25% 55%,
+      43% 44%,
+      58% 35%;
+    opacity: .46;
+  }
+
+  100% {
+    transform:
+      translate3d(7%, -10%, 0)
+      scale(1.09, 1.05);
+    background-position:
+      52% 42%,
+      69% 32%,
+      85% 25%;
+    opacity: .14;
+  }
+}
+
+@keyframes safeMapMistLowerLeft {
+  0% {
+    transform:
+      translate3d(-3%, 8%, 0)
+      scale(.93, .79);
+    background-position:
+      0% 69%,
+      13% 57%,
+      30% 47%;
+    opacity: .15;
+  }
+
+  52% {
+    transform:
+      translate3d(1%, -2%, 0)
+      scale(1.00, .94);
+    background-position:
+      26% 56%,
+      44% 45%,
+      60% 36%;
     opacity: .42;
   }
 
-  to {
+  100% {
     transform:
-      translateX(88%)
-      scaleX(1.06);
-    opacity: .28;
+      translate3d(6%, -9%, 0)
+      scale(1.08, 1.04);
+    background-position:
+      50% 43%,
+      68% 33%,
+      84% 26%;
+    opacity: .13;
   }
 }
 
 /* Keep the private campaign's fog moving under either reduced-motion setting.
    Explicit animations override the global system and in-app motion rules. */
 body .map-ambient-mist-one {
-  animation: safeMapMistOne 8.5s linear infinite !important;
+  animation: safeMapMistMidLeft 11.5s ease-in-out infinite !important;
 }
 
 body .map-ambient-mist-two {
-  animation: safeMapMistTwo 10.5s linear infinite !important;
+  animation: safeMapMistLowerLeft 13s ease-in-out infinite !important;
 }
 
 body .map-ambient-layer::before {
-  animation: safeMapMistThree 11s linear infinite !important;
+  animation: safeMapMistUpperLeft 9.5s ease-in-out infinite !important;
+}
+
+body .map-ambient-layer::after {
+  animation: safeMapMistUpperRight 10.5s ease-in-out infinite !important;
 }
 
 body.reduce-motion .map-ambient-glow {
@@ -7053,4 +7259,3 @@ body.reduce-motion .map-ambient-glow {
     animation: none !important;
   }
 }
-
