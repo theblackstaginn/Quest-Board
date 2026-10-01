@@ -89,6 +89,16 @@ Watch write RPCs require an authenticated Supabase session, validate membership 
 
 The Supabase advisor still reports unrelated pre-existing Quest Board security/performance warnings. They are intentionally outside this watch feature scope and were not modified.
 
+## Mac build check
+
+On a Mac with Xcode and XcodeGen installed:
+
+`./build-check.sh`
+
+The script regenerates the project from `project.yml`, resolves the pinned Supabase package, and performs an unsigned generic watchOS Simulator build. It does not change live Quest Board data.
+
+For the first real-device run, follow `HARDWARE_TEST_CHECKLIST.md`.
+
 ## Signing for Jess
 
 Installing on Jess's actual Apple Watch will require Xcode signing with an Apple developer identity and enabling the App Group for both the watch app and widget targets.
