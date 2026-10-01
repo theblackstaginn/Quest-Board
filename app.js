@@ -2571,6 +2571,43 @@ async function syncProfileToSupabase() {
   if (error) {
     throw error;
   }
+
+  if (
+    getDeviceSyncId()
+    && getLogicalUserIds()
+      .length > 1
+  ) {
+    const {
+      error: linkedProfileError
+    } =
+      await supabaseClient
+        .from("profiles")
+        .update({
+          profile_id:
+            activeProfileId,
+
+          display_name:
+            settings.playerName
+            || character.defaultName,
+
+          class_name:
+            character.className,
+
+          updated_at:
+            new Date().toISOString()
+        })
+        .in(
+          "user_id",
+          getLogicalUserIds()
+        );
+
+    if (linkedProfileError) {
+      console.warn(
+        "Linked profile sync failed:",
+        linkedProfileError
+      );
+    }
+  }
 }
 
 
