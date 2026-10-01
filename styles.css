@@ -7030,16 +7030,26 @@ body[data-active-view="map"] .topbar::before {
   }
 }
 
-body.reduce-motion
-  .map-ambient-layer *,
-body.reduce-motion
-  .map-ambient-layer::before {
+/* Keep the private campaign's fog moving under either reduced-motion setting.
+   Explicit animations override the global system and in-app motion rules. */
+body .map-ambient-mist-one {
+  animation: safeMapMistOne 8.5s linear infinite !important;
+}
+
+body .map-ambient-mist-two {
+  animation: safeMapMistTwo 10.5s linear infinite !important;
+}
+
+body .map-ambient-layer::before {
+  animation: safeMapMistThree 11s linear infinite !important;
+}
+
+body.reduce-motion .map-ambient-glow {
   animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-ambient-layer *,
-  .map-ambient-layer::before {
+  .map-ambient-glow {
     animation: none !important;
   }
 }
