@@ -7099,7 +7099,7 @@ body[data-active-view="map"] .topbar::before {
 @keyframes safeMapFogRiseRight {
   0%,
   100% {
-    opacity: .14;
+    opacity: .17;
     transform:
       translate3d(-3%, 4%, 0)
       rotate(var(--fog-angle))
@@ -7107,7 +7107,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   28% {
-    opacity: .21;
+    opacity: .25;
     transform:
       translate3d(0, -1%, 0)
       rotate(var(--fog-angle))
@@ -7115,7 +7115,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   56% {
-    opacity: .30;
+    opacity: .35;
     transform:
       translate3d(7%, -8%, 0)
       rotate(var(--fog-angle))
@@ -7123,7 +7123,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   78% {
-    opacity: .20;
+    opacity: .24;
     transform:
       translate3d(2%, -3%, 0)
       rotate(var(--fog-angle))
@@ -7134,7 +7134,7 @@ body[data-active-view="map"] .topbar::before {
 @keyframes safeMapFogRiseRightSoft {
   0%,
   100% {
-    opacity: .08;
+    opacity: .10;
     transform:
       translate3d(-2%, 3%, 0)
       rotate(var(--fog-angle))
@@ -7142,7 +7142,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   34% {
-    opacity: .15;
+    opacity: .18;
     transform:
       translate3d(2%, -2%, 0)
       rotate(var(--fog-angle))
@@ -7150,7 +7150,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   63% {
-    opacity: .23;
+    opacity: .27;
     transform:
       translate3d(8%, -7%, 0)
       rotate(var(--fog-angle))
@@ -7158,7 +7158,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   82% {
-    opacity: .14;
+    opacity: .17;
     transform:
       translate3d(3%, -3%, 0)
       rotate(var(--fog-angle))
@@ -7169,7 +7169,7 @@ body[data-active-view="map"] .topbar::before {
 @keyframes safeMapFogRiseLeft {
   0%,
   100% {
-    opacity: .13;
+    opacity: .16;
     transform:
       translate3d(3%, 4%, 0)
       rotate(var(--fog-angle))
@@ -7177,7 +7177,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   30% {
-    opacity: .20;
+    opacity: .24;
     transform:
       translate3d(0, -1%, 0)
       rotate(var(--fog-angle))
@@ -7185,7 +7185,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   58% {
-    opacity: .28;
+    opacity: .33;
     transform:
       translate3d(-7%, -8%, 0)
       rotate(var(--fog-angle))
@@ -7193,7 +7193,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   80% {
-    opacity: .19;
+    opacity: .23;
     transform:
       translate3d(-2%, -3%, 0)
       rotate(var(--fog-angle))
@@ -7204,7 +7204,7 @@ body[data-active-view="map"] .topbar::before {
 @keyframes safeMapFogRiseLeftSoft {
   0%,
   100% {
-    opacity: .07;
+    opacity: .09;
     transform:
       translate3d(2%, 3%, 0)
       rotate(var(--fog-angle))
@@ -7212,7 +7212,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   36% {
-    opacity: .14;
+    opacity: .17;
     transform:
       translate3d(-2%, -2%, 0)
       rotate(var(--fog-angle))
@@ -7220,7 +7220,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   65% {
-    opacity: .21;
+    opacity: .25;
     transform:
       translate3d(-8%, -7%, 0)
       rotate(var(--fog-angle))
@@ -7228,7 +7228,7 @@ body[data-active-view="map"] .topbar::before {
   }
 
   83% {
-    opacity: .13;
+    opacity: .16;
     transform:
       translate3d(-3%, -3%, 0)
       rotate(var(--fog-angle))
@@ -7242,7 +7242,7 @@ body.reduce-motion .map-fog-wisp {
 }
 
 body.reduce-motion .map-fog-wisp {
-  opacity: .14;
+  opacity: .17;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7252,6 +7252,6 @@ body.reduce-motion .map-fog-wisp {
   }
 
   .map-fog-wisp {
-    opacity: .14;
+    opacity: .17;
   }
 }
