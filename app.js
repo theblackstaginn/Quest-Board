@@ -702,16 +702,6 @@ const CAMPAIGN_LOCATIONS = [
   { at:0,id:"guild-hall",name:"Guild Hall",glyph:"⌂" },{ at:3,id:"old-road",name:"Old Road",glyph:"Ⅰ" },{ at:6,id:"whispering-pines",name:"Whispering Pines",glyph:"♠" },
   { at:10,id:"mossgate",name:"Mossgate",glyph:"◇" },{ at:15,id:"wardens-crossing",name:"Warden's Crossing",glyph:"⚔" },{ at:20,id:"blackwood-ruins",name:"Blackwood Ruins",glyph:"♜" },{ at:24,id:"heart-of-the-wood",name:"Heart of the Wood",glyph:"★" }
 ];
-
-const MAP_LOCATION_POSITIONS = {
-  "guild-hall": { x: 22.5, y: 83.2 },
-  "old-road": { x: 42.5, y: 72.2 },
-  "whispering-pines": { x: 28.0, y: 58.3 },
-  "mossgate": { x: 28.6, y: 40.4 },
-  "wardens-crossing": { x: 69.2, y: 49.3 },
-  "blackwood-ruins": { x: 71.4, y: 28.0 },
-  "heart-of-the-wood": { x: 55.7, y: 9.3 }
-};
 const ADVENTURER_TITLES = [{level:1,title:"Wayfarer"},{level:3,title:"Adventurer"},{level:5,title:"Pathfinder"},{level:8,title:"Vanguard"},{level:12,title:"Champion"},{level:18,title:"Warden"},{level:25,title:"Legend of the Guild"}];
 const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:"ranger",title:"Follow the Blackwood Trail"},{questId:"keep",title:"Break the Mossgate Guard"},{questId:"boss",title:"Defeat the Briar Warden"}];
 const ACHIEVEMENTS = [
@@ -3417,316 +3407,7 @@ function openCurrentStoryQuest(){const s=getState(),n=getQuestChainStage(s);if(n
 function renderRpgSystems(s){const a=evaluateAchievements(s);renderCampaign(s);renderDailyContracts(s);renderQuestChain(s);renderNpcs();renderAchievements(s);renderEquipment(s);renderCodex(s);$("#characterTitleName").textContent=getAdventurerTitle(s);if(a.length&&appInitialized){const x=ACHIEVEMENTS.find(y=>y.id===a[0]);if(x)showRewardBurst(`Achievement: ${x.name}`);}}
 
 // =========================================================
-// 19. BLACKWOOD MAP
-// =========================================================
-
-function renderMap(
-  state = getState(),
-  {
-    animate = activeView === "map"
-  } = {}
-) {
-  const markerLayer =
-    $("#mapLocationMarkers");
-
-  const routeProgress =
-    $("#mapRouteProgress");
-
-  const mapSheet =
-    $("#blackwoodMapSheet");
-
-  if (
-    !markerLayer
-    || !routeProgress
-    || !mapSheet
-  ) {
-    return;
-  }
-
-  const world =
-    state.world
-    || createFreshWorldState({
-      campaignProgress:
-        state.campaignProgress
-    });
-
-  const unlockedIds =
-    new Set(
-      world.unlockedLocationIds
-      || []
-    );
-
-  const campaignProgress =
-    Math.max(
-      0,
-      Math.min(
-        CAMPAIGN_GOAL,
-        Number(
-          state.campaignProgress
-        )
-        || 0
-      )
-    );
-
-  const unlockedLocations =
-    CAMPAIGN_LOCATIONS
-      .filter(
-        location =>
-          unlockedIds.has(
-            location.id
-          )
-      )
-      .sort(
-        (a, b) =>
-          a.at - b.at
-      );
-
-  const currentLocation =
-    unlockedLocations[
-      unlockedLocations.length - 1
-    ]
-    || CAMPAIGN_LOCATIONS[0];
-
-  const nextLocation =
-    CAMPAIGN_LOCATIONS
-      .find(
-        location =>
-          !unlockedIds.has(
-            location.id
-          )
-      )
-    || null;
-
-  const routePercent =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        (
-          campaignProgress
-          / CAMPAIGN_GOAL
-        )
-        * 100
-      )
-    );
-
-  routeProgress.style
-    .setProperty(
-      "--route-offset",
-      String(
-        100 - routePercent
-      )
-    );
-
-  markerLayer.innerHTML =
-    CAMPAIGN_LOCATIONS
-      .map(
-        (
-          location,
-          index
-        ) => {
-          const position =
-            MAP_LOCATION_POSITIONS[
-              location.id
-            ]
-            || {
-              x: 50,
-              y: 50
-            };
-
-          const unlocked =
-            unlockedIds.has(
-              location.id
-            );
-
-          const current =
-            location.id
-            === currentLocation.id;
-
-          const next =
-            Boolean(
-              nextLocation
-              && location.id
-                === nextLocation.id
-            );
-
-          const status =
-            current
-              ? "Current location"
-              : unlocked
-                ? "Discovered"
-                : next
-                  ? "Next destination"
-                  : "Locked";
-
-          const markerClass = [
-            "map-location-marker",
-            unlocked
-              ? "is-unlocked"
-              : "is-locked",
-            current
-              ? "is-current"
-              : "",
-            next
-              ? "is-next"
-              : ""
-          ]
-            .filter(Boolean)
-            .join(" ");
-
-          return `
-            <button
-              class="${markerClass}"
-              type="button"
-              data-map-location-id="${escapeHtml(location.id)}"
-              style="
-                --map-x: ${position.x}%;
-                --map-y: ${position.y}%;
-                --marker-delay: ${index * 90}ms;
-              "
-              aria-label="${escapeHtml(
-                `${location.name}. ${status}.`
-              )}"
-            >
-              <span
-                class="map-marker-halo"
-                aria-hidden="true"
-              ></span>
-
-              <span
-                class="map-marker-core"
-                aria-hidden="true"
-              >
-                ${escapeHtml(
-                  location.glyph
-                )}
-              </span>
-
-              <span
-                class="map-marker-label"
-              >
-                ${escapeHtml(
-                  location.name
-                )}
-              </span>
-            </button>
-          `;
-        }
-      )
-      .join("");
-
-  mapSheet.dataset
-    .currentLocation =
-      currentLocation.id;
-
-  mapSheet.dataset
-    .campaignComplete =
-      campaignProgress
-        >= CAMPAIGN_GOAL
-          ? "true"
-          : "false";
-
-  mapSheet.classList
-    .remove(
-      "map-is-live"
-    );
-
-  if (
-    animate
-    && !getSettings()
-      .reducedMotion
-  ) {
-    requestAnimationFrame(
-      () =>
-        requestAnimationFrame(
-          () =>
-            mapSheet.classList
-              .add(
-                "map-is-live"
-              )
-        )
-    );
-  }
-
-  else {
-    mapSheet.classList
-      .add(
-        "map-is-live"
-      );
-  }
-}
-
-
-function showMapLocation(
-  locationId
-) {
-  const location =
-    CAMPAIGN_LOCATIONS
-      .find(
-        item =>
-          item.id
-          === locationId
-      );
-
-  if (!location) {
-    return;
-  }
-
-  const state =
-    getState();
-
-  const unlockedIds =
-    new Set(
-      state.world
-        ?.unlockedLocationIds
-      || []
-    );
-
-  const unlockedLocations =
-    CAMPAIGN_LOCATIONS
-      .filter(
-        item =>
-          unlockedIds.has(
-            item.id
-          )
-      )
-      .sort(
-        (a, b) =>
-          a.at - b.at
-      );
-
-  const current =
-    unlockedLocations[
-      unlockedLocations.length - 1
-    ];
-
-  playUiSound(
-    "open"
-  );
-
-  if (
-    !unlockedIds.has(
-      location.id
-    )
-  ) {
-    showToast(
-      `${location.name} | Unlocks at campaign step ${location.at}.`
-    );
-
-    return;
-  }
-
-  showToast(
-    current?.id
-      === location.id
-        ? `${location.name} | Current expedition position.`
-        : `${location.name} | Discovered.`
-  );
-}
-
-
-// =========================================================
-// 20. MAIN RENDER
+// 19. MAIN RENDER
 // =========================================================
 
 function render({ skipParty = false } = {}) {
@@ -3777,10 +3458,6 @@ function render({ skipParty = false } = {}) {
   );
 
   renderRpgSystems(
-    state
-  );
-
-  renderMap(
     state
   );
 
@@ -5815,17 +5492,6 @@ async function setView(view) {
     activeView === "party"
   ) {
     await refreshParty();
-  }
-
-  if (
-    activeView === "map"
-  ) {
-    renderMap(
-      getState(),
-      {
-        animate: true
-      }
-    );
   }
 
   if (
@@ -9284,7 +8950,7 @@ $("#claimBossRewardsButton")
     claimBossRewards
   );
 
-$(".nav-item")
+$$(".nav-item")
   .forEach(
     button => {
       button.addEventListener(
@@ -9293,26 +8959,6 @@ $(".nav-item")
           setView(
             button.dataset.view
           )
-      );
-    }
-  );
-
-$("#mapLocationMarkers")
-  ?.addEventListener(
-    "click",
-    event => {
-      const marker =
-        event.target.closest(
-          "[data-map-location-id]"
-        );
-
-      if (!marker) {
-        return;
-      }
-
-      showMapLocation(
-        marker.dataset
-          .mapLocationId
       );
     }
   );
