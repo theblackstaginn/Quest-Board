@@ -2793,8 +2793,8 @@ body[data-character-theme="amethyst"] .character-class-name {
 
 .treasure-dialog::backdrop {
   background: rgba(0, 0, 0, 0.86);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .treasure-dialog-panel {
@@ -3124,8 +3124,8 @@ body.reduce-motion *::after {
 
 .relic-dialog::backdrop {
   background: rgba(0, 0, 0, 0.86);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .relic-dialog-panel {
@@ -3464,8 +3464,8 @@ body[data-active-view="party"] .party-activity-item {
 
 .party-character-dialog::backdrop {
   background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .party-character-dialog-panel {
@@ -6836,6 +6836,14 @@ body[data-active-view="map"] .topbar::before {
   pointer-events: none;
 }
 
+.map-ambient-layer::before,
+.map-ambient-layer::after,
+.map-ambient-mist {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 /*
   Fog is intentionally broken into four isolated banks instead
   of one map-wide sheet. Each bank sits over a mountain/forest
@@ -6880,7 +6888,7 @@ body[data-active-view="map"] .topbar::before {
     );
   background-repeat: no-repeat;
   background-size: 118% 100%, 126% 106%, 116% 96%;
-  filter: blur(6px);
+  filter: blur(4px);
   opacity: .46;
   animation:
     safeMapMistUpperLeft
@@ -6927,7 +6935,7 @@ body[data-active-view="map"] .topbar::before {
     );
   background-repeat: no-repeat;
   background-size: 118% 100%, 124% 104%, 116% 96%;
-  filter: blur(6px);
+  filter: blur(4px);
   opacity: .43;
   animation:
     safeMapMistUpperRight
@@ -7010,7 +7018,7 @@ body[data-active-view="map"] .topbar::before {
     );
   background-repeat: no-repeat;
   background-size: 116% 100%, 124% 104%, 112% 94%;
-  filter: blur(6px);
+  filter: blur(4px);
 }
 
 .map-ambient-mist-one {
@@ -7093,161 +7101,165 @@ body[data-active-view="map"] .topbar::before {
 }
 
 @keyframes safeMapMistUpperLeft {
-  0% {
-    transform:
-      translate3d(-3%, 7%, 0)
-      scale(.92, .80);
-    background-position:
-      0% 66%,
-      12% 54%,
-      28% 44%;
-    opacity: .18;
-  }
-
-  48% {
-    transform:
-      translate3d(1%, -2%, 0)
-      scale(1.00, .94);
-    background-position:
-      24% 54%,
-      40% 43%,
-      55% 35%;
-    opacity: .50;
-  }
-
+  0%,
   100% {
     transform:
-      translate3d(6%, -11%, 0)
-      scale(1.08, 1.06);
-    background-position:
-      48% 42%,
-      66% 31%,
-      82% 25%;
-    opacity: .16;
+      translate3d(-2%, 3%, 0)
+      scale(.98, .94);
+    opacity: .30;
   }
-}
 
-@keyframes safeMapMistUpperRight {
-  0% {
+  25% {
     transform:
-      translate3d(4%, 7%, 0)
-      scale(.93, .80);
-    background-position:
-      100% 66%,
-      88% 54%,
-      72% 45%;
-    opacity: .17;
+      translate3d(1%, -2%, 0)
+      scale(1.01, .98);
+    opacity: .42;
   }
 
   50% {
     transform:
-      translate3d(0, -2%, 0)
-      scale(1.00, .94);
-    background-position:
-      78% 53%,
-      61% 42%,
-      45% 35%;
-    opacity: .47;
+      translate3d(4%, -6%, 0)
+      scale(1.04, 1.02);
+    opacity: .48;
   }
 
+  75% {
+    transform:
+      translate3d(1%, -1%, 0)
+      scale(1.01, .98);
+    opacity: .39;
+  }
+}
+
+@keyframes safeMapMistUpperRight {
+  0%,
   100% {
     transform:
-      translate3d(-6%, -11%, 0)
-      scale(1.08, 1.05);
-    background-position:
-      54% 40%,
-      35% 30%,
-      18% 24%;
-    opacity: .15;
+      translate3d(2%, 3%, 0)
+      scale(.98, .94);
+    opacity: .28;
+  }
+
+  25% {
+    transform:
+      translate3d(-1%, -2%, 0)
+      scale(1.01, .98);
+    opacity: .39;
+  }
+
+  50% {
+    transform:
+      translate3d(-4%, -6%, 0)
+      scale(1.04, 1.02);
+    opacity: .45;
+  }
+
+  75% {
+    transform:
+      translate3d(-1%, -1%, 0)
+      scale(1.01, .98);
+    opacity: .37;
   }
 }
 
 @keyframes safeMapMistMidLeft {
-  0% {
+  0%,
+  100% {
     transform:
-      translate3d(-4%, 8%, 0)
-      scale(.92, .78);
-    background-position:
-      0% 68%,
-      14% 56%,
-      32% 46%;
-    opacity: .17;
+      translate3d(-2%, 4%, 0)
+      scale(.98, .93);
+    opacity: .28;
   }
 
-  46% {
+  25% {
     transform:
       translate3d(1%, -1%, 0)
-      scale(1.00, .93);
-    background-position:
-      25% 55%,
-      43% 44%,
-      58% 35%;
+      scale(1.01, .98);
+    opacity: .39;
+  }
+
+  50% {
+    transform:
+      translate3d(5%, -5%, 0)
+      scale(1.05, 1.02);
     opacity: .46;
   }
 
-  100% {
+  75% {
     transform:
-      translate3d(7%, -10%, 0)
-      scale(1.09, 1.05);
-    background-position:
-      52% 42%,
-      69% 32%,
-      85% 25%;
-    opacity: .14;
+      translate3d(1%, 0, 0)
+      scale(1.01, .98);
+    opacity: .37;
   }
 }
 
 @keyframes safeMapMistLowerLeft {
-  0% {
+  0%,
+  100% {
     transform:
-      translate3d(-3%, 8%, 0)
-      scale(.93, .79);
-    background-position:
-      0% 69%,
-      13% 57%,
-      30% 47%;
-    opacity: .15;
+      translate3d(-2%, 4%, 0)
+      scale(.98, .94);
+    opacity: .25;
   }
 
-  52% {
+  25% {
     transform:
-      translate3d(1%, -2%, 0)
-      scale(1.00, .94);
-    background-position:
-      26% 56%,
-      44% 45%,
-      60% 36%;
+      translate3d(1%, -1%, 0)
+      scale(1.01, .98);
+    opacity: .35;
+  }
+
+  50% {
+    transform:
+      translate3d(4%, -5%, 0)
+      scale(1.04, 1.02);
     opacity: .42;
   }
 
-  100% {
+  75% {
     transform:
-      translate3d(6%, -9%, 0)
-      scale(1.08, 1.04);
-    background-position:
-      50% 43%,
-      68% 33%,
-      84% 26%;
-    opacity: .13;
+      translate3d(1%, 0, 0)
+      scale(1.01, .98);
+    opacity: .34;
   }
 }
 
-/* Keep the private campaign's fog moving under either reduced-motion setting.
-   Explicit animations override the global system and in-app motion rules. */
+/* Endless closed-loop fog drift.
+   The 0% and 100% states are identical, so the loop has no reset jump. */
 body .map-ambient-mist-one {
-  animation: safeMapMistMidLeft 11.5s ease-in-out infinite !important;
+  animation:
+    safeMapMistMidLeft
+    18s
+    linear
+    infinite
+    !important;
 }
 
 body .map-ambient-mist-two {
-  animation: safeMapMistLowerLeft 13s ease-in-out infinite !important;
+  animation:
+    safeMapMistLowerLeft
+    22s
+    linear
+    infinite
+    !important;
 }
 
 body .map-ambient-layer::before {
-  animation: safeMapMistUpperLeft 9.5s ease-in-out infinite !important;
+  animation:
+    safeMapMistUpperLeft
+    16s
+    linear
+    infinite
+    !important;
 }
 
 body .map-ambient-layer::after {
-  animation: safeMapMistUpperRight 10.5s ease-in-out infinite !important;
+  animation:
+    safeMapMistUpperRight
+    20s
+    linear
+    infinite
+    !important;
 }
 
 body.reduce-motion .map-ambient-glow {
