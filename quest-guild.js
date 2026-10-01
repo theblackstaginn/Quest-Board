@@ -1224,12 +1224,28 @@
   }
 
   function ravenMemberByUserId(userId) {
+    const target =
+      String(userId || "");
+
     return (
       guildRavenRecipientMembers()
         .find(
           member =>
-            String(member.user_id) ===
-            String(userId)
+            String(
+              member.user_id
+            ) ===
+              target
+            || (
+              Array.isArray(
+                member.user_ids
+              )
+              && member.user_ids
+                .some(
+                  id =>
+                    String(id) ===
+                    target
+                )
+            )
         ) ||
       null
     );
@@ -1288,8 +1304,9 @@
 
   function guildRavenCard(raven) {
     const outgoing =
-      raven.sender_user_id ===
-      supabaseUser?.id;
+      guildIsLogicalUser(
+        raven.sender_user_id
+      );
 
     const otherUserId =
       outgoing
