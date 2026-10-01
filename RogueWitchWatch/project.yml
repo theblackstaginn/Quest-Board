@@ -28,7 +28,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.blackstag.questboard.roguewitch
         PRODUCT_NAME: "Rogue Witch"
-        SWIFT_VERSION: "6.0"
+        SWIFT_VERSION: "5.0"
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: 4
@@ -58,7 +58,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.blackstag.questboard.roguewitch.widget
         PRODUCT_NAME: "Rogue Witch Widget"
-        SWIFT_VERSION: "6.0"
+        SWIFT_VERSION: "5.0"
         SKIP_INSTALL: YES
         APPLICATION_EXTENSION_API_ONLY: YES
         CODE_SIGN_STYLE: Automatic
