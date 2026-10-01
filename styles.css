@@ -6853,10 +6853,9 @@ body[data-active-view="map"] .topbar::before {
   opacity: .34;
   animation:
     safeMapMistThree
-    20s
-    ease-in-out
-    infinite
-    alternate;
+    11s
+    linear
+    infinite;
 }
 
 .map-ambient-glow {
@@ -6931,10 +6930,9 @@ body[data-active-view="map"] .topbar::before {
   width: 104%;
   animation:
     safeMapMistOne
-    13s
-    ease-in-out
-    infinite
-    alternate;
+    8.5s
+    linear
+    infinite;
 }
 
 .map-ambient-mist-two {
@@ -6944,10 +6942,9 @@ body[data-active-view="map"] .topbar::before {
   opacity: .48;
   animation:
     safeMapMistTwo
-    17s
-    ease-in-out
-    infinite
-    alternate;
+    10.5s
+    linear
+    infinite;
 }
 
 @keyframes safeMapGuildGlow {
@@ -6984,48 +6981,52 @@ body[data-active-view="map"] .topbar::before {
 @keyframes safeMapMistOne {
   from {
     transform:
-      translateX(0)
-      scaleX(.90)
-      scaleY(.94);
+      translateX(-12%)
+      scaleX(.96)
+      scaleY(.96);
   }
 
   to {
     transform:
-      translateX(132%)
-      scaleX(1.18)
-      scaleY(1.08);
+      translateX(142%)
+      scaleX(1.08)
+      scaleY(1.04);
   }
 }
 
 @keyframes safeMapMistTwo {
   from {
     transform:
-      translateX(0)
-      scaleX(1.12)
-      scaleY(.92);
+      translateX(12%)
+      scaleX(1.06)
+      scaleY(.96);
   }
 
   to {
     transform:
-      translateX(-116%)
-      scaleX(.92)
-      scaleY(1.10);
+      translateX(-132%)
+      scaleX(.96)
+      scaleY(1.04);
   }
 }
 
 @keyframes safeMapMistThree {
   from {
     transform:
-      translateX(-8%)
-      scaleX(.94);
-    opacity: .20;
+      translateX(-22%)
+      scaleX(.98);
+    opacity: .28;
+  }
+
+  50% {
+    opacity: .42;
   }
 
   to {
     transform:
-      translateX(32%)
-      scaleX(1.10);
-    opacity: .42;
+      translateX(88%)
+      scaleX(1.06);
+    opacity: .28;
   }
 }
 
