@@ -73,6 +73,31 @@
       .replaceAll("'", "&#039;");
   }
 
+  function logicalGuildUserIds() {
+    if (
+      typeof getLogicalUserIds ===
+      "function"
+    ) {
+      return getLogicalUserIds();
+    }
+
+    return supabaseUser?.id
+      ? [supabaseUser.id]
+      : [];
+  }
+
+  function guildIsLogicalUser(userId) {
+    const value =
+      String(userId || "");
+
+    return logicalGuildUserIds()
+      .some(
+        id =>
+          String(id) ===
+          value
+      );
+  }
+
   function bytesToHex(bytes) {
     return Array.from(bytes)
       .map(value => value.toString(16).padStart(2, "0"))
@@ -476,7 +501,10 @@
       .select(
         "id,request_type,npc_id,request_text,status,response_text,response_payload,created_at,answered_at"
       )
-      .eq("user_id", supabaseUser.id)
+      .in(
+        "user_id",
+        logicalGuildUserIds()
+      )
       .order("created_at", { ascending: false })
       .limit(12);
 
@@ -511,9 +539,9 @@
         await supabaseClient
           .from("party_members")
           .select("party_id,joined_at")
-          .eq(
+          .in(
             "user_id",
-            supabaseUser.id
+            logicalGuildUserIds()
           )
           .order(
             "joined_at",
@@ -596,25 +624,81 @@
       ])
     );
 
-    guildFellowshipMembers = userIds.map(userId => {
+    const collapsedMembers =
+      new Map();
+
+    userIds.forEach(userId => {
       const profile =
-        profileByUserId.get(String(userId)) ||
+        profileByUserId.get(
+          String(userId)
+        ) ||
         {};
 
-      return {
-        user_id: userId,
-        profile_id:
-          profile.profile_id ||
-          null,
-        display_name:
-          profile.display_name ||
-          profile.profile_id ||
-          "Adventurer",
-        class_name:
-          profile.class_name ||
-          ""
-      };
+      const profileId =
+        profile.profile_id ||
+        null;
+
+      const key =
+        profileId ||
+        String(userId);
+
+      if (
+        !collapsedMembers.has(
+          key
+        )
+      ) {
+        collapsedMembers.set(
+          key,
+          {
+            user_id:
+              userId,
+            user_ids:
+              [userId],
+            profile_id:
+              profileId,
+            display_name:
+              profile.display_name ||
+              profileId ||
+              "Adventurer",
+            class_name:
+              profile.class_name ||
+              ""
+          }
+        );
+
+        return;
+      }
+
+      const existing =
+        collapsedMembers.get(
+          key
+        );
+
+      if (
+        !existing.user_ids.includes(
+          userId
+        )
+      ) {
+        existing.user_ids.push(
+          userId
+        );
+      }
+
+      if (
+        guildIsLogicalUser(userId)
+        && !guildIsLogicalUser(
+          existing.user_id
+        )
+      ) {
+        existing.user_id =
+          userId;
+      }
     });
+
+    guildFellowshipMembers =
+      Array.from(
+        collapsedMembers.values()
+      );
 
     return guildFellowshipMembers;
   }
@@ -667,10 +751,13 @@
           "id,party_id,sender_user_id,recipient_user_id,sender_profile_id,recipient_profile_id,message,source,created_at,read_at"
         )
         .or(
-          "sender_user_id.eq." +
-          supabaseUser.id +
-          ",recipient_user_id.eq." +
-          supabaseUser.id
+          "sender_user_id.in.(" +
+          logicalGuildUserIds()
+            .join(",") +
+          "),recipient_user_id.in.(" +
+          logicalGuildUserIds()
+            .join(",") +
+          ")"
         )
         .order(
           "created_at",
@@ -739,8 +826,9 @@
     const unreadIds =
       guildRavens
         .filter(item =>
-          item.recipient_user_id ===
-            supabaseUser.id &&
+          guildIsLogicalUser(
+            item.recipient_user_id
+          ) &&
           !item.read_at
         )
         .map(item => item.id);
@@ -753,9 +841,9 @@
             read_at:
               new Date().toISOString()
           })
-          .eq(
+          .in(
             "recipient_user_id",
-            supabaseUser.id
+            logicalGuildUserIds()
           )
           .in(
             "id",
@@ -781,7 +869,11 @@
     const { data, error } = await supabaseClient
       .from("guild_artifacts")
       .select(
-        "id,request_id,profile_id,party_id,artifact_type,title,payload,status,created_at,updated_at,accepted_at,completed_at"
+        "id,request_id,user_id,profile_id,party_id,artifact_type,title,payload,status,created_at,updated_at,accepted_at,completed_at"
+      )
+      .in(
+        "user_id",
+        logicalGuildUserIds()
       )
       .order("created_at", { ascending: false })
       .limit(40);
@@ -935,7 +1027,10 @@
       .from("guild_artifacts")
       .update(patch)
       .eq("id", id)
-      .eq("user_id", supabaseUser.id);
+      .in(
+        "user_id",
+        logicalGuildUserIds()
+      );
 
     if (error) {
       throw error;
@@ -1022,7 +1117,10 @@
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
-      .eq("user_id", supabaseUser.id);
+      .in(
+        "user_id",
+        logicalGuildUserIds()
+      );
 
     if (error) {
       throw error;
@@ -1046,8 +1144,17 @@
     guildFellowshipMembers
       .filter(member =>
         member?.user_id &&
-        member.user_id !==
-          supabaseUser?.id
+        !(
+          Array.isArray(
+            member.user_ids
+          )
+            ? member.user_ids.some(
+                guildIsLogicalUser
+              )
+            : guildIsLogicalUser(
+                member.user_id
+              )
+        )
       )
       .forEach(member => {
         membersByUserId.set(
@@ -1058,8 +1165,9 @@
 
     guildRavens.forEach(raven => {
       const outgoing =
-        raven.sender_user_id ===
-        supabaseUser?.id;
+        guildIsLogicalUser(
+          raven.sender_user_id
+        );
 
       const otherUserId =
         outgoing
@@ -1068,8 +1176,9 @@
 
       if (
         !otherUserId ||
-        otherUserId ===
-          supabaseUser?.id
+        guildIsLogicalUser(
+          otherUserId
+        )
       ) {
         return;
       }
@@ -1970,7 +2079,10 @@
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
-      .eq("user_id", supabaseUser.id);
+      .in(
+        "user_id",
+        logicalGuildUserIds()
+      );
 
     if (error) {
       console.warn(
