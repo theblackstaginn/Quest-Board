@@ -6600,3 +6600,97 @@ body[data-active-view="map"] .map-view::before {
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   JESS PARTY CHARACTER BACKGROUND
+========================================================= */
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-panel {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 7, 11, .58) 0%,
+      rgba(8, 7, 11, .70) 36%,
+      rgba(8, 7, 11, .84) 100%
+    ),
+    url("jess-party-character-bg.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  border-color: rgba(156, 104, 201, .38);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, .82),
+    inset 0 0 70px rgba(57, 28, 83, .18);
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 34%,
+      rgba(126, 72, 164, .12),
+      transparent 38%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, .28),
+      transparent 18%,
+      transparent 82%,
+      rgba(0, 0, 0, .28)
+    );
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-header h2,
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-description {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, .95),
+    0 0 18px rgba(87, 42, 121, .28);
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-class {
+  color: #d8b6ff;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, .95),
+    0 0 10px rgba(143, 78, 194, .34);
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-character-dialog-art-shell,
+.party-character-dialog[data-profile-id="jess"]
+  .party-profile-stat,
+.party-character-dialog[data-profile-id="jess"]
+  .party-profile-record {
+  background:
+    linear-gradient(
+      rgba(7, 5, 10, .64),
+      rgba(7, 5, 10, .76)
+    );
+  border-color: rgba(156, 104, 201, .28);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .party-profile-record-grid > div {
+  background: rgba(8, 5, 12, .56);
+  border-color: rgba(156, 104, 201, .18);
+}
+
+.party-character-dialog[data-profile-id="jess"]
+  .close-button {
+  box-shadow:
+    0 0 0 1px rgba(160, 106, 205, .22),
+    0 0 16px rgba(112, 52, 160, .18);
+}
