@@ -748,6 +748,8 @@ let partyRefreshTimer = null;
 let deviceSyncSaveTimer = null;
 let deviceSyncPollTimer = null;
 let deviceSyncLastUpdatedAt = null;
+let deviceSyncUserIds = [];
+let deviceSyncIdentityPollTick = 0;
 let applyingDeviceSyncRemote = false;
 
 let giftRecipient = null;
@@ -927,6 +929,121 @@ function setDeviceSyncId(syncId) {
       getDeviceSyncIdKey()
     );
   }
+}
+
+
+function getLogicalUserIds() {
+  return Array.from(
+    new Set(
+      [
+        supabaseUser?.id,
+        ...deviceSyncUserIds
+      ].filter(Boolean)
+    )
+  );
+}
+
+
+function isLogicalUserId(userId) {
+  return getLogicalUserIds()
+    .includes(
+      String(userId || "")
+    );
+}
+
+
+function getPrimarySyncedUserId() {
+  return (
+    deviceSyncUserIds[0]
+    || supabaseUser?.id
+    || null
+  );
+}
+
+
+function isPrimarySyncedIdentity() {
+  const primary =
+    getPrimarySyncedUserId();
+
+  return Boolean(
+    !primary
+    || !supabaseUser
+    || primary === supabaseUser.id
+  );
+}
+
+
+async function refreshDeviceSyncIdentityContext({
+  syncParty = true
+} = {}) {
+  const syncId =
+    getDeviceSyncId();
+
+  if (
+    !syncId
+    || !supabaseReady
+    || !supabaseUser
+  ) {
+    deviceSyncUserIds =
+      supabaseUser?.id
+        ? [supabaseUser.id]
+        : [];
+
+    return deviceSyncUserIds;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .rpc(
+        "get_synced_user_ids",
+        {
+          p_sync_id:
+            syncId
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  deviceSyncUserIds =
+    Array.isArray(data)
+      ? data.filter(Boolean)
+      : [];
+
+  if (
+    supabaseUser?.id
+    && !deviceSyncUserIds.includes(
+      supabaseUser.id
+    )
+  ) {
+    deviceSyncUserIds.push(
+      supabaseUser.id
+    );
+  }
+
+  if (syncParty) {
+    const {
+      error: partySyncError
+    } =
+      await supabaseClient
+        .rpc(
+          "join_synced_party",
+          {
+            p_sync_id:
+              syncId
+          }
+        );
+
+    if (partySyncError) {
+      throw partySyncError;
+    }
+  }
+
+  return deviceSyncUserIds;
 }
 
 
@@ -1442,9 +1559,9 @@ async function restoreOrSeedCloudProgress(
       .select(
         "profile_id, state, settings, updated_at"
       )
-      .eq(
+      .in(
         "user_id",
-        supabaseUser.id
+        getLogicalUserIds()
       )
       .maybeSingle();
 
@@ -1820,9 +1937,19 @@ async function generateDeviceSyncPairCode() {
         syncId
       );
 
+      await refreshDeviceSyncIdentityContext();
+
       await pullDeviceSync({
         force: true
       });
+
+      await loadCurrentParty();
+
+      window.dispatchEvent(
+        new Event(
+          "questboard:guild-refresh"
+        )
+      );
     }
 
     else {
@@ -1939,6 +2066,8 @@ async function joinDeviceSync() {
       data.sync_id
     );
 
+    await refreshDeviceSyncIdentityContext();
+
     applyingDeviceSyncRemote =
       true;
 
@@ -1986,12 +2115,20 @@ async function joinDeviceSync() {
         "";
     }
 
+    await loadCurrentParty();
+
     renderDeviceSyncStatus();
 
     startDeviceSyncPolling();
 
+    window.dispatchEvent(
+      new Event(
+        "questboard:guild-refresh"
+      )
+    );
+
     showToast(
-      "Live device sync connected."
+      "Live device sync connected across Quest Board."
     );
   }
 
@@ -2046,15 +2183,30 @@ async function initializeDeviceSync() {
   if (
     !getDeviceSyncId()
   ) {
+    deviceSyncUserIds =
+      supabaseUser?.id
+        ? [supabaseUser.id]
+        : [];
+
     return;
   }
 
   try {
+    await refreshDeviceSyncIdentityContext();
+
     await pullDeviceSync({
       force: true
     });
 
+    await loadCurrentParty();
+
     startDeviceSyncPolling();
+
+    window.dispatchEvent(
+      new Event(
+        "questboard:guild-refresh"
+      )
+    );
   }
 
   catch (error) {
@@ -2079,7 +2231,22 @@ document.addEventListener(
       === "visible"
       && getDeviceSyncId()
     ) {
-      pullDeviceSync()
+      Promise.all([
+        pullDeviceSync(),
+        refreshDeviceSyncIdentityContext()
+      ])
+        .then(
+          () =>
+            loadCurrentParty()
+        )
+        .then(
+          () =>
+            window.dispatchEvent(
+              new Event(
+                "questboard:guild-refresh"
+              )
+            )
+        )
         .catch(error =>
           console.error(
             "Device sync visibility refresh failed:",
@@ -6543,37 +6710,115 @@ async function fetchPartyMembers() {
     throw profileError;
   }
 
-  return (
-    memberships.map(
-      membership => {
-        const profile =
-          profiles.find(
-            item =>
-              item.user_id
-              === membership.user_id
-          );
+  const profileByUserId =
+    new Map(
+      (profiles || []).map(
+        profile => [
+          String(profile.user_id),
+          profile
+        ]
+      )
+    );
 
-        return {
+  const collapsed =
+    new Map();
+
+  for (
+    const membership
+    of memberships
+  ) {
+    const profile =
+      profileByUserId.get(
+        String(
+          membership.user_id
+        )
+      )
+      || {};
+
+    const profileId =
+      normalizeProfileId(
+        profile.profile_id
+      );
+
+    const key =
+      profileId
+      || String(
+        membership.user_id
+      );
+
+    if (!collapsed.has(key)) {
+      collapsed.set(
+        key,
+        {
           user_id:
             membership.user_id,
+
+          user_ids:
+            [
+              membership.user_id
+            ],
 
           joined_at:
             membership.joined_at,
 
           profile_id:
-            profile?.profile_id
-            || null,
+            profileId,
 
           display_name:
-            profile?.display_name
-            || "Adventurer",
+            profile.display_name
+            || (
+              profileId
+                ? getCharacterConfig(
+                    profileId
+                  ).defaultName
+                : "Adventurer"
+            ),
 
           class_name:
-            profile?.class_name
-            || "Unknown Class"
-        };
-      }
-    )
+            profile.class_name
+            || (
+              profileId
+                ? getCharacterConfig(
+                    profileId
+                  ).className
+                : "Unknown Class"
+            )
+        }
+      );
+
+      continue;
+    }
+
+    const existing =
+      collapsed.get(
+        key
+      );
+
+    if (
+      !existing.user_ids.includes(
+        membership.user_id
+      )
+    ) {
+      existing.user_ids.push(
+        membership.user_id
+      );
+    }
+
+    if (
+      isLogicalUserId(
+        membership.user_id
+      )
+      && !isLogicalUserId(
+        existing.user_id
+      )
+    ) {
+      existing.user_id =
+        membership.user_id;
+    }
+  }
+
+  return Array.from(
+    collapsed.values()
   );
 }
 
@@ -6619,64 +6864,172 @@ async function fetchPartyActivity() {
 // =========================================================
 
 function getPartyMemberProgress(member, activity) {
-  const isCurrentPlayer = Boolean(
-    supabaseUser && member.user_id === supabaseUser.id
-  );
+  const memberUserIds =
+    Array.isArray(
+      member.user_ids
+    )
+      ? member.user_ids
+      : [
+          member.user_id
+        ];
+
+  const isCurrentPlayer =
+    Boolean(
+      member.profile_id ===
+        activeProfileId
+      && memberUserIds.some(
+        isLogicalUserId
+      )
+    );
 
   if (isCurrentPlayer) {
-    const state = normalizeWeek();
-    const strengthXp = Math.max(0, Number(state.xp.strength) || 0);
-    const enduranceXp = Math.max(0, Number(state.xp.endurance) || 0);
-    const restorationXp = Math.max(0, Number(state.xp.restoration) || 0);
+    const state =
+      normalizeWeek();
+
+    const strengthXp =
+      Math.max(
+        0,
+        Number(
+          state.xp.strength
+        ) || 0
+      );
+
+    const enduranceXp =
+      Math.max(
+        0,
+        Number(
+          state.xp.endurance
+        ) || 0
+      );
+
+    const restorationXp =
+      Math.max(
+        0,
+        Number(
+          state.xp.restoration
+        ) || 0
+      );
 
     return {
       strengthXp,
       enduranceXp,
       restorationXp,
-      weeklyQuests: state.weeklyCompleted.length,
-      totalQuests: state.history.length,
-      totalXp: strengthXp + enduranceXp + restorationXp
+      weeklyQuests:
+        state.weeklyCompleted.length,
+      totalQuests:
+        state.history.length,
+      totalXp:
+        strengthXp
+        + enduranceXp
+        + restorationXp
     };
   }
 
-  const memberActivity = (activity || []).filter(
-    item => item.user_id === member.user_id
-  );
+  const memberActivity =
+    (activity || [])
+      .filter(
+        item =>
+          memberUserIds.includes(
+            item.user_id
+          )
+          || (
+            member.profile_id
+            && item.profile_id
+              === member.profile_id
+          )
+      );
 
   let strengthXp = 0;
   let enduranceXp = 0;
   let restorationXp = 0;
 
-  for (const item of memberActivity) {
-    if (item.quest_id === "boss") {
-      strengthXp += BOSS_STRENGTH_XP;
-      enduranceXp += BOSS_ENDURANCE_XP;
+  for (
+    const item
+    of memberActivity
+  ) {
+    if (
+      item.quest_id
+      === "boss"
+    ) {
+      strengthXp +=
+        BOSS_STRENGTH_XP;
+
+      enduranceXp +=
+        BOSS_ENDURANCE_XP;
+
       continue;
     }
 
-    const quest = findQuest(item.quest_id);
-    const xp = Math.max(0, Number(item.xp) || 0);
+    const quest =
+      findQuest(
+        item.quest_id
+      );
 
-    if (quest?.xpType === "strength") strengthXp += xp;
-    else if (quest?.xpType === "endurance") enduranceXp += xp;
-    else if (quest?.xpType === "restoration") restorationXp += xp;
+    const xp =
+      Math.max(
+        0,
+        Number(
+          item.xp
+        ) || 0
+      );
+
+    if (
+      quest?.xpType
+      === "strength"
+    ) {
+      strengthXp += xp;
+    }
+
+    else if (
+      quest?.xpType
+      === "endurance"
+    ) {
+      enduranceXp += xp;
+    }
+
+    else if (
+      quest?.xpType
+      === "restoration"
+    ) {
+      restorationXp += xp;
+    }
   }
 
-  const weeklyQuests = memberActivity.filter(
-    item => item.week_key === getWeekKey() && item.quest_id !== "boss"
-  ).length;
+  const weeklyQuests =
+    memberActivity
+      .filter(
+        item =>
+          item.week_key
+            === getWeekKey()
+          && item.quest_id
+            !== "boss"
+      )
+      .length;
 
-  const totalXp = memberActivity.reduce(
-    (total, item) => total + Math.max(0, Number(item.xp) || 0),
-    0
-  );
+  const totalXp =
+    memberActivity
+      .reduce(
+        (
+          total,
+          item
+        ) =>
+          total
+          + Math.max(
+            0,
+            Number(
+              item.xp
+            ) || 0
+          ),
+        0
+      );
 
   return {
     strengthXp,
     enduranceXp,
     restorationXp,
     weeklyQuests,
-    totalQuests: memberActivity.length,
+    totalQuests:
+      memberActivity.length,
     totalXp
   };
 }
@@ -6697,9 +7050,23 @@ function renderPartyMembers(members, activity) {
   const currentWeek = getWeekKey();
 
   container.innerHTML = members.map(member => {
-    const isCurrentPlayer = Boolean(
-      supabaseUser && member.user_id === supabaseUser.id
-    );
+    const memberUserIds =
+      Array.isArray(
+        member.user_ids
+      )
+        ? member.user_ids
+        : [
+            member.user_id
+          ];
+
+    const isCurrentPlayer =
+      Boolean(
+        member.profile_id ===
+          activeProfileId
+        && memberUserIds.some(
+          isLogicalUserId
+        )
+      );
 
     const memberProfileId = normalizeProfileId(member.profile_id)
       || (isCurrentPlayer ? activeProfileId : null);
@@ -6727,7 +7094,12 @@ function renderPartyMembers(members, activity) {
     });
 
     const weeklyGold = activity
-      .filter(item => item.user_id === member.user_id && item.week_key === currentWeek)
+      .filter(item =>
+        memberUserIds.includes(
+          item.user_id
+        )
+        && item.week_key === currentWeek
+      )
       .reduce((total, item) => total + (Number(item.gold) || 0), 0);
 
     const portraitMarkup = character?.card
@@ -6852,7 +7224,9 @@ function openGiftDialog(
   if (
     !currentParty
     || !supabaseUser
-    || userId === supabaseUser.id
+    || isLogicalUserId(
+      userId
+    )
   ) {
     return;
   }
@@ -7168,9 +7542,9 @@ async function checkIncomingGifts() {
         .select(
           "id, sender_display_name, currency, amount, created_at"
         )
-        .eq(
+        .in(
           "recipient_user_id",
-          supabaseUser.id
+          getLogicalUserIds()
         )
         .is(
           "claimed_at",
@@ -7281,9 +7655,9 @@ async function checkIncomingGifts() {
           "id",
           giftIds
         )
-        .eq(
+        .in(
           "recipient_user_id",
-          supabaseUser.id
+          getLogicalUserIds()
         )
         .is(
           "claimed_at",
@@ -7415,17 +7789,19 @@ async function fetchPartyTreasureInventory() {
     error
   } =
     await supabaseClient
-      .from("party_treasure_inventory")
+      .from(
+        "party_treasure_inventory"
+      )
       .select(
-        "item_id, quantity"
+        "user_id, item_id, quantity"
       )
       .eq(
         "party_id",
         currentParty.id
       )
-      .eq(
+      .in(
         "user_id",
-        supabaseUser.id
+        getLogicalUserIds()
       )
       .gt(
         "quantity",
@@ -7436,7 +7812,44 @@ async function fetchPartyTreasureInventory() {
     throw error;
   }
 
-  return data || [];
+  const totals =
+    new Map();
+
+  for (
+    const row
+    of data || []
+  ) {
+    totals.set(
+      row.item_id,
+      (
+        totals.get(
+          row.item_id
+        )
+        || 0
+      )
+      + (
+        Number(
+          row.quantity
+        )
+        || 0
+      )
+    );
+  }
+
+  return Array.from(
+    totals.entries()
+  )
+    .map(
+      (
+        [
+          item_id,
+          quantity
+        ]
+      ) => ({
+        item_id,
+        quantity
+      })
+    );
 }
 
 
@@ -7637,6 +8050,13 @@ async function ensureWeeklyBossTreasureDrop(
   if (
     !currentParty
     || !supabaseUser
+  ) {
+    return null;
+  }
+
+  if (
+    getDeviceSyncId()
+    && !isPrimarySyncedIdentity()
   ) {
     return null;
   }
