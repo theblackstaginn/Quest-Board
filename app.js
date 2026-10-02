@@ -9776,7 +9776,7 @@ function createWeatherParticle(kind) {
 
   else if (kind === "leaf") {
     duration =
-      9 + Math.random() * 7;
+      17 + Math.random() * 9;
     size =
       8 + Math.random() * 7;
     opacity =
