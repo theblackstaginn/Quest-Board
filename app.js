@@ -2420,6 +2420,38 @@ function findQuest(id) {
 // 16. SUPABASE INITIALIZATION
 // =========================================================
 
+if (supabaseClient) {
+  supabaseClient.auth
+    .onAuthStateChange(
+      (
+        event,
+        session
+      ) => {
+        if (
+          event
+          !== "PASSWORD_RECOVERY"
+        ) {
+          return;
+        }
+
+        if (session?.user) {
+          supabaseUser =
+            session.user;
+
+          supabaseReady =
+            true;
+        }
+
+        queueMicrotask(
+          () => {
+            renderAccountStatus();
+            openPasswordRecoveryDialog();
+          }
+        );
+      }
+    );
+}
+
 async function initializeSupabase() {
   setPartySyncStatus(
     "Connecting to the guild..."
@@ -5769,6 +5801,9 @@ function renderAccountStatus() {
   const signOutButton =
     $("#signOutAccountButton");
 
+  const signedInActions =
+    $("#signedInAccountActions");
+
   const syncActions =
     $("#accountSyncActions");
 
@@ -5788,6 +5823,9 @@ function renderAccountStatus() {
       "Cloud account service is unavailable.";
     fields.hidden = false;
     signOutButton.hidden = true;
+    if (signedInActions) {
+      signedInActions.hidden = true;
+    }
     if (syncActions) {
       syncActions.hidden = true;
     }
@@ -5799,6 +5837,9 @@ function renderAccountStatus() {
       "This save is cloud-backed, but still tied to this device. Protect it with an email and password so it can be restored after reinstalling or switching devices.";
     fields.hidden = false;
     signOutButton.hidden = true;
+    if (signedInActions) {
+      signedInActions.hidden = true;
+    }
     if (syncActions) {
       syncActions.hidden = true;
     }
@@ -5809,6 +5850,9 @@ function renderAccountStatus() {
     `Protected as ${supabaseUser.email || "signed-in adventurer"}. Your save can be restored on another device.`;
   fields.hidden = true;
   signOutButton.hidden = false;
+  if (signedInActions) {
+    signedInActions.hidden = false;
+  }
   if (syncActions) {
     syncActions.hidden = false;
   }
@@ -5855,6 +5899,180 @@ function validateAccountCredentials(
 
   return true;
 }
+
+function openPasswordRecoveryDialog() {
+  const dialog =
+    $("#passwordRecoveryDialog");
+
+  if (!dialog) {
+    return;
+  }
+
+  $("#newPasswordInput").value =
+    "";
+
+  $("#confirmNewPasswordInput").value =
+    "";
+
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+
+  setTimeout(
+    () =>
+      $("#newPasswordInput")
+        ?.focus(),
+    40
+  );
+}
+
+
+async function requestPasswordReset() {
+  if (!supabaseClient) {
+    showToast(
+      "Cloud account service is unavailable."
+    );
+    return;
+  }
+
+  const email =
+    $("#accountEmailInput")
+      ?.value
+      .trim()
+      .toLowerCase()
+    || "";
+
+  if (
+    !email
+    || !email.includes("@")
+  ) {
+    showToast(
+      "Enter your Quest Board email first."
+    );
+    return;
+  }
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient.auth
+        .resetPasswordForEmail(
+          email
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    showToast(
+      "Password reset email sent. Open it on this device."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not send password reset email:",
+      error
+    );
+
+    showToast(
+      "Could not send the reset email. Try again in a moment."
+    );
+  }
+}
+
+
+async function saveNewAccountPassword() {
+  if (!supabaseClient) {
+    showToast(
+      "Cloud account service is unavailable."
+    );
+    return;
+  }
+
+  const password =
+    $("#newPasswordInput")
+      ?.value
+    || "";
+
+  const confirmation =
+    $("#confirmNewPasswordInput")
+      ?.value
+    || "";
+
+  if (password.length < 8) {
+    showToast(
+      "Use a password with at least 8 characters."
+    );
+    return;
+  }
+
+  if (
+    password
+    !== confirmation
+  ) {
+    showToast(
+      "Those passwords do not match."
+    );
+    return;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .updateUser({
+          password
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.user) {
+      supabaseUser =
+        data.user;
+
+      supabaseReady =
+        true;
+    }
+
+    $("#passwordRecoveryDialog")
+      ?.close();
+
+    renderAccountStatus();
+
+    if (
+      window.location.hash
+    ) {
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+        + window.location.search
+      );
+    }
+
+    showToast(
+      "Quest Board password updated."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not update Quest Board password:",
+      error
+    );
+
+    showToast(
+      "Could not update the password. Open a fresh reset link and try again."
+    );
+  }
+}
+
 
 async function finishPermanentAccountLogin(
   session
@@ -9115,6 +9333,24 @@ $("#signInAccountButton")
   ?.addEventListener(
     "click",
     signInPermanentAccount
+  );
+
+$("#forgotPasswordButton")
+  ?.addEventListener(
+    "click",
+    requestPasswordReset
+  );
+
+$("#changePasswordButton")
+  ?.addEventListener(
+    "click",
+    openPasswordRecoveryDialog
+  );
+
+$("#saveNewPasswordButton")
+  ?.addEventListener(
+    "click",
+    saveNewAccountPassword
   );
 
 $("#signOutAccountButton")
