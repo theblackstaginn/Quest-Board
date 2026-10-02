@@ -7846,3 +7846,131 @@ body.reduce-motion .weather-atmosphere__particles {
   background: rgba(8, 5, 12, 0.12);
   border-color: rgba(156, 104, 201, 0.14);
 }
+
+/* =========================================================
+   APP-WIDE LIGHT GLASS PASS
+   Lower dark tint on translucent UI surfaces while keeping
+   artwork panels, modal backdrops, and progress tracks intact.
+========================================================= */
+
+.topbar::before {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 9, 7, 0.58),
+      rgba(10, 9, 7, 0.30) 70%,
+      rgba(10, 9, 7, 0)
+    );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.player-hud {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(35, 30, 22, 0.58),
+      rgba(17, 15, 12, 0.50)
+    );
+}
+
+.currency-purse,
+.summary-stat {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+body[data-active-view="party"] .party-section {
+  background: rgba(7, 5, 3, 0.20);
+}
+
+.campaign-panel,
+.daily-contracts-panel,
+.quest-chain-panel,
+.guild-hall-panel,
+.equipment-panel,
+.achievements-panel,
+.codex-panel,
+.fellowship-renown {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18, 22, 18, 0.46),
+      rgba(8, 11, 9, 0.34)
+    );
+}
+
+.daily-contract,
+.npc-card,
+.equipment-slot,
+.inventory-relic {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.quest-chain-step {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.npc-dialogue {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.achievement-card,
+.codex-entry {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.boss-combat-panel {
+  background: rgba(74, 20, 17, 0.10);
+}
+
+.relic-filter {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.relic-filter.active {
+  background: rgba(202, 153, 75, 0.12);
+}
+
+.relic-card {
+  background: rgba(4, 5, 4, 0.36);
+}
+
+.party-treasure-item {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.device-sync-code {
+  background: rgba(80, 59, 24, 0.07);
+}
+
+/* Keep the already-light Fellowship character glass consistent. */
+.party-character-dialog-panel {
+  background-image:
+    linear-gradient(
+      rgba(5, 6, 5, 0.035),
+      rgba(5, 6, 5, 0.09)
+    ),
+    url("mossy-stone.webp");
+}
+
+.party-profile-record-grid > div {
+  background: rgba(5, 6, 5, 0.07);
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-character-dialog-panel {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 7, 11, 0.07) 0%,
+      rgba(8, 7, 11, 0.11) 36%,
+      rgba(8, 7, 11, 0.18) 100%
+    ),
+    url("jess-party-character-bg.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-grid > div {
+  background: rgba(8, 5, 12, 0.07);
+}
