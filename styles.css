@@ -1588,6 +1588,27 @@ body[data-character-theme="amethyst"] .character-class-name {
   border: 0;
   background: transparent;
   box-shadow: none;
+  isolation: isolate;
+}
+
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: min(calc(100% - 22px), 610px);
+  height: calc(100% + 18px);
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(204, 157, 75, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(rgba(30, 18, 10, 0.16), rgba(14, 8, 5, 0.32)),
+    url("btn-cluster-bg.webp") center / cover no-repeat;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(245, 213, 151, 0.14);
+  pointer-events: none;
 }
 
 .nav-cluster {
