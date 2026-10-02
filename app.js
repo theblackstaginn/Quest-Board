@@ -9550,6 +9550,64 @@ function getWorldSeason(date = new Date()) {
   return "autumn";
 }
 
+function getAtmosphereTestOverrides() {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const season =
+    params.get("season");
+
+  const weather =
+    params.get("weather");
+
+  const daypart =
+    params.get("daypart");
+
+  const validSeasons =
+    new Set([
+      "spring",
+      "summer",
+      "autumn",
+      "winter"
+    ]);
+
+  const validWeather =
+    new Set([
+      "seasonal",
+      "clear",
+      "cloudy",
+      "fog",
+      "rain",
+      "snow",
+      "storm"
+    ]);
+
+  const validDayparts =
+    new Set([
+      "dawn",
+      "day",
+      "dusk",
+      "night"
+    ]);
+
+  return {
+    season:
+      validSeasons.has(season)
+        ? season
+        : null,
+    weather:
+      validWeather.has(weather)
+        ? weather
+        : null,
+    daypart:
+      validDayparts.has(daypart)
+        ? daypart
+        : null
+  };
+}
+
 function getWorldDaypart(date = new Date()) {
   const hour = date.getHours();
 
@@ -9866,14 +9924,20 @@ function renderWorldAtmosphere({
   const now =
     new Date();
 
+  const testOverrides =
+    getAtmosphereTestOverrides();
+
   const season =
-    getWorldSeason(now);
+    testOverrides.season
+    || getWorldSeason(now);
 
   const daypart =
-    getWorldDaypart(now);
+    testOverrides.daypart
+    || getWorldDaypart(now);
 
   const weather =
-    getWorldWeatherMode(
+    testOverrides.weather
+    || getWorldWeatherMode(
       condition,
       updatedAt
     );
