@@ -7704,3 +7704,140 @@ body.reduce-motion .weather-atmosphere__particles {
     display: none;
   }
 }
+
+
+/* =========================================================
+   PARTY CHARACTER — CHARACTER PAGE ASSET MATCH
+   Reuse the Character page's stat/record art and keep
+   profile glass light enough for the environment to show.
+========================================================= */
+
+.party-character-dialog-panel {
+  background-image:
+    linear-gradient(
+      rgba(5, 6, 5, 0.05),
+      rgba(5, 6, 5, 0.13)
+    ),
+    url("mossy-stone.webp");
+}
+
+.party-profile-stat {
+  border: 0;
+  border-radius: 12px;
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+
+.party-profile-stat:nth-child(1) {
+  background-image: url("strength-pnl.webp");
+}
+
+.party-profile-stat:nth-child(2) {
+  background-image: url("endurance-pnl.webp");
+}
+
+.party-profile-stat:nth-child(3) {
+  background-image: url("restoration-pnl.webp");
+}
+
+.party-profile-stat::after {
+  display: none;
+}
+
+.party-profile-record {
+  border: 0;
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      rgba(5, 6, 5, 0.06),
+      rgba(5, 6, 5, 0.14)
+    ),
+    url("mossy-stone.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.party-profile-record-grid > div {
+  background: rgba(5, 6, 5, 0.12);
+  border-color: rgba(201, 154, 80, 0.16);
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-character-dialog-panel {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 7, 11, 0.12) 0%,
+      rgba(8, 7, 11, 0.18) 36%,
+      rgba(8, 7, 11, 0.28) 100%
+    ),
+    url("jess-party-character-bg.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-character-dialog-panel::before {
+  background:
+    radial-gradient(
+      circle at 50% 34%,
+      rgba(126, 72, 164, 0.07),
+      transparent 40%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.08),
+      transparent 18%,
+      transparent 82%,
+      rgba(0, 0, 0, 0.08)
+    );
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-character-dialog-art-shell {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat {
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(1) {
+  background-image: url("strength-pnl.webp");
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(2) {
+  background-image: url("endurance-pnl.webp");
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(3) {
+  background-image: url("restoration-pnl.webp");
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record {
+  background:
+    linear-gradient(
+      rgba(7, 5, 10, 0.08),
+      rgba(7, 5, 10, 0.16)
+    ),
+    url("mossy-stone.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-color: rgba(156, 104, 201, 0.16);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-grid > div {
+  background: rgba(8, 5, 12, 0.12);
+  border-color: rgba(156, 104, 201, 0.14);
+}
