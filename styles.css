@@ -7501,7 +7501,7 @@ body.reduce-motion .map-fog-wisp {
 }
 
 .weather-particle--rain {
-  width: 1.5px;
+  width: var(--thickness, 1.5px);
   height: var(--size, 26px);
   border-radius: 999px;
   background: linear-gradient(
@@ -7541,7 +7541,12 @@ body.reduce-motion .map-fog-wisp {
   height: var(--size, 10px);
   border-radius: 75% 8% 72% 12%;
   background:
-    linear-gradient(135deg, rgba(190, 116, 49, .95), rgba(103, 53, 25, .93));
+    linear-gradient(
+      135deg,
+      rgba(196, 48, 45, .96),
+      rgba(119, 24, 29, .95) 58%,
+      rgba(78, 18, 23, .94)
+    );
   box-shadow: 0 1px 3px rgba(24, 12, 4, .24);
   animation:
     weatherLeafFall
