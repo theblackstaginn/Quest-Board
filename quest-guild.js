@@ -1010,6 +1010,163 @@
     renderPartyChallenge = patched;
   }
 
+  function safeStoryFlags(value) {
+    if (
+      !value ||
+      typeof value !== "object" ||
+      Array.isArray(value)
+    ) {
+      return {};
+    }
+
+    const blockedKeys =
+      new Set([
+        "__proto__",
+        "prototype",
+        "constructor"
+      ]);
+
+    const entries =
+      Object.entries(value)
+        .slice(0, 40);
+
+    const flags = {};
+
+    for (
+      const [
+        rawKey,
+        rawValue
+      ]
+      of entries
+    ) {
+      const key =
+        String(rawKey || "")
+          .trim()
+          .slice(0, 80);
+
+      if (
+        !key ||
+        blockedKeys.has(key)
+      ) {
+        continue;
+      }
+
+      if (
+        typeof rawValue === "boolean" ||
+        typeof rawValue === "number"
+      ) {
+        flags[key] = rawValue;
+        continue;
+      }
+
+      if (
+        typeof rawValue === "string"
+      ) {
+        flags[key] =
+          rawValue.slice(0, 240);
+      }
+    }
+
+    return flags;
+  }
+
+  function applyGuildStoryBeatToWorld(
+    item,
+    acceptedAt
+  ) {
+    if (
+      item?.artifact_type !==
+        "story_beat" ||
+      typeof getState !== "function" ||
+      typeof saveState !== "function"
+    ) {
+      return false;
+    }
+
+    try {
+      const state =
+        getState();
+
+      const existingWorld =
+        state?.world &&
+        typeof state.world === "object"
+          ? state.world
+          : {};
+
+      const world = {
+        ...existingWorld
+      };
+
+      const payload =
+        item?.payload &&
+        typeof item.payload === "object"
+          ? item.payload
+          : {};
+
+      const text =
+        String(
+          payload.text ||
+          payload.description ||
+          ""
+        )
+          .trim()
+          .slice(0, 4000);
+
+      const title =
+        String(
+          item.title ||
+          payload.title ||
+          "Story Beat"
+        )
+          .trim()
+          .slice(0, 160);
+
+      const storyFlags = {
+        ...(
+          world.storyFlags &&
+          typeof world.storyFlags === "object" &&
+          !Array.isArray(world.storyFlags)
+            ? world.storyFlags
+            : {}
+        ),
+        ...safeStoryFlags(
+          payload.story_flags ||
+          payload.storyFlags
+        )
+      };
+
+      world.storyFlags =
+        storyFlags;
+
+      world.lastStoryBeat = {
+        artifactId:
+          item.id,
+        requestId:
+          item.request_id || null,
+        title,
+        text,
+        acceptedAt:
+          acceptedAt ||
+          new Date().toISOString()
+      };
+
+      state.world =
+        world;
+
+      saveState(state);
+
+      return true;
+    }
+    catch (error) {
+      console.warn(
+        "Could not persist Guild story beat into world state:",
+        error
+      );
+
+      return false;
+    }
+  }
+
   async function activateGuildArtifact(id) {
     const item = guildArtifacts.find(entry => entry.id === id);
 
@@ -1017,10 +1174,13 @@
       return;
     }
 
+    const acceptedAt =
+      new Date().toISOString();
+
     const patch = {
       status: "active",
-      accepted_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      accepted_at: acceptedAt,
+      updated_at: acceptedAt
     };
 
     const { error } = await supabaseClient
@@ -1036,10 +1196,23 @@
       throw error;
     }
 
+    const storySaved =
+      item.artifact_type ===
+        "story_beat"
+        ? applyGuildStoryBeatToWorld(
+            item,
+            acceptedAt
+          )
+        : true;
+
     await refreshGuildLoop();
 
     if (typeof showToast === "function") {
-      showToast("Guild dispatch accepted.");
+      showToast(
+        storySaved
+          ? "Guild dispatch accepted."
+          : "Story accepted, but its world memory could not be saved."
+      );
     }
   }
 
