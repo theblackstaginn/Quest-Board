@@ -8648,6 +8648,150 @@ function reloadLatestBuild(
   );
 }
 
+function collectRefreshAssetUrls() {
+  const urls =
+    new Set();
+
+  const addUrl =
+    value => {
+      if (!value) {
+        return;
+      }
+
+      try {
+        const url =
+          new URL(
+            value,
+            document.baseURI
+          );
+
+        if (
+          url.origin
+          === window.location.origin
+        ) {
+          urls.add(
+            url.href
+          );
+        }
+      }
+
+      catch {
+        // Ignore malformed or unsupported asset URLs.
+      }
+    };
+
+  addUrl("./index.html");
+
+  document
+    .querySelectorAll(
+      [
+        'link[rel="stylesheet"][href]',
+        'link[rel~="icon"][href]',
+        'script[src]',
+        'img[src]',
+        'source[src]'
+      ].join(",")
+    )
+    .forEach(
+      element => {
+        addUrl(
+          element.getAttribute("href")
+          || element.getAttribute("src")
+        );
+      }
+    );
+
+  const collectRuleUrls =
+    rules => {
+      if (!rules) {
+        return;
+      }
+
+      for (const rule of rules) {
+        if (rule.cssRules) {
+          collectRuleUrls(
+            rule.cssRules
+          );
+        }
+
+        const cssText =
+          rule.cssText || "";
+
+        for (
+          const match
+          of cssText.matchAll(
+            /url\((?:["']?)([^)"']+)(?:["']?)\)/g
+          )
+        ) {
+          addUrl(
+            match[1]
+          );
+        }
+      }
+    };
+
+  for (
+    const sheet
+    of Array.from(
+      document.styleSheets
+    )
+  ) {
+    if (sheet.href) {
+      addUrl(
+        sheet.href
+      );
+    }
+
+    try {
+      collectRuleUrls(
+        sheet.cssRules
+      );
+    }
+
+    catch {
+      // Cross-origin stylesheets such as Google Fonts
+      // intentionally block CSS rule inspection.
+    }
+  }
+
+  return Array.from(
+    urls
+  );
+}
+
+
+async function refreshQuestBoardAssetCache() {
+  const urls =
+    collectRefreshAssetUrls();
+
+  const results =
+    await Promise.allSettled(
+      urls.map(
+        url =>
+          fetch(
+            url,
+            {
+              cache: "reload",
+              credentials: "same-origin"
+            }
+          )
+      )
+    );
+
+  return {
+    total:
+      results.length,
+
+    refreshed:
+      results.filter(
+        result =>
+          result.status
+          === "fulfilled"
+      ).length
+  };
+}
+
+
 function resetPullRefresh() {
   pullStartY = null;
   pullStartX = null;
@@ -8780,55 +8924,31 @@ document.addEventListener(
       const buildCheck =
         await checkForNewBuild();
 
-      if (
-        buildCheck.updateAvailable
-      ) {
-        $("#pullRefreshLabel").textContent =
-          "Updating Quest Board…";
+      $("#pullRefreshLabel").textContent =
+        "Refreshing app cache…";
 
-        showToast(
-          "New Quest Board build found. Updating…"
-        );
+      await refreshQuestBoardAssetCache();
 
-        reloadLatestBuild(
-          buildCheck.latestBuild
-        );
-
-        return;
-      }
+      const buildToLoad =
+        buildCheck.latestBuild
+        && buildCheck.latestBuild !== "0"
+          ? buildCheck.latestBuild
+          : getCurrentBuildVersion();
 
       $("#pullRefreshLabel").textContent =
-        "Syncing board…";
-
-      render({ skipParty: true });
-
-      await refreshWorldAtmosphere({
-        force: true
-      });
-
-      let partySynced = true;
-
-      if (supabaseReady) {
-        await checkIncomingGifts();
-
-        if (activeView === "party") {
-          partySynced = await refreshParty();
-
-          if ($("#partySyncStatus")?.dataset.state === "error") {
-            partySynced = false;
-          }
-        }
-      }
+        "Reloading Quest Board…";
 
       showToast(
-        partySynced
-          ? (
-              buildCheck.checked
-                ? "Quest Board is current."
-                : "Board refreshed. Update check unavailable."
-            )
-          : "Board refreshed. Fellowship sync unavailable."
+        buildCheck.updateAvailable
+          ? "New build found. Refreshing everything…"
+          : "Refreshing Quest Board from the source…"
       );
+
+      reloadLatestBuild(
+        buildToLoad
+      );
+
+      return;
     }
 
     catch (error) {
