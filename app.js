@@ -9841,9 +9841,70 @@ function createWeatherParticle(kind) {
     duration =
       12 + Math.random() * 18;
     size =
-      6 + Math.random() * 12;
+      7 + Math.random() * 13;
     opacity =
-      .46 + Math.random() * .46;
+      .52 + Math.random() * .38;
+
+    const leafShapes = [
+      "leaf-maple",
+      "leaf-oak",
+      "leaf-teardrop",
+      "leaf-long"
+    ];
+
+    const leafPalettes = [
+      [
+        "rgba(226, 40, 45, .99)",
+        "rgba(166, 20, 29, .98)",
+        "rgba(86, 10, 18, .96)"
+      ],
+      [
+        "rgba(208, 28, 39, .99)",
+        "rgba(145, 15, 24, .98)",
+        "rgba(75, 8, 15, .96)"
+      ],
+      [
+        "rgba(190, 20, 33, .99)",
+        "rgba(126, 11, 21, .98)",
+        "rgba(63, 6, 13, .96)"
+      ],
+      [
+        "rgba(172, 30, 25, .99)",
+        "rgba(116, 15, 17, .98)",
+        "rgba(66, 7, 10, .96)"
+      ]
+    ];
+
+    const shape =
+      leafShapes[
+        Math.floor(
+          Math.random() * leafShapes.length
+        )
+      ];
+
+    const palette =
+      leafPalettes[
+        Math.floor(
+          Math.random() * leafPalettes.length
+        )
+      ];
+
+    particle.classList.add(shape);
+
+    particle.style.setProperty(
+      "--leaf-c1",
+      palette[0]
+    );
+
+    particle.style.setProperty(
+      "--leaf-c2",
+      palette[1]
+    );
+
+    particle.style.setProperty(
+      "--leaf-c3",
+      palette[2]
+    );
   }
 
   else if (kind === "petal") {
