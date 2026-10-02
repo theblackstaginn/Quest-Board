@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="112">
+  <meta name="quest-board-build" content="113">
 
   <title>Quest Board</title>
 
@@ -1099,18 +1099,35 @@
                 Restore Existing Save
               </button>
 
+              <button
+                class="text-button"
+                id="forgotPasswordButton"
+                type="button"
+              >
+                Forgot Password?
+              </button>
+
             </div>
 
           </div>
 
-          <button
-            class="settings-danger-button"
-            id="signOutAccountButton"
-            type="button"
-            hidden
-          >
-            Sign Out
-          </button>
+          <div class="account-actions" id="signedInAccountActions" hidden>
+            <button
+              class="fantasy-action-button"
+              id="changePasswordButton"
+              type="button"
+            >
+              Change Password
+            </button>
+
+            <button
+              class="settings-danger-button"
+              id="signOutAccountButton"
+              type="button"
+            >
+              Sign Out
+            </button>
+          </div>
         </section>
 
         <section class="settings-panel device-sync-panel">
@@ -2264,12 +2281,59 @@
   ></div>
 
 
+  <dialog
+    class="rpg-event-dialog password-recovery-dialog"
+    id="passwordRecoveryDialog"
+    aria-labelledby="passwordRecoveryTitle"
+  >
+    <div class="rpg-event-panel">
+      <p class="eyebrow">Adventurer Account</p>
+
+      <h2 id="passwordRecoveryTitle">
+        Choose a New Password
+      </h2>
+
+      <p class="muted">
+        Enter a new password for your Quest Board account.
+      </p>
+
+      <div class="account-fields">
+        <input
+          class="setting-input account-input"
+          id="newPasswordInput"
+          type="password"
+          autocomplete="new-password"
+          placeholder="New password"
+          minlength="8"
+        >
+
+        <input
+          class="setting-input account-input"
+          id="confirmNewPasswordInput"
+          type="password"
+          autocomplete="new-password"
+          placeholder="Confirm new password"
+          minlength="8"
+        >
+      </div>
+
+      <button
+        class="fantasy-action-button"
+        id="saveNewPasswordButton"
+        type="button"
+      >
+        Update Password
+      </button>
+    </div>
+  </dialog>
+
+
   <!-- =====================================================
        SCRIPTS
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=112"></script>
+  <script src="app.js?v=113"></script>
   <script src="quest-guild.js?v=8"></script>
 
 </body>
