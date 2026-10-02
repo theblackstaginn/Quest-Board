@@ -5958,7 +5958,11 @@ async function requestPasswordReset() {
     } =
       await supabaseClient.auth
         .resetPasswordForEmail(
-          email
+          email,
+          {
+            redirectTo:
+              `${window.location.origin}${window.location.pathname}`
+          }
         );
 
     if (error) {
