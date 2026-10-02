@@ -7315,3 +7315,59 @@ body.reduce-motion .map-fog-wisp {
     opacity: .17;
   }
 }
+
+
+/* =========================================================
+   58. ENLARGED BOTTOM NAV CLUSTER
+========================================================= */
+
+.bottom-nav {
+  width: min(calc(100% - 6px), 780px);
+}
+
+.bottom-nav::before {
+  width: min(calc(100% - 8px), 680px);
+  height: calc(100% + 30px);
+  border-radius: 20px;
+}
+
+.nav-item {
+  width: 144px;
+}
+
+.nav-item-map {
+  width: 190px;
+  margin-inline: -12px;
+}
+
+@media (max-width: 560px) {
+  .bottom-nav {
+    width: calc(100% - 2px);
+  }
+
+  .bottom-nav::before {
+    width: calc(100% + 2px);
+    height: calc(100% + 28px);
+    border-radius: 18px;
+  }
+
+  .nav-item {
+    width: 122px;
+  }
+
+  .nav-item-map {
+    width: 164px;
+    margin-inline: -10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .nav-item {
+    width: 118px;
+  }
+
+  .nav-item-map {
+    width: 158px;
+    margin-inline: -10px;
+  }
+}
