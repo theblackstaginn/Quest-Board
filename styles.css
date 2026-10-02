@@ -8072,3 +8072,58 @@ body[data-active-view="party"] .party-section {
     inset 0 1px 0 rgba(255, 226, 170, 0.035),
     0 7px 16px rgba(0, 0, 0, 0.14);
 }
+
+/* =========================================================
+   JESS PARTY CHARACTER — UNIFIED STAT PANELS + RECORD LEGIBILITY
+========================================================= */
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(1),
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(2),
+.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(3) {
+  background-image: url("restoration-pnl.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record {
+  background:
+    linear-gradient(
+      rgba(8, 6, 10, 0.10),
+      rgba(8, 6, 10, 0.18)
+    ),
+    url("mossy-stone.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-title,
+.party-character-dialog[data-profile-id="jess"] .party-profile-record .eyebrow {
+  color: #e9c37f;
+  text-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(226, 180, 104, 0.16);
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-grid > div {
+  background: rgba(7, 6, 8, 0.22);
+  border-color: rgba(221, 184, 118, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 236, 200, 0.035),
+    0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-grid span {
+  color: #eee3cf;
+  font-weight: 700;
+  text-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.95);
+}
+
+.party-character-dialog[data-profile-id="jess"] .party-profile-record-grid strong {
+  color: #f0bd68;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(230, 175, 83, 0.12);
+}
