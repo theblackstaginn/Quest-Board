@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="107">
+  <meta name="quest-board-build" content="108">
 
   <title>Quest Board</title>
 
@@ -21,13 +21,28 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=107">
+  <link rel="stylesheet" href="styles.css?v=108">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
 <body>
 
   <div class="world-overlay"></div>
+
+  <div
+    class="weather-atmosphere"
+    id="weatherAtmosphere"
+    data-season="autumn"
+    data-weather="clear"
+    data-daypart="night"
+    aria-hidden="true"
+  >
+    <div class="weather-atmosphere__veil"></div>
+    <div class="weather-atmosphere__mist weather-atmosphere__mist--one"></div>
+    <div class="weather-atmosphere__mist weather-atmosphere__mist--two"></div>
+    <div class="weather-atmosphere__particles" id="weatherParticles"></div>
+    <div class="weather-atmosphere__flash"></div>
+  </div>
 
   <div class="pull-refresh" id="pullRefresh" role="status" aria-live="polite" aria-atomic="true">
     <span class="pull-refresh-mark" aria-hidden="true">✦</span>
@@ -2252,7 +2267,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=99"></script>
+  <script src="app.js?v=108"></script>
   <script src="quest-guild.js?v=7"></script>
 
 </body>
