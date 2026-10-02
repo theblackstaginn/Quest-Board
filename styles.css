@@ -5810,29 +5810,29 @@ body[data-active-view="party"] .party-activity-item {
 }
 
 .player-hud-wallet img {
-  width: 21px;
-  height: 21px;
-  flex: 0 0 21px;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
 }
 
 .player-hud-wallet b {
-  font-size: .68rem;
+  font-size: .72rem;
 }
 
 @media (max-width: 560px) {
   .player-hud-wallet {
-    gap: 12px;
+    gap: 10px;
   }
 
   .player-hud-wallet img {
-    width: 20px;
-    height: 20px;
-    flex-basis: 20px;
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
   }
 
   .player-hud-wallet b {
-    font-size: .65rem;
+    font-size: .68rem;
   }
 }
 
