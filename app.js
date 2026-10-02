@@ -8802,6 +8802,10 @@ document.addEventListener(
 
       render({ skipParty: true });
 
+      await refreshWorldAtmosphere({
+        force: true
+      });
+
       let partySynced = true;
 
       if (supabaseReady) {
@@ -9472,8 +9476,13 @@ document.addEventListener(
   () => {
     if (
       document.visibilityState
-        === "visible"
-      && activeQuest
+        !== "visible"
+    ) {
+      return;
+    }
+
+    if (
+      activeQuest
       && $("#questDialog")
         ?.open
     ) {
@@ -9481,6 +9490,8 @@ document.addEventListener(
         activeQuest.id
       );
     }
+
+    void refreshWorldAtmosphere();
   }
 );
 
@@ -9504,6 +9515,503 @@ function restorePendingVictory() {
   ) {
     openBossDefeated();
   }
+}
+
+
+
+// =========================================================
+// 75A. BOARD LIVE WEATHER ATMOSPHERE
+// =========================================================
+
+const WORLD_WEATHER_REFRESH_MS =
+  15 * 60 * 1000;
+
+const WORLD_WEATHER_STALE_MS =
+  3 * 60 * 60 * 1000;
+
+let worldWeatherRefreshTimer = null;
+let lastWorldWeatherSyncAt = 0;
+
+function getWorldSeason(date = new Date()) {
+  const month = date.getMonth();
+
+  if (month === 11 || month <= 1) {
+    return "winter";
+  }
+
+  if (month <= 4) {
+    return "spring";
+  }
+
+  if (month <= 7) {
+    return "summer";
+  }
+
+  return "autumn";
+}
+
+function getWorldDaypart(date = new Date()) {
+  const hour = date.getHours();
+
+  if (hour < 6 || hour >= 20) {
+    return "night";
+  }
+
+  if (hour < 9) {
+    return "dawn";
+  }
+
+  if (hour < 18) {
+    return "day";
+  }
+
+  return "dusk";
+}
+
+function getWorldWeatherMode(
+  condition = "",
+  updatedAt = null
+) {
+  const updatedTime =
+    updatedAt
+      ? Date.parse(updatedAt)
+      : Number.NaN;
+
+  const weatherIsStale =
+    Number.isFinite(updatedTime)
+    && (
+      Date.now() - updatedTime
+        > WORLD_WEATHER_STALE_MS
+    );
+
+  if (
+    !condition
+    || weatherIsStale
+  ) {
+    return "seasonal";
+  }
+
+  const normalized =
+    String(condition)
+      .toLowerCase();
+
+  if (
+    /thunder|lightning|storm/.test(
+      normalized
+    )
+  ) {
+    return "storm";
+  }
+
+  if (
+    /snow|sleet|flurr|blizzard|ice pellet/.test(
+      normalized
+    )
+  ) {
+    return "snow";
+  }
+
+  if (
+    /rain|drizzle|shower/.test(
+      normalized
+    )
+  ) {
+    return "rain";
+  }
+
+  if (
+    /fog|mist|haze|smoke/.test(
+      normalized
+    )
+  ) {
+    return "fog";
+  }
+
+  if (
+    /cloud|overcast/.test(
+      normalized
+    )
+  ) {
+    return "cloudy";
+  }
+
+  return "clear";
+}
+
+function getWeatherParticlePlan(
+  season,
+  weather,
+  daypart
+) {
+  if (weather === "storm") {
+    return {
+      kind: "rain",
+      count: 42
+    };
+  }
+
+  if (weather === "rain") {
+    return {
+      kind: "rain",
+      count: 32
+    };
+  }
+
+  if (weather === "snow") {
+    return {
+      kind: "snow",
+      count: 28
+    };
+  }
+
+  if (weather === "fog") {
+    return {
+      kind: null,
+      count: 0
+    };
+  }
+
+  if (season === "autumn") {
+    return {
+      kind: "leaf",
+      count:
+        weather === "cloudy"
+          ? 11
+          : 17
+    };
+  }
+
+  if (season === "winter") {
+    return {
+      kind: "frost",
+      count:
+        weather === "cloudy"
+          ? 10
+          : 15
+    };
+  }
+
+  if (season === "spring") {
+    return {
+      kind: "petal",
+      count:
+        weather === "cloudy"
+          ? 8
+          : 13
+    };
+  }
+
+  if (
+    season === "summer"
+    && daypart === "night"
+  ) {
+    return {
+      kind: "firefly",
+      count: 15
+    };
+  }
+
+  return {
+    kind: "mote",
+    count: 14
+  };
+}
+
+function createWeatherParticle(kind) {
+  const particle =
+    document.createElement("span");
+
+  particle.className =
+    `weather-particle weather-particle--${kind}`;
+
+  particle.style.setProperty(
+    "--x",
+    `${(Math.random() * 100).toFixed(2)}%`
+  );
+
+  particle.style.setProperty(
+    "--drift",
+    `${Math.round(
+      (Math.random() * 120) - 60
+    )}px`
+  );
+
+  particle.style.setProperty(
+    "--rot",
+    `${Math.round(
+      Math.random() * 180
+    )}deg`
+  );
+
+  let duration = 12;
+  let size = 8;
+  let opacity = .68;
+
+  if (kind === "rain") {
+    duration =
+      .72 + Math.random() * .46;
+    size =
+      22 + Math.random() * 24;
+    opacity =
+      .34 + Math.random() * .38;
+  }
+
+  else if (kind === "snow") {
+    duration =
+      8 + Math.random() * 7;
+    size =
+      3 + Math.random() * 5;
+    opacity =
+      .46 + Math.random() * .46;
+  }
+
+  else if (kind === "frost") {
+    duration =
+      13 + Math.random() * 8;
+    size =
+      2 + Math.random() * 4;
+    opacity =
+      .18 + Math.random() * .28;
+  }
+
+  else if (kind === "leaf") {
+    duration =
+      9 + Math.random() * 7;
+    size =
+      8 + Math.random() * 7;
+    opacity =
+      .48 + Math.random() * .40;
+  }
+
+  else if (kind === "petal") {
+    duration =
+      10 + Math.random() * 7;
+    size =
+      6 + Math.random() * 6;
+    opacity =
+      .34 + Math.random() * .36;
+  }
+
+  else if (kind === "firefly") {
+    duration =
+      4.5 + Math.random() * 5;
+    size =
+      2 + Math.random() * 3;
+    opacity =
+      .42 + Math.random() * .42;
+
+    particle.style.setProperty(
+      "--y",
+      `${(
+        28 + Math.random() * 58
+      ).toFixed(2)}%`
+    );
+  }
+
+  else {
+    duration =
+      11 + Math.random() * 8;
+    size =
+      2 + Math.random() * 4;
+    opacity =
+      .22 + Math.random() * .32;
+  }
+
+  particle.style.setProperty(
+    "--dur",
+    `${duration.toFixed(2)}s`
+  );
+
+  particle.style.setProperty(
+    "--delay",
+    `-${(
+      Math.random() * duration
+    ).toFixed(2)}s`
+  );
+
+  particle.style.setProperty(
+    "--size",
+    `${size.toFixed(2)}px`
+  );
+
+  particle.style.setProperty(
+    "--opacity",
+    opacity.toFixed(2)
+  );
+
+  return particle;
+}
+
+function renderWorldAtmosphere({
+  condition = "",
+  updatedAt = null
+} = {}) {
+  const atmosphere =
+    document.getElementById(
+      "weatherAtmosphere"
+    );
+
+  const particleHost =
+    document.getElementById(
+      "weatherParticles"
+    );
+
+  if (
+    !atmosphere
+    || !particleHost
+  ) {
+    return;
+  }
+
+  const now =
+    new Date();
+
+  const season =
+    getWorldSeason(now);
+
+  const daypart =
+    getWorldDaypart(now);
+
+  const weather =
+    getWorldWeatherMode(
+      condition,
+      updatedAt
+    );
+
+  atmosphere.dataset.season =
+    season;
+
+  atmosphere.dataset.daypart =
+    daypart;
+
+  atmosphere.dataset.weather =
+    weather;
+
+  atmosphere.dataset.condition =
+    condition || "";
+
+  particleHost.replaceChildren();
+
+  const reduceMotion =
+    document.body.classList.contains(
+      "reduce-motion"
+    )
+    || window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+  if (reduceMotion) {
+    return;
+  }
+
+  const plan =
+    getWeatherParticlePlan(
+      season,
+      weather,
+      daypart
+    );
+
+  if (
+    !plan.kind
+    || plan.count <= 0
+  ) {
+    return;
+  }
+
+  const fragment =
+    document.createDocumentFragment();
+
+  for (
+    let index = 0;
+    index < plan.count;
+    index += 1
+  ) {
+    fragment.appendChild(
+      createWeatherParticle(
+        plan.kind
+      )
+    );
+  }
+
+  particleHost.appendChild(
+    fragment
+  );
+}
+
+async function refreshWorldAtmosphere({
+  force = false
+} = {}) {
+  if (
+    !force
+    && Date.now()
+      - lastWorldWeatherSyncAt
+      < 60 * 1000
+  ) {
+    return;
+  }
+
+  lastWorldWeatherSyncAt =
+    Date.now();
+
+  if (!supabaseClient) {
+    renderWorldAtmosphere();
+    return;
+  }
+
+  try {
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("world_weather")
+        .select(
+          "condition, updated_at"
+        )
+        .eq(
+          "id",
+          "local"
+        )
+        .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    renderWorldAtmosphere({
+      condition:
+        data?.condition || "",
+      updatedAt:
+        data?.updated_at || null
+    });
+  }
+
+  catch (error) {
+    console.warn(
+      "World weather unavailable:",
+      error
+    );
+
+    renderWorldAtmosphere();
+  }
+}
+
+function startWorldAtmosphereRefresh() {
+  if (worldWeatherRefreshTimer) {
+    clearInterval(
+      worldWeatherRefreshTimer
+    );
+  }
+
+  worldWeatherRefreshTimer =
+    window.setInterval(
+      () => {
+        void refreshWorldAtmosphere({
+          force: true
+        });
+      },
+      WORLD_WEATHER_REFRESH_MS
+    );
 }
 
 
@@ -9552,7 +10060,15 @@ async function initializeApp() {
     );
   }
 
+  renderWorldAtmosphere();
+
   await initializeSupabase();
+
+  await refreshWorldAtmosphere({
+    force: true
+  });
+
+  startWorldAtmosphereRefresh();
 
   if (supabaseReady) {
     await checkIncomingGifts();
