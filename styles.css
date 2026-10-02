@@ -7493,7 +7493,7 @@ body.reduce-motion .map-fog-wisp {
 .weather-particle {
   position: absolute;
   left: var(--x, 50%);
-  top: -12vh;
+  top: -2px;
   width: var(--size, 8px);
   height: var(--size, 8px);
   opacity: var(--opacity, .72);
@@ -7545,8 +7545,8 @@ body.reduce-motion .map-fog-wisp {
   box-shadow: 0 1px 3px rgba(24, 12, 4, .24);
   animation:
     weatherLeafFall
-    var(--dur, 12s)
-    ease-in
+    var(--dur, 20s)
+    ease-in-out
     var(--delay, 0s)
     infinite;
 }
@@ -7602,7 +7602,7 @@ body.reduce-motion .map-fog-wisp {
 
 @keyframes weatherRainFall {
   from {
-    transform: translate3d(0, -12vh, 0) rotate(10deg);
+    transform: translate3d(0, 0, 0) rotate(10deg);
   }
   to {
     transform: translate3d(var(--drift, -55px), 116vh, 0) rotate(10deg);
@@ -7611,7 +7611,7 @@ body.reduce-motion .map-fog-wisp {
 
 @keyframes weatherSnowFall {
   0% {
-    transform: translate3d(0, -12vh, 0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   45% {
     transform: translate3d(var(--drift, 24px), 48vh, 0) rotate(145deg);
@@ -7623,7 +7623,7 @@ body.reduce-motion .map-fog-wisp {
 
 @keyframes weatherLeafFall {
   0% {
-    transform: translate3d(0, -12vh, 0) rotate(var(--rot, 0deg));
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
   }
   34% {
     transform: translate3d(var(--drift, 42px), 32vh, 0) rotate(calc(var(--rot, 0deg) + 180deg));
