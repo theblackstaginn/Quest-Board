@@ -9807,20 +9807,25 @@ function createWeatherParticle(kind) {
 
   if (kind === "rain") {
     duration =
-      .72 + Math.random() * .46;
+      .55 + Math.random() * .80;
     size =
-      22 + Math.random() * 24;
+      14 + Math.random() * 30;
     opacity =
-      .34 + Math.random() * .38;
+      .28 + Math.random() * .52;
+
+    particle.style.setProperty(
+      "--thickness",
+      `${(.9 + Math.random() * 1.4).toFixed(2)}px`
+    );
   }
 
   else if (kind === "snow") {
     duration =
-      8 + Math.random() * 7;
+      6 + Math.random() * 12;
     size =
-      3 + Math.random() * 5;
+      2 + Math.random() * 8;
     opacity =
-      .46 + Math.random() * .46;
+      .38 + Math.random() * .54;
   }
 
   else if (kind === "frost") {
@@ -9834,11 +9839,11 @@ function createWeatherParticle(kind) {
 
   else if (kind === "leaf") {
     duration =
-      17 + Math.random() * 9;
+      12 + Math.random() * 18;
     size =
-      8 + Math.random() * 7;
+      6 + Math.random() * 12;
     opacity =
-      .48 + Math.random() * .40;
+      .46 + Math.random() * .46;
   }
 
   else if (kind === "petal") {
