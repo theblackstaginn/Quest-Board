@@ -8507,3 +8507,68 @@ body[data-character-theme="amethyst"] .profile-avatar {
     align-self: flex-start;
   }
 }
+
+.party-adventure-reward {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 11px 12px;
+  border: 1px solid rgba(222, 177, 98, 0.24);
+  border-radius: 11px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(133, 83, 27, 0.15),
+      rgba(5, 6, 5, 0.12)
+    );
+}
+
+.party-adventure-reward-glyph {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(230, 188, 111, 0.38);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(244, 204, 127, 0.30),
+      rgba(45, 28, 11, 0.34)
+    );
+  color: #ecc27a;
+  font-size: 1rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 198, 0.14),
+    0 4px 10px rgba(0, 0, 0, 0.20);
+}
+
+.party-adventure-reward strong,
+.party-adventure-reward small {
+  display: block;
+}
+
+.party-adventure-reward strong {
+  margin-bottom: 2px;
+  color: var(--cream);
+  font-family: var(--font-heading);
+  font-size: 0.74rem;
+}
+
+.party-adventure-reward small {
+  color: #d9c5a5;
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+
+.party-adventure-claim {
+  width: 100%;
+  margin-top: 9px;
+}
+
+.party-adventure-claim[hidden] {
+  display: none;
+}
+
