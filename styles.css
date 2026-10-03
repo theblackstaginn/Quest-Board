@@ -7318,57 +7318,169 @@ body.reduce-motion .map-fog-wisp {
 
 
 /* =========================================================
-   58. ENLARGED BOTTOM NAV CLUSTER
+   58. TALL LEATHER BUTTON CLUSTER
 ========================================================= */
 
 .bottom-nav {
-  width: min(calc(100% - 6px), 780px);
+  --nav-button-width: 158px;
+  width: min(calc(100% - 16px), 600px);
+  height: 178px;
+  display: block;
 }
 
 .bottom-nav::before {
-  width: min(calc(100% - 8px), 680px);
-  height: calc(100% + 30px);
-  border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  border-radius: 26px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(45, 27, 14, .10),
+      rgba(15, 8, 5, .40)
+    ),
+    url("btn-cluster-bg.webp") center / cover no-repeat;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, .58),
+    inset 0 1px 0 rgba(245, 213, 151, .17),
+    inset 0 -12px 26px rgba(10, 5, 3, .20);
 }
 
-.nav-item {
-  width: 144px;
+.nav-cluster {
+  display: contents;
 }
 
-.nav-item-map {
-  width: 190px;
-  margin-inline: -12px;
+.bottom-nav .nav-item,
+.bottom-nav .nav-item-map {
+  position: absolute;
+  left: var(--cluster-x, 50%);
+  top: var(--cluster-y, 44px);
+  width: var(--nav-button-width);
+  margin: 0;
+  margin-left:
+    calc(
+      var(--nav-button-width) / -2
+    );
+  transform:
+    rotate(var(--cluster-rot, 0deg));
+  transform-origin: center;
+  z-index: var(--cluster-z, 2);
+}
+
+.bottom-nav .nav-item[data-view="board"] {
+  --cluster-x: 19%;
+  --cluster-y: 18px;
+  --cluster-rot: -4deg;
+  --cluster-z: 3;
+}
+
+.bottom-nav .nav-item[data-view="map"] {
+  --cluster-x: 50%;
+  --cluster-y: 10px;
+  --cluster-rot: .8deg;
+  --cluster-z: 2;
+  filter: brightness(.84) saturate(.94);
+}
+
+.bottom-nav .nav-item[data-view="party"] {
+  --cluster-x: 81%;
+  --cluster-y: 20px;
+  --cluster-rot: 4deg;
+  --cluster-z: 3;
+}
+
+.bottom-nav .nav-item[data-view="character"] {
+  --cluster-x: 34%;
+  --cluster-y: 90px;
+  --cluster-rot: 2.2deg;
+  --cluster-z: 5;
+}
+
+.bottom-nav .nav-item[data-view="settings"] {
+  --cluster-x: 66%;
+  --cluster-y: 88px;
+  --cluster-rot: -2.4deg;
+  --cluster-z: 5;
+}
+
+.bottom-nav .nav-item:active {
+  transform:
+    translateY(1px)
+    scale(.97)
+    rotate(var(--cluster-rot, 0deg));
+}
+
+.bottom-nav .nav-item-map.active {
+  filter:
+    brightness(1.12)
+    saturate(1.08)
+    drop-shadow(
+      0 0 7px
+      rgba(221, 170, 83, .28)
+    );
 }
 
 @media (max-width: 560px) {
   .bottom-nav {
-    width: calc(100% - 2px);
+    --nav-button-width: 142px;
+    width: calc(100% - 8px);
+    height: 172px;
   }
 
   .bottom-nav::before {
-    width: calc(100% + 2px);
-    height: calc(100% + 28px);
-    border-radius: 18px;
+    width: 100%;
+    height: 100%;
+    border-radius: 23px;
   }
 
-  .nav-item {
-    width: 122px;
+  .bottom-nav .nav-item[data-view="board"] {
+    --cluster-x: 20%;
+    --cluster-y: 18px;
   }
 
-  .nav-item-map {
-    width: 164px;
-    margin-inline: -10px;
+  .bottom-nav .nav-item[data-view="map"] {
+    --cluster-x: 50%;
+    --cluster-y: 8px;
+  }
+
+  .bottom-nav .nav-item[data-view="party"] {
+    --cluster-x: 80%;
+    --cluster-y: 20px;
+  }
+
+  .bottom-nav .nav-item[data-view="character"] {
+    --cluster-x: 35%;
+    --cluster-y: 88px;
+  }
+
+  .bottom-nav .nav-item[data-view="settings"] {
+    --cluster-x: 65%;
+    --cluster-y: 86px;
   }
 }
 
 @media (max-width: 390px) {
-  .nav-item {
-    width: 118px;
+  .bottom-nav {
+    --nav-button-width: 136px;
+    width: calc(100% - 6px);
+    height: 168px;
   }
 
-  .nav-item-map {
-    width: 158px;
-    margin-inline: -10px;
+  .bottom-nav .nav-item[data-view="board"] {
+    --cluster-x: 20%;
+  }
+
+  .bottom-nav .nav-item[data-view="party"] {
+    --cluster-x: 80%;
+  }
+
+  .bottom-nav .nav-item[data-view="character"] {
+    --cluster-x: 35%;
+    --cluster-y: 86px;
+  }
+
+  .bottom-nav .nav-item[data-view="settings"] {
+    --cluster-x: 65%;
+    --cluster-y: 84px;
   }
 }
 
