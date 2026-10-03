@@ -2420,6 +2420,61 @@ function findQuest(id) {
 // 16. SUPABASE INITIALIZATION
 // =========================================================
 
+function isPasswordRecoveryReturn() {
+  const query =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const hash =
+    new URLSearchParams(
+      window.location.hash
+        .replace(/^#/, "")
+    );
+
+  return (
+    query.get("recovery") === "1"
+    || hash.get("type") === "recovery"
+  );
+}
+
+
+async function finishPasswordRecoveryReturn() {
+  if (
+    !supabaseClient
+    || !isPasswordRecoveryReturn()
+  ) {
+    return false;
+  }
+
+  const {
+    data: {
+      session
+    },
+    error
+  } =
+    await supabaseClient.auth
+      .getSession();
+
+  if (
+    error
+    || !session?.user
+  ) {
+    return false;
+  }
+
+  supabaseUser =
+    session.user;
+
+  supabaseReady =
+    true;
+
+  openPasswordRecoveryDialog();
+
+  return true;
+}
+
+
 if (supabaseClient) {
   supabaseClient.auth
     .onAuthStateChange(
@@ -2480,6 +2535,24 @@ async function initializeSupabase() {
     } =
       await supabaseClient.auth
         .getSession();
+
+    const recoveryReturn =
+      isPasswordRecoveryReturn();
+
+    if (
+      recoveryReturn
+      && session?.user
+    ) {
+      supabaseUser =
+        session.user;
+
+      supabaseReady =
+        true;
+
+      queueMicrotask(
+        openPasswordRecoveryDialog
+      );
+    }
 
     if (session?.user) {
       supabaseUser =
@@ -5961,7 +6034,7 @@ async function requestPasswordReset() {
           email,
           {
             redirectTo:
-              `${window.location.origin}${window.location.pathname}`
+              `${window.location.origin}${window.location.pathname}?recovery=1`
           }
         );
 
@@ -6051,12 +6124,14 @@ async function saveNewAccountPassword() {
 
     if (
       window.location.hash
+      || new URLSearchParams(
+        window.location.search
+      ).has("recovery")
     ) {
       window.history.replaceState(
         {},
         document.title,
         window.location.pathname
-        + window.location.search
       );
     }
 
@@ -10563,6 +10638,12 @@ async function initializeApp() {
   renderWorldAtmosphere();
 
   await initializeSupabase();
+
+  if (
+    isPasswordRecoveryReturn()
+  ) {
+    await finishPasswordRecoveryReturn();
+  }
 
   await refreshWorldAtmosphere({
     force: true
