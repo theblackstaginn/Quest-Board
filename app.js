@@ -11721,7 +11721,7 @@ function spawnOctoberRavenPass(
       : window.innerHeight * .88;
 
   const ravenMinY =
-    1.5;
+    .5;
 
   const ravenMaxY =
     Math.max(
@@ -11732,7 +11732,7 @@ function spawnOctoberRavenPass(
             window.innerHeight,
             1
           )
-      ) * 100 - 6
+      ) * 100 - 2.5
     );
 
   const baseY =
@@ -11792,8 +11792,8 @@ function spawnOctoberRavenPass(
       17
       + Math.pow(
           depth,
-          1.18
-        ) * 35;
+          1.14
+        ) * 43;
 
     const size =
       perspectiveSize
