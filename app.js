@@ -504,6 +504,16 @@ const RELICS = [
   },
 
   {
+    id: "lanternbound-seal",
+    name: "Lanternbound Seal",
+    image: "relics/lantern-of-guidance.webp",
+    flavor: "Four lights burn along the old road. This seal remembers the companions who lit them together.",
+    rarity: "epic",
+    source: "party",
+    manual: true
+  },
+
+  {
     id: "ravens-oath",
     name: "Raven's Oath",
     image: "relics/ravens-oath.webp",
@@ -708,6 +718,9 @@ const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:
 const PARTY_ADVENTURE = {
   id: "lantern-road-i",
   title: "The Lantern Road",
+  relicId: "lanternbound-seal",
+  rewardCopy:
+    "Each companion earns the Lanternbound Seal and one Fellowship consumable.",
   intro:
     "Beyond the Guild Hall, four dead lanterns mark an old road into the Blackwood. The path will only wake for companions who travel it together.",
   completed:
@@ -7163,14 +7176,16 @@ async function renderParty() {
       activity,
       inventory,
       bonusProgress,
-      adventure
+      adventure,
+      adventureReward
     ] =
       await Promise.all([
         fetchPartyMembers(),
         fetchPartyActivity(),
         fetchPartyTreasureInventory(),
         fetchPartyBonusProgress(),
-        fetchPartyAdventure()
+        fetchPartyAdventure(),
+        fetchPartyAdventureReward()
       ]);
 
     renderPartyMembers(
@@ -7181,7 +7196,8 @@ async function renderParty() {
     renderPartyAdventure(
       adventure,
       members,
-      activity
+      activity,
+      adventureReward
     );
 
     renderPartyChallenge(
@@ -7460,6 +7476,172 @@ async function fetchPartyAdventure() {
 }
 
 
+async function fetchPartyAdventureReward() {
+  if (
+    !currentParty
+    || !supabaseUser
+    || !supabaseClient
+  ) {
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("party_adventure_rewards")
+      .select(
+        "party_id, adventure_id, profile_id, user_id, relic_id, item_id, claimed_at"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .eq(
+        "adventure_id",
+        PARTY_ADVENTURE.id
+      )
+      .eq(
+        "profile_id",
+        activeProfileId
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data || null;
+}
+
+
+async function claimPartyAdventureReward() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+    || !currentParty
+  ) {
+    showToast(
+      "The Fellowship is not connected."
+    );
+    return;
+  }
+
+  const button =
+    $("#claimPartyAdventureRewardButton");
+
+  if (button) {
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Claiming…";
+  }
+
+  try {
+    const existing =
+      await fetchPartyAdventureReward();
+
+    let reward =
+      existing;
+
+    if (!reward) {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("party_adventure_rewards")
+          .insert({
+            party_id:
+              currentParty.id,
+
+            adventure_id:
+              PARTY_ADVENTURE.id,
+
+            profile_id:
+              activeProfileId,
+
+            user_id:
+              supabaseUser.id,
+
+            relic_id:
+              PARTY_ADVENTURE.relicId,
+
+            item_id:
+              "fellowship-token"
+          })
+          .select(
+            "party_id, adventure_id, profile_id, user_id, relic_id, item_id, claimed_at"
+          )
+          .single();
+
+      if (error) {
+        throw error;
+      }
+
+      reward =
+        data;
+    }
+
+    const item =
+      PARTY_TREASURES[
+        reward?.item_id
+      ];
+
+    const newlyUnlocked =
+      unlockRelicById(
+        PARTY_ADVENTURE.relicId,
+        {
+          reveal:
+            true
+        }
+      );
+
+    await refreshParty();
+
+    showRewardBurst(
+      "Fellowship Adventure Reward"
+    );
+
+    showToast(
+      `Lantern Road Reward | Lanternbound Seal | ${item?.name || "Fellowship consumable"}`
+    );
+
+    if (
+      !newlyUnlocked
+      && item
+    ) {
+      showTreasureReveal(
+        reward.item_id
+      );
+    }
+  }
+
+  catch (error) {
+    console.error(
+      "Could not claim fellowship adventure reward:",
+      error
+    );
+
+    showToast(
+      "Adventure reward could not be claimed yet."
+    );
+  }
+
+  finally {
+    if (button) {
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Claim Adventure Rewards";
+    }
+  }
+}
+
+
 async function beginPartyAdventure() {
   if (
     !supabaseReady
@@ -7586,7 +7768,8 @@ function getPartyAdventureMemberQuestCount(
 function renderPartyAdventure(
   adventureRow,
   members,
-  activity
+  activity,
+  rewardRow = null
 ) {
   const panel =
     $("#partyAdventurePanel");
@@ -7618,6 +7801,12 @@ function renderPartyAdventure(
 
   const narrative =
     $("#partyAdventureNarrative");
+
+  const rewardSummary =
+    $("#partyAdventureRewardSummary");
+
+  const rewardButton =
+    $("#claimPartyAdventureRewardButton");
 
   if (
     !route
@@ -7654,6 +7843,16 @@ function renderPartyAdventure(
     if (startButton) {
       startButton.hidden =
         false;
+    }
+
+    if (rewardSummary) {
+      rewardSummary.textContent =
+        PARTY_ADVENTURE.rewardCopy;
+    }
+
+    if (rewardButton) {
+      rewardButton.hidden =
+        true;
     }
 
     if (contributionBox) {
@@ -7891,16 +8090,66 @@ function renderPartyAdventure(
 
   if (complete) {
     status.textContent =
-      "Road Cleared";
+      rewardRow
+        ? "Rewards Claimed"
+        : "Road Cleared";
 
     narrative.textContent =
       PARTY_ADVENTURE.completed;
 
     objectiveText.textContent =
-      "The Fellowship completed The Lantern Road.";
+      rewardRow
+        ? "The road is cleared and your spoils are secured."
+        : "The Fellowship completed The Lantern Road.";
+
+    if (rewardRow) {
+      const rewardItem =
+        PARTY_TREASURES[
+          rewardRow.item_id
+        ];
+
+      if (rewardSummary) {
+        rewardSummary.textContent =
+          `Claimed: Lanternbound Seal + ${rewardItem?.name || "Fellowship consumable"}.`;
+      }
+
+      if (rewardButton) {
+        rewardButton.hidden =
+          true;
+      }
+
+      unlockRelicById(
+        PARTY_ADVENTURE.relicId,
+        {
+          reveal:
+            false
+        }
+      );
+    }
+
+    else {
+      if (rewardSummary) {
+        rewardSummary.textContent =
+          PARTY_ADVENTURE.rewardCopy;
+      }
+
+      if (rewardButton) {
+        rewardButton.hidden =
+          false;
+      }
+    }
   }
 
   else {
+    if (rewardSummary) {
+      rewardSummary.textContent =
+        PARTY_ADVENTURE.rewardCopy;
+    }
+
+    if (rewardButton) {
+      rewardButton.hidden =
+        true;
+    }
     const currentStage =
       PARTY_ADVENTURE.stages[
         currentStageIndex
