@@ -659,6 +659,8 @@ const PARTY_TREASURES = {
     name: "Fellowship Token",
     rarity: "Common",
     glyph: "+1",
+    artFile: "consumables/fellowship-token.webp",
+    effectType: "immediate",
     description:
       "Adds one bonus point to the shared weekly challenge."
   },
@@ -667,6 +669,8 @@ const PARTY_TREASURES = {
     name: "Banner of Plenty",
     rarity: "Uncommon",
     glyph: "G",
+    artFile: "consumables/banner-of-plenty.webp",
+    effectType: "immediate",
     description:
       "Grants 15 Gold to every fellowship member."
   },
@@ -675,6 +679,8 @@ const PARTY_TREASURES = {
     name: "Crystal Parcel",
     rarity: "Rare",
     glyph: "C",
+    artFile: "consumables/crystal-parcel.webp",
+    effectType: "immediate",
     description:
       "Grants one Crystal to every fellowship member."
   },
@@ -683,10 +689,72 @@ const PARTY_TREASURES = {
     name: "Rallying Horn",
     rarity: "Epic",
     glyph: "+3",
+    artFile: "consumables/rallying-horn.webp",
+    effectType: "immediate",
     description:
       "Adds three bonus points to the shared weekly challenge."
+  },
+
+  "wayfarers-ration": {
+    name: "Wayfarer's Ration",
+    rarity: "Common",
+    glyph: "G+",
+    artFile: "consumables/wayfarers-ration.webp",
+    effectType: "next-gold",
+    description:
+      "Your next completed normal quest earns +10 Gold."
+  },
+
+  "scholars-ink": {
+    name: "Scholar's Ink",
+    rarity: "Uncommon",
+    glyph: "XP",
+    artFile: "consumables/scholars-ink.webp",
+    effectType: "next-xp",
+    description:
+      "Your next completed normal quest earns +10 matching-stat XP."
+  },
+
+  "ember-draught": {
+    name: "Ember Draught",
+    rarity: "Uncommon",
+    glyph: "STR",
+    artFile: "consumables/ember-draught.webp",
+    effectType: "next-strength-xp",
+    description:
+      "Your next Strength quest earns +15 Strength XP."
+  },
+
+  "windrunner-cordial": {
+    name: "Windrunner Cordial",
+    rarity: "Uncommon",
+    glyph: "END",
+    artFile: "consumables/windrunner-cordial.webp",
+    effectType: "next-endurance-xp",
+    description:
+      "Your next Endurance quest earns +15 Endurance XP."
+  },
+
+  "mossheart-tonic": {
+    name: "Mossheart Tonic",
+    rarity: "Uncommon",
+    glyph: "RST",
+    artFile: "consumables/mossheart-tonic.webp",
+    effectType: "next-restoration-xp",
+    description:
+      "Your next Restoration quest earns +15 Restoration XP."
+  },
+
+  "wardens-key": {
+    name: "Warden's Key",
+    rarity: "Rare",
+    glyph: "KEY",
+    artFile: "consumables/wardens-key.webp",
+    effectType: "road-encounter",
+    description:
+      "Opens a random road encounter immediately."
   }
-};
+}
 
 
 // =========================================================
@@ -1429,6 +1497,13 @@ function createFreshState() {
     equippedRelics: { weapon:null, armor:null, charm:null },
     codexDiscoveries: ["guild-hall"],
     encounterCount: 0,
+    activeConsumableEffects: {
+      nextGold: false,
+      nextXp: false,
+      nextStrengthXp: false,
+      nextEnduranceXp: false,
+      nextRestorationXp: false
+    },
     onboardingComplete: false,
     world: createFreshWorldState()
   };
@@ -1450,6 +1525,16 @@ function migrateState(parsed) {
     equippedRelics: { ...fresh.equippedRelics, ...(parsed?.equippedRelics || {}) },
     achievements: Array.isArray(parsed?.achievements) ? parsed.achievements : [],
     codexDiscoveries: Array.isArray(parsed?.codexDiscoveries) ? parsed.codexDiscoveries : fresh.codexDiscoveries,
+
+    activeConsumableEffects: {
+      ...fresh.activeConsumableEffects,
+      ...(
+        parsed?.activeConsumableEffects
+        && typeof parsed.activeConsumableEffects === "object"
+          ? parsed.activeConsumableEffects
+          : {}
+      )
+    },
 
     world:
       migrateWorldState(
@@ -3617,6 +3702,42 @@ function showRewardBurst(t){const e=$("#rewardBurst");if(!e)return;e.textContent
 let pendingEncounter=null;
 function maybeTriggerEncounter(){const s=getState(),n=s.history.filter(x=>x.questId!=="boss").length;if(!n||n%3!==0)return;pendingEncounter=RANDOM_ENCOUNTERS[(n+Number(s.encounterCount||0))%RANDOM_ENCOUNTERS.length];$("#encounterGlyph").textContent=pendingEncounter.glyph;$("#encounterTitle").textContent=pendingEncounter.title;$("#encounterCopy").textContent=pendingEncounter.copy;$("#encounterReward").textContent=pendingEncounter.reward==="xp"?`+${pendingEncounter.amount} XP`:`+${pendingEncounter.amount} ${capitalize(pendingEncounter.reward)}`;$("#encounterDialog")?.showModal();}
 function claimEncounter(){if(!pendingEncounter)return;const s=getState();if(pendingEncounter.reward==="gold")s.gold+=pendingEncounter.amount;else if(pendingEncounter.reward==="crystals")s.crystals+=pendingEncounter.amount;else s.xp.restoration+=pendingEncounter.amount;s.encounterCount=Number(s.encounterCount||0)+1;saveState(s);$("#encounterDialog")?.close();showRewardBurst($("#encounterReward")?.textContent||"Treasure claimed");pendingEncounter=null;render();}
+
+function getActiveConsumableEffects(state = getState()) {
+  return {
+    nextGold: Boolean(state.activeConsumableEffects?.nextGold),
+    nextXp: Boolean(state.activeConsumableEffects?.nextXp),
+    nextStrengthXp: Boolean(state.activeConsumableEffects?.nextStrengthXp),
+    nextEnduranceXp: Boolean(state.activeConsumableEffects?.nextEnduranceXp),
+    nextRestorationXp: Boolean(state.activeConsumableEffects?.nextRestorationXp)
+  };
+}
+
+function getConsumableEffectStateKey(effectType) {
+  return {
+    "next-gold": "nextGold",
+    "next-xp": "nextXp",
+    "next-strength-xp": "nextStrengthXp",
+    "next-endurance-xp": "nextEnduranceXp",
+    "next-restoration-xp": "nextRestorationXp"
+  }[effectType] || null;
+}
+
+function openConsumableRoadEncounter() {
+  if (pendingEncounter || $("#encounterDialog")?.open) return false;
+  const state = getState();
+  const offset = Math.floor(Math.random() * RANDOM_ENCOUNTERS.length);
+  const index = (Number(state.encounterCount || 0) + state.history.length + offset) % RANDOM_ENCOUNTERS.length;
+  pendingEncounter = RANDOM_ENCOUNTERS[index];
+  $("#encounterGlyph").textContent = pendingEncounter.glyph;
+  $("#encounterTitle").textContent = pendingEncounter.title;
+  $("#encounterCopy").textContent = pendingEncounter.copy;
+  $("#encounterReward").textContent = pendingEncounter.reward === "xp"
+    ? "+" + pendingEncounter.amount + " XP"
+    : "+" + pendingEncounter.amount + " " + capitalize(pendingEncounter.reward);
+  $("#encounterDialog")?.showModal();
+  return true;
+}
 function renderBossCombat(s){
   const p=$("#bossCombatPanel");
   if(!p)return;
@@ -4361,8 +4482,57 @@ async function completeQuest() {
       .toISOString();
 
   const equipmentBonuses = getEquipmentBonuses(state);
-  const earnedXp = (Number(completedQuest.xp) || 0) + (equipmentBonuses.xpBonus[completedQuest.xpType] || 0);
-  const earnedGold = Math.max(0, Math.round((Number(completedQuest.gold) || 0) * equipmentBonuses.goldMultiplier + equipmentBonuses.flatGold));
+  const activeEffects = getActiveConsumableEffects(state);
+  let consumableXpBonus = 0;
+  let consumableGoldBonus = 0;
+  const consumedEffects = [];
+
+  if (activeEffects.nextGold) {
+    consumableGoldBonus += 10;
+    activeEffects.nextGold = false;
+    consumedEffects.push("Wayfarer's Ration");
+  }
+
+  if (activeEffects.nextXp) {
+    consumableXpBonus += 10;
+    activeEffects.nextXp = false;
+    consumedEffects.push("Scholar's Ink");
+  }
+
+  if (completedQuest.xpType === "strength" && activeEffects.nextStrengthXp) {
+    consumableXpBonus += 15;
+    activeEffects.nextStrengthXp = false;
+    consumedEffects.push("Ember Draught");
+  }
+
+  if (completedQuest.xpType === "endurance" && activeEffects.nextEnduranceXp) {
+    consumableXpBonus += 15;
+    activeEffects.nextEnduranceXp = false;
+    consumedEffects.push("Windrunner Cordial");
+  }
+
+  if (completedQuest.xpType === "restoration" && activeEffects.nextRestorationXp) {
+    consumableXpBonus += 15;
+    activeEffects.nextRestorationXp = false;
+    consumedEffects.push("Mossheart Tonic");
+  }
+
+  state.activeConsumableEffects = activeEffects;
+
+  const earnedXp =
+    (Number(completedQuest.xp) || 0)
+    + (equipmentBonuses.xpBonus[completedQuest.xpType] || 0)
+    + consumableXpBonus;
+
+  const earnedGold = Math.max(
+    0,
+    Math.round(
+      (Number(completedQuest.gold) || 0)
+      * equipmentBonuses.goldMultiplier
+      + equipmentBonuses.flatGold
+      + consumableGoldBonus
+    )
+  );
 
   state.weeklyCompleted.push({
     questId:
@@ -4482,13 +4652,13 @@ async function completeQuest() {
     && !partySynced
   ) {
     showToast(
-      `Quest saved | +${earnedXp} XP | +${earnedGold} Gold | Party sync failed`
+      "Quest saved | +" + earnedXp + " XP | +" + earnedGold + " Gold" + (consumedEffects.length ? " | Used: " + consumedEffects.join(", ") : "") + " | Party sync failed"
     );
   }
 
   else {
     showToast(
-      `Quest Complete | +${earnedXp} XP | +${earnedGold} Gold`
+      "Quest Complete | +" + earnedXp + " XP | +" + earnedGold + " Gold" + (consumedEffects.length ? " | Used: " + consumedEffects.join(", ") : "")
     );
   }
 
@@ -9421,66 +9591,65 @@ async function ensureWeeklyBossTreasureDrop(
 async function usePartyTreasure(
   itemId
 ) {
-  if (
-    partyTreasureUsing
-    || !PARTY_TREASURES[
-      itemId
-    ]
-    || !currentParty
-  ) {
+  const item = PARTY_TREASURES[itemId];
+
+  if (partyTreasureUsing || !item || !currentParty) return;
+
+  const effectStateKey = getConsumableEffectStateKey(item.effectType);
+
+  if (effectStateKey) {
+    const activeEffects = getActiveConsumableEffects(getState());
+    if (activeEffects[effectStateKey]) {
+      showToast(item.name + " is already prepared.");
+      return;
+    }
+  }
+
+  if (item.effectType === "road-encounter" && (pendingEncounter || $("#encounterDialog")?.open)) {
+    showToast("Finish the current road encounter first.");
     return;
   }
 
-  partyTreasureUsing =
-    true;
+  partyTreasureUsing = true;
 
   try {
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "use_party_treasure",
-        {
-          supplied_party_id:
-            currentParty.id,
+    const { data, error } = await supabaseClient.rpc(
+      "use_party_treasure",
+      {
+        supplied_party_id: currentParty.id,
+        supplied_item_id: itemId,
+        supplied_week_key: getWeekKey()
+      }
+    );
 
-          supplied_item_id:
-            itemId,
+    if (error) throw error;
 
-          supplied_week_key:
-            getWeekKey()
-        }
-      );
+    const returnedEffectType = data?.effect_type || item.effectType || "immediate";
+    const returnedStateKey = getConsumableEffectStateKey(returnedEffectType);
 
-    if (error) {
-      throw error;
+    if (returnedStateKey) {
+      const state = getState();
+      state.activeConsumableEffects = getActiveConsumableEffects(state);
+      state.activeConsumableEffects[returnedStateKey] = true;
+      saveState(state);
+      showRewardBurst(item.name + " prepared");
+    }
+
+    if (returnedEffectType === "road-encounter") {
+      openConsumableRoadEncounter();
     }
 
     await checkIncomingGifts();
-
     await refreshParty();
 
-    showToast(
-      data?.message
-      || `${PARTY_TREASURES[itemId].name} used.`
-    );
+    showToast(data?.message || (item.name + " used."));
   }
-
   catch (error) {
-    console.error(
-      "Treasure could not be used:",
-      error
-    );
-
-    showToast(
-      "That treasure could not be used."
-    );
+    console.error("Treasure could not be used:", error);
+    showToast("That treasure could not be used.");
   }
-
   finally {
-    partyTreasureUsing =
-      false;
+    partyTreasureUsing = false;
   }
 }
 
