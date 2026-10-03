@@ -10461,6 +10461,18 @@ $("#leavePartyButton")
     leaveParty
   );
 
+$("#beginPartyAdventureButton")
+  ?.addEventListener(
+    "click",
+    beginPartyAdventure
+  );
+
+$("#claimPartyAdventureRewardButton")
+  ?.addEventListener(
+    "click",
+    claimPartyAdventureReward
+  );
+
 $("#refreshPartyButton")
   ?.addEventListener(
     "click",
