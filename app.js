@@ -704,6 +704,44 @@ const CAMPAIGN_LOCATIONS = [
 ];
 const ADVENTURER_TITLES = [{level:1,title:"Wayfarer"},{level:3,title:"Adventurer"},{level:5,title:"Pathfinder"},{level:8,title:"Vanguard"},{level:12,title:"Champion"},{level:18,title:"Warden"},{level:25,title:"Legend of the Guild"}];
 const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:"ranger",title:"Follow the Blackwood Trail"},{questId:"keep",title:"Break the Mossgate Guard"},{questId:"boss",title:"Defeat the Briar Warden"}];
+const BOSS_PROFILES = [
+  {
+    id: "briar-warden",
+    name: "The Briar Warden",
+    locations: ["guild-hall","old-road","whispering-pines","mossgate"],
+    copy: "Break the Warden's final guard and force open the road into the Blackwood."
+  },
+  {
+    id: "hollow-antler",
+    name: "The Hollow Antler",
+    locations: ["whispering-pines","mossgate"],
+    copy: "A pale-horned thing stalks the tree line. Hold your ground until the forest yields."
+  },
+  {
+    id: "mossjaw",
+    name: "Mossjaw, Gatekeeper",
+    locations: ["mossgate","wardens-crossing"],
+    copy: "The old gate has grown teeth. Batter through Mossjaw's guard before the path closes again."
+  },
+  {
+    id: "ash-crowned-knight",
+    name: "The Ash-Crowned Knight",
+    locations: ["wardens-crossing","blackwood-ruins"],
+    copy: "An oathbound knight bars the crossing. Outlast the armor, then break the final stance."
+  },
+  {
+    id: "lantern-widow",
+    name: "The Lantern Widow",
+    locations: ["blackwood-ruins","heart-of-the-wood"],
+    copy: "False lights drift among the ruins. Keep moving until the Widow's lure burns out."
+  },
+  {
+    id: "rootbound-king",
+    name: "The Rootbound King",
+    locations: ["heart-of-the-wood"],
+    copy: "The oldest roots have risen in defense of the heartwood. Endure the final stand."
+  }
+];
 const ACHIEVEMENTS = [
  {id:"first-step",name:"First Step",copy:"Complete your first quest.",test:s=>s.history.length>=1},{id:"road-worn",name:"Road-Worn",copy:"Complete 10 quests.",test:s=>s.history.length>=10},
  {id:"veteran",name:"Guild Veteran",copy:"Complete 25 quests.",test:s=>s.history.length>=25},{id:"strength-ii",name:"Ironbound",copy:"Reach Strength level 3.",test:s=>getLevelData(s.xp.strength).level>=3},
@@ -3491,6 +3529,31 @@ function showNextRelicReveal() {
 function getOverallLevel(s){return Math.floor((Number(s.xp.strength||0)+Number(s.xp.endurance||0)+Number(s.xp.restoration||0))/XP_PER_LEVEL)+1;}
 function getAdventurerTitle(s){const l=getOverallLevel(s);return ADVENTURER_TITLES.filter(x=>l>=x.level).at(-1)?.title||"Wayfarer";}
 function getCampaignLocation(p){return CAMPAIGN_LOCATIONS.filter(x=>p>=x.at).at(-1)||CAMPAIGN_LOCATIONS[0];}
+function getBossProfileById(id){return BOSS_PROFILES.find(x=>x.id===id)||BOSS_PROFILES[0];}
+function getWeeklyBossProfile(s){
+  const weekKey=getWeekKey();
+  const stored=(s.history||[]).find(x=>x.questId==="boss"&&x.weekKey===weekKey&&x.bossId);
+  if(stored)return getBossProfileById(stored.bossId);
+
+  const priorBosses=(s.history||[]).filter(x=>x.questId==="boss");
+  if(!priorBosses.length)return BOSS_PROFILES[0];
+
+  const progress=Math.max(
+    Number(s.campaignProgress||0),
+    (s.history||[]).filter(x=>x.questId!=="boss").length
+  );
+  const location=getCampaignLocation(progress);
+  const candidates=BOSS_PROFILES.filter(
+    x=>x.id!=="briar-warden"&&x.locations.includes(location.id)
+  );
+  const pool=candidates.length?candidates:BOSS_PROFILES.slice(1);
+  const seed=`${weekKey}:${location.id}`;
+  const hash=Array.from(seed).reduce(
+    (total,char)=>((total*31)+char.charCodeAt(0))>>>0,
+    7
+  );
+  return pool[hash%pool.length];
+}
 function getEquipmentBonuses(s){const o={flatGold:0,goldMultiplier:1,xpBonus:{strength:0,endurance:0,restoration:0}};Object.values(s.equippedRelics||{}).forEach(id=>{const b=EQUIPMENT_RELICS[id];if(!b)return;o.flatGold+=Number(b.flatGold||0);o.goldMultiplier*=Number(b.goldMultiplier||1);if(b.xpType)o.xpBonus[b.xpType]+=Number(b.xpBonus||0);});return o;}
 function evaluateAchievements(s){const e=new Set(s.achievements||[]),a=[];ACHIEVEMENTS.forEach(x=>{if(!e.has(x.id)&&x.test(s)){e.add(x.id);a.push(x.id);}});if(a.length){s.achievements=Array.from(e);saveState(s);}return a;}
 function renderCampaign(s){const p=Math.min(CAMPAIGN_GOAL,Math.max(Number(s.campaignProgress||0),Math.min(CAMPAIGN_GOAL,s.history.filter(x=>x.questId!=="boss").length)));s.campaignProgress=p;const c=getCampaignLocation(p);$("#campaignRank").textContent=getAdventurerTitle(s);$("#campaignLocation").textContent=c.name;$("#campaignProgressText").textContent=`${p} / ${CAMPAIGN_GOAL} quests`;$("#campaignNarrative").textContent=p>=CAMPAIGN_GOAL?"The heart of the Blackwood stands open. Campaign I is conquered.":`Current location: ${c.name}. Every completed quest pushes the expedition deeper into the wood.`;$("#campaignMap").innerHTML=CAMPAIGN_LOCATIONS.map((x,i)=>`<div class="campaign-map-stop ${p>=x.at?"is-unlocked":""} ${c.name===x.name?"is-current":""}"><span class="campaign-map-node">${x.glyph}</span><small>${escapeHtml(x.name)}</small></div>${i<CAMPAIGN_LOCATIONS.length-1?'<span class="campaign-map-path"></span>':""}`).join("");}
@@ -3506,7 +3569,24 @@ function showRewardBurst(t){const e=$("#rewardBurst");if(!e)return;e.textContent
 let pendingEncounter=null;
 function maybeTriggerEncounter(){const s=getState(),n=s.history.filter(x=>x.questId!=="boss").length;if(!n||n%3!==0)return;pendingEncounter=RANDOM_ENCOUNTERS[(n+Number(s.encounterCount||0))%RANDOM_ENCOUNTERS.length];$("#encounterGlyph").textContent=pendingEncounter.glyph;$("#encounterTitle").textContent=pendingEncounter.title;$("#encounterCopy").textContent=pendingEncounter.copy;$("#encounterReward").textContent=pendingEncounter.reward==="xp"?`+${pendingEncounter.amount} XP`:`+${pendingEncounter.amount} ${capitalize(pendingEncounter.reward)}`;$("#encounterDialog")?.showModal();}
 function claimEncounter(){if(!pendingEncounter)return;const s=getState();if(pendingEncounter.reward==="gold")s.gold+=pendingEncounter.amount;else if(pendingEncounter.reward==="crystals")s.crystals+=pendingEncounter.amount;else s.xp.restoration+=pendingEncounter.amount;s.encounterCount=Number(s.encounterCount||0)+1;saveState(s);$("#encounterDialog")?.close();showRewardBurst($("#encounterReward")?.textContent||"Treasure claimed");pendingEncounter=null;render();}
-function renderBossCombat(s){const p=$("#bossCombatPanel");if(!p)return;const on=activeQuest?.id==="boss";p.hidden=!on;if(!on)return;const g=Number(getSettings().weeklyGoal)||DEFAULT_WEEKLY_GOAL,c=Math.min(g,s.weeklyCompleted.length),hp=Math.max(10,100-Math.floor(c/Math.max(1,g)*70));$("#bossHpText").textContent=`${hp} / 100 HP`;$("#bossHpBar").style.width=`${hp}%`;}
+function renderBossCombat(s){
+  const p=$("#bossCombatPanel");
+  if(!p)return;
+
+  const on=activeQuest?.id==="boss";
+  p.hidden=!on;
+  if(!on)return;
+
+  const boss=getWeeklyBossProfile(s);
+  const g=Number(getSettings().weeklyGoal)||DEFAULT_WEEKLY_GOAL;
+  const c=Math.min(g,s.weeklyCompleted.length);
+  const hp=Math.max(10,100-Math.floor(c/Math.max(1,g)*70));
+
+  $("#bossEnemyName").textContent=boss.name;
+  $("#bossCombatCopy").textContent=boss.copy;
+  $("#bossHpText").textContent=`${hp} / 100 HP`;
+  $("#bossHpBar").style.width=`${hp}%`;
+}
 function equipRelic(id){const s=getState(),c=EQUIPMENT_RELICS[id];if(!c||!s.discoveredRelics.includes(id))return;s.equippedRelics[c.slot]=s.equippedRelics[c.slot]===id?null:id;saveState(s);render();showToast(s.equippedRelics[c.slot]?"Relic equipped.":"Relic unequipped.");}
 function openCurrentStoryQuest(){const s=getState(),n=getQuestChainStage(s);if(n<QUEST_CHAIN.length)openQuest(QUEST_CHAIN[n].questId);}
 function renderRpgSystems(s){const a=evaluateAchievements(s);renderCampaign(s);renderDailyContracts(s);renderQuestChain(s);renderNpcs();renderAchievements(s);renderEquipment(s);renderCodex(s);$("#characterTitleName").textContent=getAdventurerTitle(s);if(a.length&&appInitialized){const x=ACHIEVEMENTS.find(y=>y.id===a[0]);if(x)showRewardBurst(`Achievement: ${x.name}`);}}
@@ -3714,12 +3794,24 @@ function renderBossBattle(
     state.bossDefeatedWeek
     === weekKey;
 
+  const boss =
+    getWeeklyBossProfile(state);
+
   const bossButton =
     $("#bossButton");
 
   bossButton.disabled =
     !weekConquered
     || bossDefeated;
+
+  const bossName =
+    bossButton
+      ?.querySelector("strong");
+
+  if (bossName) {
+    bossName.textContent =
+      boss.name;
+  }
 
   if (bossDefeated) {
     $("#bossLockText")
@@ -3732,7 +3824,7 @@ function renderBossBattle(
   ) {
     $("#bossLockText")
       .textContent =
-        "Unlocked. Face the boss.";
+        `Unlocked. Face ${boss.name}.`;
   }
 
   else {
@@ -4052,13 +4144,20 @@ function openQuest(id) {
     .textContent =
       quest.category;
 
+  const bossProfile =
+    quest.id === "boss"
+      ? getWeeklyBossProfile(state)
+      : null;
+
   $("#dialogTitle")
     .textContent =
-      quest.title;
+      bossProfile?.name
+      || quest.title;
 
   $("#dialogDescription")
     .textContent =
-      quest.description;
+      bossProfile?.copy
+      || quest.description;
 
   $("#dialogTime")
     .textContent =
@@ -4441,7 +4540,7 @@ async function completeBossBattle() {
       null;
 
     showToast(
-      "The Boss has already been defeated this week."
+      `${getWeeklyBossProfile(state).name} has already been defeated this week.`
     );
 
     return;
@@ -4521,6 +4620,9 @@ async function claimBossRewards() {
     new Date()
       .toISOString();
 
+  const bossProfile =
+    getWeeklyBossProfile(state);
+
   state.xp.strength +=
     BOSS_STRENGTH_XP;
 
@@ -4541,7 +4643,12 @@ async function claimBossRewards() {
       "boss",
 
     title:
-      "Boss Battle",
+      bossProfile.name,
+
+    bossId:
+      bossProfile.id,
+
+    weekKey,
 
     category:
       "Boss",
@@ -4577,7 +4684,8 @@ async function claimBossRewards() {
   ) {
     partySynced =
       await syncBossActivityToParty(
-        completedAt
+        completedAt,
+        bossProfile
       );
 
     if (partySynced) {
@@ -4700,7 +4808,11 @@ async function syncQuestActivityToParty(
 // =========================================================
 
 async function syncBossActivityToParty(
-  completedAt
+  completedAt,
+  bossProfile =
+    getWeeklyBossProfile(
+      getState()
+    )
 ) {
   try {
     const settings =
@@ -4732,7 +4844,7 @@ async function syncBossActivityToParty(
             "boss",
 
           quest_title:
-            "Boss Battle",
+            bossProfile.name,
 
           xp:
             BOSS_STRENGTH_XP
@@ -6996,12 +7108,17 @@ async function renderParty() {
         (localRenown % 500) / 5
       )}%`;
 
+  const fellowshipBoss =
+    getWeeklyBossProfile(
+      localState
+    );
+
   $("#fellowshipBossThreat")
     .textContent =
       localState.bossDefeatedWeek
         === getWeekKey()
-        ? "Weekly threat defeated"
-        : "Blackwood threat active";
+        ? `${fellowshipBoss.name} defeated`
+        : fellowshipBoss.name;
 
   try {
     await ensureWeeklyBossTreasureDrop(false);
