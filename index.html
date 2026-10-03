@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="118">
+  <meta name="quest-board-build" content="119">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=117">
+  <link rel="stylesheet" href="styles.css?v=119">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
@@ -791,6 +791,68 @@
               class="party-members"
               id="partyMembers"
             ></div>
+
+          </section>
+
+
+          <section
+            class="party-adventure"
+            id="partyAdventurePanel"
+            aria-labelledby="partyAdventureTitle"
+          >
+
+            <div class="party-adventure-heading">
+              <div>
+                <p class="eyebrow">Fellowship Adventure</p>
+                <h2 id="partyAdventureTitle">The Lantern Road</h2>
+              </div>
+
+              <span
+                class="party-adventure-status"
+                id="partyAdventureStatus"
+              >
+                Not Begun
+              </span>
+            </div>
+
+            <p
+              class="party-adventure-narrative"
+              id="partyAdventureNarrative"
+            >
+              Beyond the Guild Hall, four dead lanterns mark an old road into the Blackwood.
+              The path will only wake for companions who travel it together.
+            </p>
+
+            <div
+              class="party-adventure-contributions"
+              id="partyAdventureContributions"
+              hidden
+            ></div>
+
+            <div
+              class="party-adventure-route"
+              id="partyAdventureRoute"
+            ></div>
+
+            <div class="progress-meta party-adventure-progress-meta">
+              <strong id="partyAdventureProgress">0 / 4 stages</strong>
+              <span id="partyAdventureObjective">The road is waiting.</span>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                id="partyAdventureBar"
+              ></div>
+            </div>
+
+            <button
+              class="fantasy-action-button party-adventure-start"
+              id="beginPartyAdventureButton"
+              type="button"
+            >
+              Begin Fellowship Adventure
+            </button>
 
           </section>
 
@@ -2333,7 +2395,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=118"></script>
+  <script src="app.js?v=119"></script>
   <script src="quest-guild.js?v=8"></script>
 
 </body>
