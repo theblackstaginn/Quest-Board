@@ -704,6 +704,41 @@ const CAMPAIGN_LOCATIONS = [
 ];
 const ADVENTURER_TITLES = [{level:1,title:"Wayfarer"},{level:3,title:"Adventurer"},{level:5,title:"Pathfinder"},{level:8,title:"Vanguard"},{level:12,title:"Champion"},{level:18,title:"Warden"},{level:25,title:"Legend of the Guild"}];
 const QUEST_CHAIN = [{questId:"there-back",title:"Scout the Old Road"},{questId:"ranger",title:"Follow the Blackwood Trail"},{questId:"keep",title:"Break the Mossgate Guard"},{questId:"boss",title:"Defeat the Briar Warden"}];
+
+const PARTY_ADVENTURE = {
+  id: "lantern-road-i",
+  title: "The Lantern Road",
+  intro:
+    "Beyond the Guild Hall, four dead lanterns mark an old road into the Blackwood. The path will only wake for companions who travel it together.",
+  completed:
+    "All four lanterns burn behind the Fellowship. The old road knows your names now, and something deeper in the Blackwood has noticed the light.",
+  stages: [
+    {
+      numeral: "I",
+      title: "Light the First Lantern",
+      copy:
+        "The gate will not open for a lone traveler. Each companion must carry a flame to the road."
+    },
+    {
+      numeral: "II",
+      title: "Cross the Old Mile",
+      copy:
+        "The first lantern catches. Keep the Fellowship moving until the old milestones begin to answer."
+    },
+    {
+      numeral: "III",
+      title: "Hold the Broken Shrine",
+      copy:
+        "Something circles the pines. The watch must be shared; no companion can be left carrying it alone."
+    },
+    {
+      numeral: "IV",
+      title: "Break the Night Watch",
+      copy:
+        "At the final lantern, a Blackwood threat blocks the road. Reach it battle-worn, then break the guard."
+    }
+  ]
+};
 const BOSS_PROFILES = [
   {
     id: "briar-warden",
@@ -7127,16 +7162,24 @@ async function renderParty() {
       members,
       activity,
       inventory,
-      bonusProgress
+      bonusProgress,
+      adventure
     ] =
       await Promise.all([
         fetchPartyMembers(),
         fetchPartyActivity(),
         fetchPartyTreasureInventory(),
-        fetchPartyBonusProgress()
+        fetchPartyBonusProgress(),
+        fetchPartyAdventure()
       ]);
 
     renderPartyMembers(
+      members,
+      activity
+    );
+
+    renderPartyAdventure(
+      adventure,
       members,
       activity
     );
@@ -7375,6 +7418,505 @@ async function fetchPartyActivity() {
   }
 
   return data || [];
+}
+
+
+// =========================================================
+// 57A. SHARED FELLOWSHIP ADVENTURE
+// =========================================================
+
+async function fetchPartyAdventure() {
+  if (
+    !currentParty
+    || !supabaseClient
+  ) {
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("party_adventures")
+      .select(
+        "party_id, adventure_id, started_by_user_id, started_at"
+      )
+      .eq(
+        "party_id",
+        currentParty.id
+      )
+      .eq(
+        "adventure_id",
+        PARTY_ADVENTURE.id
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data || null;
+}
+
+
+async function beginPartyAdventure() {
+  if (
+    !supabaseReady
+    || !supabaseUser
+    || !currentParty
+  ) {
+    showToast(
+      "The Fellowship is not connected."
+    );
+    return;
+  }
+
+  const button =
+    $("#beginPartyAdventureButton");
+
+  if (button) {
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Lighting the Road…";
+  }
+
+  try {
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("party_adventures")
+        .upsert(
+          {
+            party_id:
+              currentParty.id,
+
+            adventure_id:
+              PARTY_ADVENTURE.id,
+
+            started_by_user_id:
+              supabaseUser.id
+          },
+          {
+            onConflict:
+              "party_id,adventure_id",
+
+            ignoreDuplicates:
+              true
+          }
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    await refreshParty();
+
+    showToast(
+      "The Lantern Road has begun."
+    );
+  }
+
+  catch (error) {
+    console.error(
+      "Could not begin fellowship adventure:",
+      error
+    );
+
+    showToast(
+      "The Fellowship could not begin the adventure."
+    );
+  }
+
+  finally {
+    if (button) {
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Begin Fellowship Adventure";
+    }
+  }
+}
+
+
+function getPartyAdventureMemberQuestCount(
+  member,
+  activity,
+  startedAtMs
+) {
+  const memberUserIds =
+    Array.isArray(
+      member.user_ids
+    )
+      ? member.user_ids
+      : [
+          member.user_id
+        ];
+
+  return (
+    activity || []
+  )
+    .filter(
+      item =>
+        item.quest_id !== "boss"
+        && (
+          Date.parse(
+            item.completed_at || ""
+          ) || 0
+        ) >= startedAtMs
+        && (
+          memberUserIds.includes(
+            item.user_id
+          )
+          || (
+            member.profile_id
+            && item.profile_id
+              === member.profile_id
+          )
+        )
+    )
+    .length;
+}
+
+
+function renderPartyAdventure(
+  adventureRow,
+  members,
+  activity
+) {
+  const panel =
+    $("#partyAdventurePanel");
+
+  if (!panel) {
+    return;
+  }
+
+  const startButton =
+    $("#beginPartyAdventureButton");
+
+  const contributionBox =
+    $("#partyAdventureContributions");
+
+  const route =
+    $("#partyAdventureRoute");
+
+  const progressText =
+    $("#partyAdventureProgress");
+
+  const objectiveText =
+    $("#partyAdventureObjective");
+
+  const progressBar =
+    $("#partyAdventureBar");
+
+  const status =
+    $("#partyAdventureStatus");
+
+  const narrative =
+    $("#partyAdventureNarrative");
+
+  if (
+    !route
+    || !progressText
+    || !objectiveText
+    || !progressBar
+    || !status
+    || !narrative
+  ) {
+    return;
+  }
+
+  const safeMembers =
+    Array.isArray(members)
+      ? members
+      : [];
+
+  if (!adventureRow) {
+    status.textContent =
+      "Not Begun";
+
+    narrative.textContent =
+      PARTY_ADVENTURE.intro;
+
+    progressText.textContent =
+      `0 / ${PARTY_ADVENTURE.stages.length} stages`;
+
+    objectiveText.textContent =
+      "The road is waiting.";
+
+    progressBar.style.width =
+      "0%";
+
+    if (startButton) {
+      startButton.hidden =
+        false;
+    }
+
+    if (contributionBox) {
+      contributionBox.hidden =
+        true;
+
+      contributionBox.innerHTML =
+        "";
+    }
+
+    route.innerHTML =
+      PARTY_ADVENTURE.stages
+        .map(
+          stage => `
+            <article class="party-adventure-stage is-locked">
+              <span class="party-adventure-node">
+                ${stage.numeral}
+              </span>
+              <div>
+                <strong>${escapeHtml(stage.title)}</strong>
+                <p>${escapeHtml(stage.copy)}</p>
+                <small>Awaiting the Fellowship.</small>
+              </div>
+            </article>
+          `
+        )
+        .join("");
+
+    return;
+  }
+
+  if (startButton) {
+    startButton.hidden =
+      true;
+  }
+
+  const startedAtMs =
+    Date.parse(
+      adventureRow.started_at || ""
+    ) || 0;
+
+  const adventureActivity =
+    (
+      activity || []
+    )
+      .filter(
+        item =>
+          (
+            Date.parse(
+              item.completed_at || ""
+            ) || 0
+          ) >= startedAtMs
+      );
+
+  const normalActivity =
+    adventureActivity
+      .filter(
+        item =>
+          item.quest_id !== "boss"
+      );
+
+  const bossActivity =
+    adventureActivity
+      .filter(
+        item =>
+          item.quest_id === "boss"
+      );
+
+  const contributions =
+    safeMembers
+      .map(
+        member => ({
+          name:
+            member.display_name
+            || member.profile_id
+            || "Companion",
+
+          count:
+            getPartyAdventureMemberQuestCount(
+              member,
+              activity,
+              startedAtMs
+            )
+        })
+      );
+
+  const hasMembers =
+    contributions.length > 0;
+
+  const everyMemberHasOne =
+    hasMembers
+    && contributions.every(
+      item =>
+        item.count >= 1
+    );
+
+  const everyMemberHasTwo =
+    hasMembers
+    && contributions.every(
+      item =>
+        item.count >= 2
+    );
+
+  const crossingTarget =
+    Math.max(
+      4,
+      safeMembers.length * 2
+    );
+
+  const finalQuestTarget =
+    Math.max(
+      6,
+      safeMembers.length * 3
+    );
+
+  const stageDone = [
+    everyMemberHasOne,
+    everyMemberHasOne
+      && normalActivity.length
+        >= crossingTarget,
+    everyMemberHasOne
+      && normalActivity.length
+        >= crossingTarget
+      && everyMemberHasTwo,
+    everyMemberHasOne
+      && normalActivity.length
+        >= crossingTarget
+      && everyMemberHasTwo
+      && normalActivity.length
+        >= finalQuestTarget
+      && bossActivity.length
+        >= 1
+  ];
+
+  const completedStages =
+    stageDone.filter(Boolean)
+      .length;
+
+  const complete =
+    completedStages
+    >= PARTY_ADVENTURE.stages.length;
+
+  const currentStageIndex =
+    complete
+      ? PARTY_ADVENTURE.stages.length
+      : stageDone.findIndex(
+          done =>
+            !done
+        );
+
+  const contributionText =
+    contributions
+      .map(
+        item =>
+          `${item.name}: ${item.count}`
+      )
+      .join(" · ");
+
+  if (contributionBox) {
+    contributionBox.hidden =
+      contributions.length === 0;
+
+    contributionBox.innerHTML =
+      contributions
+        .map(
+          item => `
+            <span>
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>${item.count} quest${item.count === 1 ? "" : "s"}</small>
+            </span>
+          `
+        )
+        .join("");
+  }
+
+  const objectives = [
+    `Each companion completes 1 quest — ${contributionText || "waiting for companions"}`,
+    `Complete ${crossingTarget} fellowship quests — ${Math.min(normalActivity.length, crossingTarget)} / ${crossingTarget}`,
+    `Each companion reaches 2 quests — ${contributionText || "waiting for companions"}`,
+    `Reach ${finalQuestTarget} quests and defeat a boss — ${Math.min(normalActivity.length, finalQuestTarget)} / ${finalQuestTarget} quests · ${bossActivity.length ? "boss defeated" : "boss still standing"}`
+  ];
+
+  route.innerHTML =
+    PARTY_ADVENTURE.stages
+      .map(
+        (
+          stage,
+          index
+        ) => {
+          const done =
+            Boolean(
+              stageDone[index]
+            );
+
+          const current =
+            !complete
+            && index
+              === currentStageIndex;
+
+          const className =
+            done
+              ? "is-complete"
+              : current
+                ? "is-current"
+                : "is-locked";
+
+          return `
+            <article class="party-adventure-stage ${className}">
+              <span class="party-adventure-node">
+                ${done ? "✓" : stage.numeral}
+              </span>
+
+              <div>
+                <strong>${escapeHtml(stage.title)}</strong>
+                <p>${escapeHtml(stage.copy)}</p>
+                <small>
+                  ${done ? "Stage complete." : escapeHtml(objectives[index])}
+                </small>
+              </div>
+            </article>
+          `;
+        }
+      )
+      .join("");
+
+  progressText.textContent =
+    `${completedStages} / ${PARTY_ADVENTURE.stages.length} stages`;
+
+  progressBar.style.width =
+    `${Math.round(
+      completedStages
+      / PARTY_ADVENTURE.stages.length
+      * 100
+    )}%`;
+
+  if (complete) {
+    status.textContent =
+      "Road Cleared";
+
+    narrative.textContent =
+      PARTY_ADVENTURE.completed;
+
+    objectiveText.textContent =
+      "The Fellowship completed The Lantern Road.";
+  }
+
+  else {
+    const currentStage =
+      PARTY_ADVENTURE.stages[
+        currentStageIndex
+      ];
+
+    status.textContent =
+      `Stage ${currentStageIndex + 1} of ${PARTY_ADVENTURE.stages.length}`;
+
+    narrative.textContent =
+      currentStage.copy;
+
+    objectiveText.textContent =
+      objectives[
+        currentStageIndex
+      ];
+  }
 }
 
 
