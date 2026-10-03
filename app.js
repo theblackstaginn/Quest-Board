@@ -12288,6 +12288,7 @@ const WORLD_DEVICE_WEATHER_CACHE_MS =
 
 let deviceWeatherCache = null;
 let deviceWeatherRequest = null;
+let deviceWeatherLocationWarningShown = false;
 
 function getDevicePosition() {
   return new Promise(
@@ -12392,6 +12393,121 @@ function getOpenMeteoCondition(
   return "";
 }
 
+function getOpenMeteoMinuteWindowCondition(
+  payload
+) {
+  const minuteData =
+    payload?.minutely_15;
+
+  if (!minuteData) {
+    return "";
+  }
+
+  const codes =
+    Array.isArray(
+      minuteData.weather_code
+    )
+      ? minuteData.weather_code
+      : [];
+
+  const precipitation =
+    Array.isArray(
+      minuteData.precipitation
+    )
+      ? minuteData.precipitation
+      : [];
+
+  const rain =
+    Array.isArray(
+      minuteData.rain
+    )
+      ? minuteData.rain
+      : [];
+
+  const showers =
+    Array.isArray(
+      minuteData.showers
+    )
+      ? minuteData.showers
+      : [];
+
+  const snowfall =
+    Array.isArray(
+      minuteData.snowfall
+    )
+      ? minuteData.snowfall
+      : [];
+
+  const count =
+    Math.max(
+      codes.length,
+      precipitation.length,
+      rain.length,
+      showers.length,
+      snowfall.length
+    );
+
+  let sawRain =
+    false;
+
+  let sawSnow =
+    false;
+
+  for (
+    let index = 0;
+    index < count;
+    index += 1
+  ) {
+    const condition =
+      getOpenMeteoCondition(
+        codes[index],
+        {
+          precipitation:
+            precipitation[index] || 0,
+          rain:
+            rain[index] || 0,
+          showers:
+            showers[index] || 0,
+          snowfall:
+            snowfall[index] || 0
+        }
+      );
+
+    if (
+      condition ===
+      "Thunderstorm"
+    ) {
+      return "Thunderstorm";
+    }
+
+    if (
+      condition ===
+      "Snow"
+    ) {
+      sawSnow =
+        true;
+    }
+
+    if (
+      condition ===
+      "Rain"
+    ) {
+      sawRain =
+        true;
+    }
+  }
+
+  if (sawSnow) {
+    return "Snow";
+  }
+
+  if (sawRain) {
+    return "Rain";
+  }
+
+  return "";
+}
+
 async function fetchDeviceWeather({
   force = false
 } = {}) {
@@ -12444,6 +12560,27 @@ async function fetchDeviceWeather({
       );
 
       url.searchParams.set(
+        "minutely_15",
+        [
+          "weather_code",
+          "precipitation",
+          "rain",
+          "showers",
+          "snowfall"
+        ].join(",")
+      );
+
+      url.searchParams.set(
+        "past_minutely_15",
+        "1"
+      );
+
+      url.searchParams.set(
+        "forecast_minutely_15",
+        "2"
+      );
+
+      url.searchParams.set(
         "timezone",
         "auto"
       );
@@ -12468,11 +12605,29 @@ async function fetchDeviceWeather({
       const current =
         payload?.current || {};
 
-      const condition =
+      const currentCondition =
         getOpenMeteoCondition(
           current.weather_code,
           current
         );
+
+      const minuteWindowCondition =
+        getOpenMeteoMinuteWindowCondition(
+          payload
+        );
+
+      const condition =
+        (
+          currentCondition ===
+            "Thunderstorm"
+          || currentCondition ===
+            "Snow"
+        )
+          ? currentCondition
+          : (
+              minuteWindowCondition
+              || currentCondition
+            );
 
       if (!condition) {
         throw new Error(
@@ -12535,8 +12690,25 @@ async function refreshWorldAtmosphere({
 
   catch (deviceWeatherError) {
     console.info(
-      "Live device weather unavailable; using shared weather fallback."
+      "Live device weather unavailable; using shared weather fallback.",
+      deviceWeatherError
     );
+
+    if (
+      !deviceWeatherLocationWarningShown
+      && (
+        deviceWeatherError?.code === 1
+        || deviceWeatherError?.name ===
+          "NotAllowedError"
+      )
+    ) {
+      deviceWeatherLocationWarningShown =
+        true;
+
+      showToast(
+        "Allow location access for live Blackwood weather."
+      );
+    }
   }
 
   if (!supabaseClient) {
