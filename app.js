@@ -11061,16 +11061,16 @@ let octoberRavenHasSpawned = false;
 let octoberLightningHasFlashed = false;
 
 const OCTOBER_RAVEN_MIN_DELAY_MS =
-  18 * 1000;
+  9 * 1000;
 
 const OCTOBER_RAVEN_MAX_DELAY_MS =
-  48 * 1000;
+  28 * 1000;
 
 const OCTOBER_LIGHTNING_MIN_DELAY_MS =
-  52 * 1000;
+  26 * 1000;
 
 const OCTOBER_LIGHTNING_MAX_DELAY_MS =
-  138 * 1000;
+  74 * 1000;
 
 function getWorldSeason(date = new Date()) {
   const month = date.getMonth();
@@ -11699,11 +11699,13 @@ function spawnOctoberRavenPass(
     Math.random();
 
   const flockSize =
-    flockRoll < .68
+    flockRoll < .34
       ? 1
-      : flockRoll < .93
+      : flockRoll < .72
         ? 2
-        : 3;
+        : flockRoll < .93
+          ? 3
+          : 4;
 
   const reverse =
     Math.random() < .46;
@@ -11951,8 +11953,8 @@ function scheduleOctoberRavens({
             OCTOBER_RAVEN_MAX_DELAY_MS
           )
         : getAtmosphereRandom(
-            6 * 1000,
-            14 * 1000
+            4 * 1000,
+            9 * 1000
           );
 
     octoberRavenTimer =
@@ -12015,10 +12017,10 @@ function scheduleAtmosphereLightning({
 
     if (weather === "storm") {
       minDelay =
-        14 * 1000;
+        9 * 1000;
 
       maxDelay =
-        42 * 1000;
+        28 * 1000;
     }
 
     else if (
@@ -12026,10 +12028,10 @@ function scheduleAtmosphereLightning({
       || weather === "cloudy"
     ) {
       minDelay =
-        34 * 1000;
+        18 * 1000;
 
       maxDelay =
-        96 * 1000;
+        52 * 1000;
     }
 
     const delay =
@@ -12039,8 +12041,8 @@ function scheduleAtmosphereLightning({
             maxDelay
           )
         : getAtmosphereRandom(
-            12 * 1000,
-            24 * 1000
+            7 * 1000,
+            15 * 1000
           );
 
     atmosphereLightningTimer =
