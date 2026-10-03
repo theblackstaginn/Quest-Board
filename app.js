@@ -11257,14 +11257,14 @@ function getWeatherParticlePlan(
   if (weather === "storm") {
     return {
       kind: "rain",
-      count: 42
+      count: 96
     };
   }
 
   if (weather === "rain") {
     return {
       kind: "rain",
-      count: 32
+      count: 72
     };
   }
 
@@ -11360,15 +11360,15 @@ function createWeatherParticle(kind) {
 
   if (kind === "rain") {
     duration =
-      .55 + Math.random() * .80;
+      .48 + Math.random() * .62;
     size =
-      14 + Math.random() * 30;
+      18 + Math.random() * 38;
     opacity =
-      .28 + Math.random() * .52;
+      .55 + Math.random() * .38;
 
     particle.style.setProperty(
       "--thickness",
-      `${(.9 + Math.random() * 1.4).toFixed(2)}px`
+      `${(1.5 + Math.random() * 1.8).toFixed(2)}px`
     );
   }
 
@@ -12187,7 +12187,8 @@ function syncAtmosphereAmbientEvents({
 
 function renderWorldAtmosphere({
   condition = "",
-  updatedAt = null
+  updatedAt = null,
+  source = "seasonal"
 } = {}) {
   const atmosphere =
     document.getElementById(
@@ -12238,6 +12239,31 @@ function renderWorldAtmosphere({
 
   atmosphere.dataset.condition =
     condition || "";
+
+  atmosphere.dataset.source =
+    source || "unknown";
+
+  const weatherStatus =
+    document.getElementById(
+      "weatherStatus"
+    );
+
+  if (weatherStatus) {
+    const sourceLabel =
+      source === "device"
+        ? "device"
+        : source === "network"
+          ? "network"
+          : source === "shared"
+            ? "shared fallback"
+            : "seasonal";
+
+    weatherStatus.textContent =
+      `Weather: ${condition || capitalize(weather)} · ${sourceLabel}`;
+
+    weatherStatus.dataset.weather =
+      weather;
+  }
 
   particleHost.replaceChildren();
 
@@ -12783,7 +12809,10 @@ async function refreshWorldAtmosphere({
       condition:
         liveWeather.condition,
       updatedAt:
-        liveWeather.updatedAt
+        liveWeather.updatedAt,
+      source:
+        liveWeather.locationSource
+        || "device"
     });
 
     return;
@@ -12841,7 +12870,9 @@ async function refreshWorldAtmosphere({
       condition:
         data?.condition || "",
       updatedAt:
-        data?.updated_at || null
+        data?.updated_at || null,
+      source:
+        "shared"
     });
   }
 
