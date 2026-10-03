@@ -11447,11 +11447,27 @@ function createWeatherParticle(kind) {
       `${spinThree.toFixed(1)}deg`
     );
 
+    const leafTilt =
+      28 + Math.random() * 66;
+
     particle.style.setProperty(
       "--leaf-tilt",
-      `${(
-        28 + Math.random() * 66
-      ).toFixed(1)}deg`
+      `${leafTilt.toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-tilt-reverse",
+      `${(-leafTilt * .58).toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-drift-2-soft",
+      `${(driftTwo * .36).toFixed(1)}px`
+    );
+
+    particle.style.setProperty(
+      "--leaf-drift-3-soft",
+      `${(driftThree * .64).toFixed(1)}px`
     );
 
     particle.style.setProperty(
@@ -11808,12 +11824,25 @@ function spawnOctoberRavenPass(
       ).toFixed(2)}s`
     );
 
-    raven.style.setProperty(
-      "--raven-rise",
-      `${getAtmosphereRandom(
+    const ravenRise =
+      getAtmosphereRandom(
         -4.4,
         2.6
-      ).toFixed(2)}vh`
+      );
+
+    raven.style.setProperty(
+      "--raven-rise",
+      `${ravenRise.toFixed(2)}vh`
+    );
+
+    raven.style.setProperty(
+      "--raven-rise-1",
+      `${(ravenRise * .34).toFixed(2)}vh`
+    );
+
+    raven.style.setProperty(
+      "--raven-rise-2",
+      `${(ravenRise * .72).toFixed(2)}vh`
     );
 
     raven.appendChild(
