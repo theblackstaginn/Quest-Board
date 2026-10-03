@@ -12371,6 +12371,10 @@ function getDevicePosition() {
               position.coords.latitude,
             longitude:
               position.coords.longitude,
+            accuracyMeters:
+              Number(
+                position.coords.accuracy
+              ) || null,
             source:
               "device"
           });
@@ -12429,6 +12433,8 @@ async function getApproximateNetworkPosition() {
   return {
     latitude,
     longitude,
+    accuracyMeters:
+      null,
     source:
       "network"
   };
@@ -12632,6 +12638,266 @@ function getOpenMeteoMinuteWindowCondition(
   return "";
 }
 
+async function fetchOpenMeteoWeatherAt(
+  latitude,
+  longitude
+) {
+  const url =
+    new URL(
+      "https://api.open-meteo.com/v1/forecast"
+    );
+
+  url.searchParams.set(
+    "latitude",
+    Number(latitude).toFixed(5)
+  );
+
+  url.searchParams.set(
+    "longitude",
+    Number(longitude).toFixed(5)
+  );
+
+  url.searchParams.set(
+    "current",
+    [
+      "weather_code",
+      "precipitation",
+      "rain",
+      "showers",
+      "snowfall"
+    ].join(",")
+  );
+
+  url.searchParams.set(
+    "minutely_15",
+    [
+      "weather_code",
+      "precipitation",
+      "rain",
+      "showers",
+      "snowfall"
+    ].join(",")
+  );
+
+  url.searchParams.set(
+    "past_minutely_15",
+    "4"
+  );
+
+  url.searchParams.set(
+    "forecast_minutely_15",
+    "4"
+  );
+
+  url.searchParams.set(
+    "timezone",
+    "auto"
+  );
+
+  const response =
+    await fetch(
+      url.toString(),
+      {
+        cache: "no-store"
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      `Live weather request failed with status ${response.status}.`
+    );
+  }
+
+  const payload =
+    await response.json();
+
+  const current =
+    payload?.current || {};
+
+  const currentCondition =
+    getOpenMeteoCondition(
+      current.weather_code,
+      current
+    );
+
+  const minuteWindowCondition =
+    getOpenMeteoMinuteWindowCondition(
+      payload
+    );
+
+  const condition =
+    (
+      currentCondition ===
+        "Thunderstorm"
+      || currentCondition ===
+        "Snow"
+    )
+      ? currentCondition
+      : (
+          minuteWindowCondition
+          || currentCondition
+        );
+
+  return {
+    condition,
+    currentCondition,
+    minuteWindowCondition
+  };
+}
+
+function getNearbyWeatherOffsets(
+  source,
+  accuracyMeters
+) {
+  let radius =
+    source === "network"
+      ? .12
+      : .055;
+
+  if (
+    Number.isFinite(
+      accuracyMeters
+    )
+  ) {
+    radius =
+      Math.max(
+        .045,
+        Math.min(
+          .14,
+          (
+            Number(accuracyMeters)
+            / 111000
+          )
+          + .035
+        )
+      );
+  }
+
+  const diagonal =
+    radius * .72;
+
+  return [
+    [ radius, 0 ],
+    [ -radius, 0 ],
+    [ 0, radius ],
+    [ 0, -radius ],
+    [ diagonal, diagonal ],
+    [ diagonal, -diagonal ],
+    [ -diagonal, diagonal ],
+    [ -diagonal, -diagonal ]
+  ];
+}
+
+async function resolveNearbyWeather(
+  latitude,
+  longitude,
+  source,
+  accuracyMeters
+) {
+  const center =
+    await fetchOpenMeteoWeatherAt(
+      latitude,
+      longitude
+    );
+
+  if (
+    center.condition ===
+      "Thunderstorm"
+    || center.condition ===
+      "Snow"
+    || center.condition ===
+      "Rain"
+  ) {
+    return {
+      ...center,
+      matchedNearby:
+        false
+    };
+  }
+
+  const offsets =
+    getNearbyWeatherOffsets(
+      source,
+      accuracyMeters
+    );
+
+  const results =
+    await Promise.allSettled(
+      offsets.map(
+        ([latOffset, lonOffset]) =>
+          fetchOpenMeteoWeatherAt(
+            latitude + latOffset,
+            longitude + lonOffset
+          )
+      )
+    );
+
+  let sawRain =
+    false;
+
+  let sawSnow =
+    false;
+
+  for (const result of results) {
+    if (
+      result.status !==
+      "fulfilled"
+    ) {
+      continue;
+    }
+
+    const condition =
+      result.value?.condition;
+
+    if (
+      condition ===
+      "Thunderstorm"
+    ) {
+      return {
+        condition:
+          "Thunderstorm",
+        matchedNearby:
+          true
+      };
+    }
+
+    if (condition === "Snow") {
+      sawSnow =
+        true;
+    }
+
+    if (condition === "Rain") {
+      sawRain =
+        true;
+    }
+  }
+
+  if (sawSnow) {
+    return {
+      condition:
+        "Snow",
+      matchedNearby:
+        true
+    };
+  }
+
+  if (sawRain) {
+    return {
+      condition:
+        "Rain",
+      matchedNearby:
+        true
+    };
+  }
+
+  return {
+    ...center,
+    matchedNearby:
+      false
+  };
+}
+
+
 async function fetchDeviceWeather({
   force = false
 } = {}) {
@@ -12654,105 +12920,21 @@ async function fetchDeviceWeather({
       const {
         latitude,
         longitude,
+        accuracyMeters,
         source
       } =
         await getBestWeatherPosition();
 
-      const url =
-        new URL(
-          "https://api.open-meteo.com/v1/forecast"
-        );
-
-      url.searchParams.set(
-        "latitude",
-        latitude.toFixed(5)
-      );
-
-      url.searchParams.set(
-        "longitude",
-        longitude.toFixed(5)
-      );
-
-      url.searchParams.set(
-        "current",
-        [
-          "weather_code",
-          "precipitation",
-          "rain",
-          "showers",
-          "snowfall"
-        ].join(",")
-      );
-
-      url.searchParams.set(
-        "minutely_15",
-        [
-          "weather_code",
-          "precipitation",
-          "rain",
-          "showers",
-          "snowfall"
-        ].join(",")
-      );
-
-      url.searchParams.set(
-        "past_minutely_15",
-        "4"
-      );
-
-      url.searchParams.set(
-        "forecast_minutely_15",
-        "4"
-      );
-
-      url.searchParams.set(
-        "timezone",
-        "auto"
-      );
-
-      const response =
-        await fetch(
-          url.toString(),
-          {
-            cache: "no-store"
-          }
-        );
-
-      if (!response.ok) {
-        throw new Error(
-          `Live weather request failed with status ${response.status}.`
-        );
-      }
-
-      const payload =
-        await response.json();
-
-      const current =
-        payload?.current || {};
-
-      const currentCondition =
-        getOpenMeteoCondition(
-          current.weather_code,
-          current
-        );
-
-      const minuteWindowCondition =
-        getOpenMeteoMinuteWindowCondition(
-          payload
+      const weather =
+        await resolveNearbyWeather(
+          latitude,
+          longitude,
+          source,
+          accuracyMeters
         );
 
       const condition =
-        (
-          currentCondition ===
-            "Thunderstorm"
-          || currentCondition ===
-            "Snow"
-        )
-          ? currentCondition
-          : (
-              minuteWindowCondition
-              || currentCondition
-            );
+        weather?.condition || "";
 
       if (!condition) {
         throw new Error(
@@ -12768,6 +12950,16 @@ async function fetchDeviceWeather({
           Date.now(),
         locationSource:
           source || "unknown",
+        matchedNearby:
+          Boolean(
+            weather?.matchedNearby
+          ),
+        accuracyMeters:
+          Number.isFinite(
+            accuracyMeters
+          )
+            ? accuracyMeters
+            : null,
         latitude,
         longitude
       };
@@ -12833,6 +13025,13 @@ async function refreshWorldAtmosphere({
     ) {
       weatherStatus.title =
         `${liveWeather.latitude.toFixed(4)}, ${liveWeather.longitude.toFixed(4)}`;
+
+      if (
+        liveWeather.matchedNearby
+      ) {
+        weatherStatus.textContent +=
+          " · nearby precip";
+      }
     }
 
     return;
