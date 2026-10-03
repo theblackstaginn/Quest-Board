@@ -1424,7 +1424,10 @@
     );
   }
 
-  function ravenAttachmentMarkup(attachment) {
+  function ravenAttachmentMarkup(
+    attachment,
+    canDelete = false
+  ) {
     const href =
       attachment.signed_url
         ? qbEscape(attachment.signed_url)
@@ -1436,21 +1439,38 @@
         "Attachment"
       );
 
+    const deleteControl =
+      canDelete
+        ? (
+          "<button type='button' " +
+            "class='guild-raven-attachment-delete' " +
+            "data-guild-raven-attachment-delete='" +
+              qbEscape(attachment.id) +
+            "' " +
+            "data-guild-raven-id='" +
+              qbEscape(attachment.raven_id) +
+            "' " +
+            "aria-label='Delete attachment " +
+              name +
+            "'>Delete</button>"
+        )
+        : "";
+
+    let content = "";
+
     if (!href) {
-      return (
+      content =
         "<span class='guild-raven-file unavailable'>" +
           name +
-        "</span>"
-      );
+        "</span>";
     }
-
-    if (
+    else if (
       String(
         attachment.mime_type ||
         ""
       ).startsWith("image/")
     ) {
-      return (
+      content =
         "<a class='guild-raven-image-link' href='" +
           href +
           "' target='_blank' rel='noopener'>" +
@@ -1462,16 +1482,22 @@
           "<span>" +
             name +
           "</span>" +
-        "</a>"
-      );
+        "</a>";
+    }
+    else {
+      content =
+        "<a class='guild-raven-file' href='" +
+          href +
+          "' target='_blank' rel='noopener'>📎 " +
+          name +
+        "</a>";
     }
 
     return (
-      "<a class='guild-raven-file' href='" +
-        href +
-        "' target='_blank' rel='noopener'>📎 " +
-        name +
-      "</a>"
+      "<div class='guild-raven-attachment-item'>" +
+        content +
+        deleteControl +
+      "</div>"
     );
   }
 
@@ -1511,6 +1537,17 @@
         ? "<small class='guild-raven-source'>carried by Ember</small>"
         : "";
 
+    const deleteControl =
+      outgoing
+        ? (
+          "<button type='button' " +
+            "class='guild-raven-delete' " +
+            "data-guild-raven-delete='" +
+              qbEscape(raven.id) +
+            "'>Delete</button>"
+        )
+        : "";
+
     return (
       "<article class='guild-raven-card " +
         (outgoing ? "outgoing" : "incoming") +
@@ -1520,7 +1557,10 @@
             (outgoing ? "To " : "From ") +
             qbEscape(otherName) +
           "</strong>" +
-          sourceNote +
+          "<span class='guild-raven-heading-actions'>" +
+            sourceNote +
+            deleteControl +
+          "</span>" +
         "</div>" +
         (
           raven.message
@@ -1533,7 +1573,13 @@
           attachments.length
             ? "<div class='guild-raven-attachments'>" +
                 attachments
-                  .map(ravenAttachmentMarkup)
+                  .map(
+                    attachment =>
+                      ravenAttachmentMarkup(
+                        attachment,
+                        outgoing
+                      )
+                  )
                   .join("") +
               "</div>"
             : ""
@@ -1814,6 +1860,230 @@
       throw error;
     }
   }
+
+  async function deleteGuildRavenAttachment(
+    ravenId,
+    attachmentId
+  ) {
+    const raven =
+      guildRavens.find(
+        item =>
+          String(item.id) ===
+          String(ravenId)
+      );
+
+    const attachment =
+      (
+        guildRavenAttachments.get(
+          ravenId
+        ) ||
+        []
+      ).find(
+        item =>
+          String(item.id) ===
+          String(attachmentId)
+      );
+
+    if (
+      !raven ||
+      !attachment ||
+      !guildIsLogicalUser(
+        raven.sender_user_id
+      )
+    ) {
+      throw new Error(
+        "That attachment cannot be deleted from this device."
+      );
+    }
+
+    if (
+      !window.confirm(
+        "Delete \"" +
+        (
+          attachment.file_name ||
+          "this attachment"
+        ) +
+        "\" from this raven?\n\nThis cannot be undone."
+      )
+    ) {
+      return false;
+    }
+
+    const { error: storageError } =
+      await supabaseClient
+        .storage
+        .from("guild-ravens")
+        .remove([
+          attachment.storage_path
+        ]);
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    const {
+      data,
+      error: metadataError
+    } =
+      await supabaseClient
+        .from(
+          "guild_raven_attachments"
+        )
+        .delete()
+        .eq(
+          "id",
+          attachment.id
+        )
+        .eq(
+          "raven_id",
+          raven.id
+        )
+        .select(
+          "id"
+        );
+
+    if (metadataError) {
+      throw metadataError;
+    }
+
+    if (!data?.length) {
+      throw new Error(
+        "The file was removed, but its attachment record could not be cleared."
+      );
+    }
+
+    await refreshGuildLoop();
+
+    if (
+      typeof showToast ===
+      "function"
+    ) {
+      showToast(
+        "Attachment deleted."
+      );
+    }
+
+    return true;
+  }
+
+
+  async function deleteGuildRaven(
+    ravenId
+  ) {
+    const raven =
+      guildRavens.find(
+        item =>
+          String(item.id) ===
+          String(ravenId)
+      );
+
+    if (
+      !raven ||
+      !guildIsLogicalUser(
+        raven.sender_user_id
+      )
+    ) {
+      throw new Error(
+        "That raven cannot be deleted from this device."
+      );
+    }
+
+    const attachments =
+      guildRavenAttachments.get(
+        raven.id
+      ) ||
+      [];
+
+    const warning =
+      attachments.length
+        ? (
+          "Delete this raven and all " +
+          attachments.length +
+          " attachment" +
+          (
+            attachments.length === 1
+              ? ""
+              : "s"
+          ) +
+          "?\n\nThis cannot be undone."
+        )
+        : (
+          "Delete this raven?\n\nThis cannot be undone."
+        );
+
+    if (
+      !window.confirm(
+        warning
+      )
+    ) {
+      return false;
+    }
+
+    const storagePaths =
+      attachments
+        .map(
+          attachment =>
+            attachment.storage_path
+        )
+        .filter(Boolean);
+
+    if (storagePaths.length) {
+      const { error: storageError } =
+        await supabaseClient
+          .storage
+          .from("guild-ravens")
+          .remove(
+            storagePaths
+          );
+
+      if (storageError) {
+        throw storageError;
+      }
+    }
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("guild_ravens")
+        .delete()
+        .eq(
+          "id",
+          raven.id
+        )
+        .in(
+          "sender_user_id",
+          logicalGuildUserIds()
+        )
+        .select(
+          "id"
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data?.length) {
+      throw new Error(
+        "The raven could not be deleted."
+      );
+    }
+
+    await refreshGuildLoop();
+
+    if (
+      typeof showToast ===
+      "function"
+    ) {
+      showToast(
+        "Raven deleted."
+      );
+    }
+
+    return true;
+  }
+
 
   async function sendDirectGuildRaven() {
     const recipient =
@@ -2148,6 +2418,80 @@
 
     host.querySelector("#guildRavenSend")
       ?.addEventListener("click", sendDirectGuildRaven);
+
+    host.querySelectorAll(
+      "[data-guild-raven-delete]"
+    )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            button.disabled =
+              true;
+
+            deleteGuildRaven(
+              button.dataset
+                .guildRavenDelete
+            )
+              .catch(error => {
+                console.error(
+                  "Could not delete raven:",
+                  error
+                );
+
+                if (
+                  typeof showToast ===
+                  "function"
+                ) {
+                  showToast(
+                    "Could not delete raven."
+                  );
+                }
+
+                button.disabled =
+                  false;
+              });
+          }
+        );
+      });
+
+    host.querySelectorAll(
+      "[data-guild-raven-attachment-delete]"
+    )
+      .forEach(button => {
+        button.addEventListener(
+          "click",
+          () => {
+            button.disabled =
+              true;
+
+            deleteGuildRavenAttachment(
+              button.dataset
+                .guildRavenId,
+              button.dataset
+                .guildRavenAttachmentDelete
+            )
+              .catch(error => {
+                console.error(
+                  "Could not delete raven attachment:",
+                  error
+                );
+
+                if (
+                  typeof showToast ===
+                  "function"
+                ) {
+                  showToast(
+                    "Could not delete attachment."
+                  );
+                }
+
+                button.disabled =
+                  false;
+              });
+          }
+        );
+      });
 
     const ravenFileInput =
       host.querySelector(

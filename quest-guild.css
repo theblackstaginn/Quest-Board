@@ -351,6 +351,48 @@
   font-style: italic;
 }
 
+.guild-raven-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.guild-raven-delete,
+.guild-raven-attachment-delete {
+  border: 1px solid rgba(201, 154, 80, 0.28);
+  border-radius: 999px;
+  background: rgba(20, 8, 5, 0.46);
+  color: var(--cream-soft);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease,
+    background 140ms ease,
+    opacity 140ms ease;
+}
+
+.guild-raven-delete {
+  padding: 5px 8px;
+}
+
+.guild-raven-delete:hover,
+.guild-raven-attachment-delete:hover {
+  border-color: rgba(224, 181, 104, 0.62);
+  background: rgba(62, 24, 15, 0.62);
+  color: var(--gold-light);
+}
+
+.guild-raven-delete:disabled,
+.guild-raven-attachment-delete:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
 .guild-raven-card p {
   margin: 0;
   max-height: 12rem;
@@ -390,6 +432,18 @@
 .guild-raven-attachments {
   display: grid;
   gap: 8px;
+}
+
+.guild-raven-attachment-item {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.guild-raven-attachment-delete {
+  justify-self: end;
+  padding: 5px 8px;
 }
 
 .guild-raven-image-link {
