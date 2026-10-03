@@ -11710,10 +11710,35 @@ function spawnOctoberRavenPass(
   const reverse =
     Math.random() < .46;
 
+  const nav =
+    document.querySelector(
+      ".bottom-nav"
+    );
+
+  const navTop =
+    nav
+      ? nav.getBoundingClientRect().top
+      : window.innerHeight * .88;
+
+  const ravenMinY =
+    1.5;
+
+  const ravenMaxY =
+    Math.max(
+      ravenMinY + 8,
+      (
+        navTop
+        / Math.max(
+            window.innerHeight,
+            1
+          )
+      ) * 100 - 6
+    );
+
   const baseY =
     getAtmosphereRandom(
-      8,
-      48
+      ravenMinY,
+      ravenMaxY
     );
 
   for (
