@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="129">
+  <meta name="quest-board-build" content="130">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=138">
+  <link rel="stylesheet" href="styles.css?v=139">
   <link rel="stylesheet" href="quest-guild.css?v=125">
 </head>
 
@@ -102,6 +102,15 @@
           <div class="weather-atmosphere__mist weather-atmosphere__mist--two"></div>
           <div class="weather-atmosphere__particles" id="weatherParticles"></div>
           <div class="weather-atmosphere__flash"></div>
+        </div>
+
+        <div
+          class="weather-status"
+          id="weatherStatus"
+          role="status"
+          aria-live="polite"
+        >
+          Weather: checking…
         </div>
 
         <section
@@ -2414,7 +2423,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=132"></script>
+  <script src="app.js?v=133"></script>
   <script src="quest-guild.js?v=9"></script>
 
 </body>
