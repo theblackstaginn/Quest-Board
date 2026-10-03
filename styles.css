@@ -7753,10 +7753,7 @@ body.reduce-motion .map-fog-wisp {
         )
       )
       rotateX(
-        calc(
-          var(--leaf-tilt, 48deg)
-          * -.58
-        )
+        var(--leaf-tilt-reverse, -28deg)
       )
       scale(var(--leaf-depth, 1));
   }
@@ -7779,10 +7776,7 @@ body.reduce-motion .map-fog-wisp {
   61% {
     transform:
       translate3d(
-        calc(
-          var(--leaf-drift-2, 64px)
-          * .36
-        ),
+        var(--leaf-drift-2-soft, 23px),
         62vh,
         0
       )
@@ -7815,10 +7809,7 @@ body.reduce-motion .map-fog-wisp {
   100% {
     transform:
       translate3d(
-        calc(
-          var(--leaf-drift-3, 36px)
-          * .64
-        ),
+        var(--leaf-drift-3-soft, 23px),
         116vh,
         0
       )
@@ -8159,9 +8150,7 @@ body.reduce-motion .map-fog-wisp {
     transform:
       translate3d(
         38vw,
-        calc(
-          var(--raven-rise, -2vh) * .34
-        ),
+        var(--raven-rise-1, -.7vh),
         0
       )
       scale(.96);
@@ -8171,9 +8160,7 @@ body.reduce-motion .map-fog-wisp {
     transform:
       translate3d(
         64vw,
-        calc(
-          var(--raven-rise, -2vh) * .72
-        ),
+        var(--raven-rise-2, -1.4vh),
         0
       )
       scale(1);
@@ -8214,9 +8201,7 @@ body.reduce-motion .map-fog-wisp {
     transform:
       translate3d(
         -38vw,
-        calc(
-          var(--raven-rise, -2vh) * .34
-        ),
+        var(--raven-rise-1, -.7vh),
         0
       )
       scaleX(-1)
@@ -8227,9 +8212,7 @@ body.reduce-motion .map-fog-wisp {
     transform:
       translate3d(
         -64vw,
-        calc(
-          var(--raven-rise, -2vh) * .72
-        ),
+        var(--raven-rise-2, -1.4vh),
         0
       )
       scaleX(-1)
