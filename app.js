@@ -11760,16 +11760,55 @@ function spawnOctoberRavenPass(
       flockSize === 1
       && Math.random() < .12;
 
-    const size =
-      nearPass
-        ? getAtmosphereRandom(
-            46,
-            62
+    const ravenY =
+      Math.min(
+        ravenMaxY,
+        Math.max(
+          ravenMinY,
+          baseY
+          + getAtmosphereRandom(
+              -3.8,
+              3.8
+            )
+        )
+      );
+
+    const depth =
+      Math.min(
+        1,
+        Math.max(
+          0,
+          (
+            ravenY - ravenMinY
           )
-        : getAtmosphereRandom(
-            19,
-            38
-          );
+          / Math.max(
+              ravenMaxY - ravenMinY,
+              1
+            )
+        )
+      );
+
+    const perspectiveSize =
+      17
+      + Math.pow(
+          depth,
+          1.18
+        ) * 35;
+
+    const size =
+      perspectiveSize
+      * getAtmosphereRandom(
+          .88,
+          1.14
+        )
+      * (
+          nearPass
+            ? getAtmosphereRandom(
+                1.18,
+                1.34
+              )
+            : 1
+        );
 
     const duration =
       nearPass
@@ -11791,13 +11830,7 @@ function spawnOctoberRavenPass(
 
     raven.style.setProperty(
       "--raven-y",
-      `${(
-        baseY
-        + getAtmosphereRandom(
-          -3.8,
-          3.8
-        )
-      ).toFixed(2)}vh`
+      `${ravenY.toFixed(2)}vh`
     );
 
     raven.style.setProperty(
@@ -11817,31 +11850,34 @@ function spawnOctoberRavenPass(
 
     raven.style.setProperty(
       "--raven-opacity",
-      (
-        nearPass
-          ? getAtmosphereRandom(
-              .72,
-              .88
-            )
-          : getAtmosphereRandom(
-              .45,
-              .72
-            )
+      Math.min(
+        .92,
+        .43
+        + depth * .38
+        + (
+            nearPass
+              ? .08
+              : 0
+          )
+        + getAtmosphereRandom(
+            -.04,
+            .05
+          )
       ).toFixed(2)
     );
 
     raven.style.setProperty(
       "--raven-blur",
-      `${(
-        nearPass
-          ? getAtmosphereRandom(
-              0,
-              .12
+      `${Math.max(
+        0,
+        (
+          .46
+          - depth * .40
+          + getAtmosphereRandom(
+              -.04,
+              .08
             )
-          : getAtmosphereRandom(
-              0,
-              .42
-            )
+        )
       ).toFixed(2)}px`
     );
 
