@@ -7390,7 +7390,7 @@ body.reduce-motion .map-fog-wisp {
 .weather-atmosphere {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 20;
   overflow: hidden;
   pointer-events: none;
   contain: layout paint;
