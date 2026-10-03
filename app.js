@@ -11055,6 +11055,20 @@ const WORLD_WEATHER_STALE_MS =
 
 let worldWeatherRefreshTimer = null;
 let lastWorldWeatherSyncAt = 0;
+let octoberRavenTimer = null;
+let atmosphereLightningTimer = null;
+
+const OCTOBER_RAVEN_MIN_DELAY_MS =
+  18 * 1000;
+
+const OCTOBER_RAVEN_MAX_DELAY_MS =
+  48 * 1000;
+
+const OCTOBER_LIGHTNING_MIN_DELAY_MS =
+  52 * 1000;
+
+const OCTOBER_LIGHTNING_MAX_DELAY_MS =
+  138 * 1000;
 
 function getWorldSeason(date = new Date()) {
   const month = date.getMonth();
@@ -11363,11 +11377,96 @@ function createWeatherParticle(kind) {
 
   else if (kind === "leaf") {
     duration =
-      12 + Math.random() * 18;
+      14 + Math.random() * 16;
     size =
       7 + Math.random() * 13;
     opacity =
-      .52 + Math.random() * .38;
+      .48 + Math.random() * .38;
+
+    const windBias =
+      (Math.random() * 170) - 85;
+
+    const driftOne =
+      (windBias * .34)
+      + ((Math.random() * 34) - 17);
+
+    const driftTwo =
+      windBias
+      + ((Math.random() * 58) - 29);
+
+    const driftThree =
+      (windBias * .56)
+      + ((Math.random() * 76) - 38);
+
+    const spinDirection =
+      Math.random() < .5
+        ? -1
+        : 1;
+
+    const spinOne =
+      spinDirection
+      * (65 + Math.random() * 125);
+
+    const spinTwo =
+      spinOne
+      + spinDirection
+        * (95 + Math.random() * 180);
+
+    const spinThree =
+      spinTwo
+      + spinDirection
+        * (110 + Math.random() * 240);
+
+    particle.style.setProperty(
+      "--leaf-drift-1",
+      `${driftOne.toFixed(1)}px`
+    );
+
+    particle.style.setProperty(
+      "--leaf-drift-2",
+      `${driftTwo.toFixed(1)}px`
+    );
+
+    particle.style.setProperty(
+      "--leaf-drift-3",
+      `${driftThree.toFixed(1)}px`
+    );
+
+    particle.style.setProperty(
+      "--leaf-spin-1",
+      `${spinOne.toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-spin-2",
+      `${spinTwo.toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-spin-3",
+      `${spinThree.toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-tilt",
+      `${(
+        28 + Math.random() * 66
+      ).toFixed(1)}deg`
+    );
+
+    particle.style.setProperty(
+      "--leaf-depth",
+      (
+        .74 + Math.random() * .42
+      ).toFixed(2)
+    );
+
+    particle.style.setProperty(
+      "--leaf-blur",
+      `${(
+        Math.random() * .42
+      ).toFixed(2)}px`
+    );
 
     const leafShapes = [
       "leaf-maple",
@@ -11500,6 +11599,463 @@ function createWeatherParticle(kind) {
   return particle;
 }
 
+function getAtmosphereRandom(
+  min,
+  max
+) {
+  return min
+    + Math.random() * (max - min);
+}
+
+function getOctoberRavenHost(
+  atmosphere
+) {
+  let host =
+    atmosphere.querySelector(
+      ".weather-atmosphere__ravens"
+    );
+
+  if (!host) {
+    host =
+      document.createElement("div");
+
+    host.className =
+      "weather-atmosphere__ravens";
+
+    atmosphere.appendChild(host);
+  }
+
+  return host;
+}
+
+function createRavenBird() {
+  const bird =
+    document.createElement("span");
+
+  bird.className =
+    "weather-raven__bird";
+
+  const body =
+    document.createElement("span");
+
+  body.className =
+    "weather-raven__body";
+
+  const tail =
+    document.createElement("span");
+
+  tail.className =
+    "weather-raven__tail";
+
+  const leftWing =
+    document.createElement("span");
+
+  leftWing.className =
+    "weather-raven__wing weather-raven__wing--left";
+
+  const rightWing =
+    document.createElement("span");
+
+  rightWing.className =
+    "weather-raven__wing weather-raven__wing--right";
+
+  bird.append(
+    tail,
+    leftWing,
+    rightWing,
+    body
+  );
+
+  return bird;
+}
+
+function spawnOctoberRavenPass(
+  atmosphere
+) {
+  const host =
+    getOctoberRavenHost(
+      atmosphere
+    );
+
+  const flockRoll =
+    Math.random();
+
+  const flockSize =
+    flockRoll < .68
+      ? 1
+      : flockRoll < .93
+        ? 2
+        : 3;
+
+  const reverse =
+    Math.random() < .46;
+
+  const baseY =
+    getAtmosphereRandom(
+      8,
+      48
+    );
+
+  for (
+    let index = 0;
+    index < flockSize;
+    index += 1
+  ) {
+    const raven =
+      document.createElement("span");
+
+    raven.className =
+      `weather-raven ${(
+        reverse
+          ? "weather-raven--reverse"
+          : "weather-raven--forward"
+      )}`;
+
+    const nearPass =
+      flockSize === 1
+      && Math.random() < .12;
+
+    const size =
+      nearPass
+        ? getAtmosphereRandom(
+            46,
+            62
+          )
+        : getAtmosphereRandom(
+            19,
+            38
+          );
+
+    const duration =
+      nearPass
+        ? getAtmosphereRandom(
+            5.8,
+            7.4
+          )
+        : getAtmosphereRandom(
+            7.6,
+            12.2
+          );
+
+    const delay =
+      index
+      * getAtmosphereRandom(
+        .16,
+        .48
+      );
+
+    raven.style.setProperty(
+      "--raven-y",
+      `${(
+        baseY
+        + getAtmosphereRandom(
+          -3.8,
+          3.8
+        )
+      ).toFixed(2)}vh`
+    );
+
+    raven.style.setProperty(
+      "--raven-size",
+      `${size.toFixed(1)}px`
+    );
+
+    raven.style.setProperty(
+      "--flight-duration",
+      `${duration.toFixed(2)}s`
+    );
+
+    raven.style.setProperty(
+      "--flight-delay",
+      `${delay.toFixed(2)}s`
+    );
+
+    raven.style.setProperty(
+      "--raven-opacity",
+      (
+        nearPass
+          ? getAtmosphereRandom(
+              .72,
+              .88
+            )
+          : getAtmosphereRandom(
+              .45,
+              .72
+            )
+      ).toFixed(2)
+    );
+
+    raven.style.setProperty(
+      "--raven-blur",
+      `${(
+        nearPass
+          ? getAtmosphereRandom(
+              0,
+              .12
+            )
+          : getAtmosphereRandom(
+              0,
+              .42
+            )
+      ).toFixed(2)}px`
+    );
+
+    raven.style.setProperty(
+      "--wing-speed",
+      `${getAtmosphereRandom(
+        .34,
+        .54
+      ).toFixed(2)}s`
+    );
+
+    raven.style.setProperty(
+      "--raven-rise",
+      `${getAtmosphereRandom(
+        -4.4,
+        2.6
+      ).toFixed(2)}vh`
+    );
+
+    raven.appendChild(
+      createRavenBird()
+    );
+
+    host.appendChild(
+      raven
+    );
+
+    window.setTimeout(
+      () => {
+        raven.remove();
+      },
+      Math.ceil(
+        (duration + delay + 1.2)
+        * 1000
+      )
+    );
+  }
+}
+
+function triggerAtmosphereLightning(
+  atmosphere
+) {
+  const flash =
+    atmosphere.querySelector(
+      ".weather-atmosphere__flash"
+    );
+
+  if (!flash) {
+    return;
+  }
+
+  flash.style.setProperty(
+    "--flash-x",
+    `${getAtmosphereRandom(
+      18,
+      82
+    ).toFixed(1)}%`
+  );
+
+  flash.style.setProperty(
+    "--flash-strength",
+    getAtmosphereRandom(
+      .72,
+      1
+    ).toFixed(2)
+  );
+
+  flash.classList.remove(
+    "is-lightning"
+  );
+
+  void flash.offsetWidth;
+
+  flash.classList.add(
+    "is-lightning"
+  );
+
+  window.setTimeout(
+    () => {
+      flash.classList.remove(
+        "is-lightning"
+      );
+    },
+    1100
+  );
+}
+
+function scheduleOctoberRavens({
+  atmosphere,
+  enabled,
+  weather
+}) {
+  if (octoberRavenTimer) {
+    clearTimeout(
+      octoberRavenTimer
+    );
+
+    octoberRavenTimer = null;
+  }
+
+  const host =
+    getOctoberRavenHost(
+      atmosphere
+    );
+
+  if (
+    !enabled
+    || weather === "storm"
+    || weather === "rain"
+    || weather === "snow"
+  ) {
+    host.replaceChildren();
+    return;
+  }
+
+  const scheduleNext = () => {
+    octoberRavenTimer =
+      window.setTimeout(
+        () => {
+          if (
+            document.body.contains(
+              atmosphere
+            )
+          ) {
+            spawnOctoberRavenPass(
+              atmosphere
+            );
+          }
+
+          scheduleNext();
+        },
+        getAtmosphereRandom(
+          OCTOBER_RAVEN_MIN_DELAY_MS,
+          OCTOBER_RAVEN_MAX_DELAY_MS
+        )
+      );
+  };
+
+  scheduleNext();
+}
+
+function scheduleAtmosphereLightning({
+  atmosphere,
+  enabled,
+  weather
+}) {
+  if (atmosphereLightningTimer) {
+    clearTimeout(
+      atmosphereLightningTimer
+    );
+
+    atmosphereLightningTimer = null;
+  }
+
+  const flash =
+    atmosphere.querySelector(
+      ".weather-atmosphere__flash"
+    );
+
+  if (!enabled) {
+    flash?.classList.remove(
+      "is-lightning"
+    );
+
+    return;
+  }
+
+  const scheduleNext = () => {
+    let minDelay =
+      OCTOBER_LIGHTNING_MIN_DELAY_MS;
+
+    let maxDelay =
+      OCTOBER_LIGHTNING_MAX_DELAY_MS;
+
+    if (weather === "storm") {
+      minDelay =
+        14 * 1000;
+
+      maxDelay =
+        42 * 1000;
+    }
+
+    else if (
+      weather === "rain"
+      || weather === "cloudy"
+    ) {
+      minDelay =
+        34 * 1000;
+
+      maxDelay =
+        96 * 1000;
+    }
+
+    atmosphereLightningTimer =
+      window.setTimeout(
+        () => {
+          if (
+            document.body.contains(
+              atmosphere
+            )
+          ) {
+            triggerAtmosphereLightning(
+              atmosphere
+            );
+          }
+
+          scheduleNext();
+        },
+        getAtmosphereRandom(
+          minDelay,
+          maxDelay
+        )
+      );
+  };
+
+  scheduleNext();
+}
+
+function syncAtmosphereAmbientEvents({
+  atmosphere,
+  season,
+  weather,
+  now,
+  testOverrides,
+  reduceMotion
+}) {
+  const octoberMode =
+    season === "autumn"
+    && (
+      now.getMonth() === 9
+      || testOverrides.season
+        === "autumn"
+    );
+
+  atmosphere.dataset.october =
+    octoberMode
+      ? "true"
+      : "false";
+
+  scheduleOctoberRavens({
+    atmosphere,
+    enabled:
+      octoberMode
+      && !reduceMotion,
+    weather
+  });
+
+  scheduleAtmosphereLightning({
+    atmosphere,
+    enabled:
+      !reduceMotion
+      && (
+        octoberMode
+        || weather === "storm"
+      ),
+    weather
+  });
+}
+
 function renderWorldAtmosphere({
   condition = "",
   updatedAt = null
@@ -11563,6 +12119,15 @@ function renderWorldAtmosphere({
     || window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+
+  syncAtmosphereAmbientEvents({
+    atmosphere,
+    season,
+    weather,
+    now,
+    testOverrides,
+    reduceMotion
+  });
 
   if (reduceMotion) {
     return;
