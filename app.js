@@ -11057,6 +11057,8 @@ let worldWeatherRefreshTimer = null;
 let lastWorldWeatherSyncAt = 0;
 let octoberRavenTimer = null;
 let atmosphereLightningTimer = null;
+let octoberRavenHasSpawned = false;
+let octoberLightningHasFlashed = false;
 
 const OCTOBER_RAVEN_MIN_DELAY_MS =
   18 * 1000;
@@ -11942,6 +11944,17 @@ function scheduleOctoberRavens({
   }
 
   const scheduleNext = () => {
+    const delay =
+      octoberRavenHasSpawned
+        ? getAtmosphereRandom(
+            OCTOBER_RAVEN_MIN_DELAY_MS,
+            OCTOBER_RAVEN_MAX_DELAY_MS
+          )
+        : getAtmosphereRandom(
+            6 * 1000,
+            14 * 1000
+          );
+
     octoberRavenTimer =
       window.setTimeout(
         () => {
@@ -11953,14 +11966,14 @@ function scheduleOctoberRavens({
             spawnOctoberRavenPass(
               atmosphere
             );
+
+            octoberRavenHasSpawned =
+              true;
           }
 
           scheduleNext();
         },
-        getAtmosphereRandom(
-          OCTOBER_RAVEN_MIN_DELAY_MS,
-          OCTOBER_RAVEN_MAX_DELAY_MS
-        )
+        delay
       );
   };
 
@@ -12019,6 +12032,17 @@ function scheduleAtmosphereLightning({
         96 * 1000;
     }
 
+    const delay =
+      octoberLightningHasFlashed
+        ? getAtmosphereRandom(
+            minDelay,
+            maxDelay
+          )
+        : getAtmosphereRandom(
+            12 * 1000,
+            24 * 1000
+          );
+
     atmosphereLightningTimer =
       window.setTimeout(
         () => {
@@ -12030,14 +12054,14 @@ function scheduleAtmosphereLightning({
             triggerAtmosphereLightning(
               atmosphere
             );
+
+            octoberLightningHasFlashed =
+              true;
           }
 
           scheduleNext();
         },
-        getAtmosphereRandom(
-          minDelay,
-          maxDelay
-        )
+        delay
       );
   };
 
