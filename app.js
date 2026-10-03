@@ -12283,6 +12283,225 @@ function renderWorldAtmosphere({
   );
 }
 
+const WORLD_DEVICE_WEATHER_CACHE_MS =
+  12 * 60 * 1000;
+
+let deviceWeatherCache = null;
+let deviceWeatherRequest = null;
+
+function getDevicePosition() {
+  return new Promise(
+    (resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(
+          new Error(
+            "Device location is not available."
+          )
+        );
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          resolve({
+            latitude:
+              position.coords.latitude,
+            longitude:
+              position.coords.longitude
+          });
+        },
+        error => {
+          reject(error);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge:
+            WORLD_DEVICE_WEATHER_CACHE_MS
+        }
+      );
+    }
+  );
+}
+
+function getOpenMeteoCondition(
+  weatherCode,
+  {
+    precipitation = 0,
+    rain = 0,
+    showers = 0,
+    snowfall = 0
+  } = {}
+) {
+  const code =
+    Number(weatherCode);
+
+  if (
+    [95, 96, 99].includes(code)
+  ) {
+    return "Thunderstorm";
+  }
+
+  if (
+    [
+      71, 73, 75, 77,
+      85, 86
+    ].includes(code)
+    || Number(snowfall) > 0
+  ) {
+    return "Snow";
+  }
+
+  if (
+    [
+      51, 53, 55,
+      56, 57,
+      61, 63, 65,
+      66, 67,
+      80, 81, 82
+    ].includes(code)
+    || Number(rain) > 0
+    || Number(showers) > 0
+    || Number(precipitation) > 0
+  ) {
+    return "Rain";
+  }
+
+  if (
+    [45, 48].includes(code)
+  ) {
+    return "Fog";
+  }
+
+  if (code === 3) {
+    return "Overcast";
+  }
+
+  if (code === 2) {
+    return "Partly Cloudy";
+  }
+
+  if (code === 1) {
+    return "Mainly Clear";
+  }
+
+  if (code === 0) {
+    return "Clear";
+  }
+
+  return "";
+}
+
+async function fetchDeviceWeather({
+  force = false
+} = {}) {
+  if (
+    !force
+    && deviceWeatherCache
+    && Date.now()
+      - deviceWeatherCache.fetchedAt
+      < WORLD_DEVICE_WEATHER_CACHE_MS
+  ) {
+    return deviceWeatherCache;
+  }
+
+  if (deviceWeatherRequest) {
+    return deviceWeatherRequest;
+  }
+
+  deviceWeatherRequest =
+    (async () => {
+      const {
+        latitude,
+        longitude
+      } =
+        await getDevicePosition();
+
+      const url =
+        new URL(
+          "https://api.open-meteo.com/v1/forecast"
+        );
+
+      url.searchParams.set(
+        "latitude",
+        latitude.toFixed(5)
+      );
+
+      url.searchParams.set(
+        "longitude",
+        longitude.toFixed(5)
+      );
+
+      url.searchParams.set(
+        "current",
+        [
+          "weather_code",
+          "precipitation",
+          "rain",
+          "showers",
+          "snowfall"
+        ].join(",")
+      );
+
+      url.searchParams.set(
+        "timezone",
+        "auto"
+      );
+
+      const response =
+        await fetch(
+          url.toString(),
+          {
+            cache: "no-store"
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          `Live weather request failed with status ${response.status}.`
+        );
+      }
+
+      const payload =
+        await response.json();
+
+      const current =
+        payload?.current || {};
+
+      const condition =
+        getOpenMeteoCondition(
+          current.weather_code,
+          current
+        );
+
+      if (!condition) {
+        throw new Error(
+          "Live weather did not return a usable condition."
+        );
+      }
+
+      deviceWeatherCache = {
+        condition,
+        updatedAt:
+          new Date().toISOString(),
+        fetchedAt:
+          Date.now()
+      };
+
+      return deviceWeatherCache;
+    })();
+
+  try {
+    return await deviceWeatherRequest;
+  }
+
+  finally {
+    deviceWeatherRequest =
+      null;
+  }
+}
+
+
 async function refreshWorldAtmosphere({
   force = false
 } = {}) {
@@ -12297,6 +12516,28 @@ async function refreshWorldAtmosphere({
 
   lastWorldWeatherSyncAt =
     Date.now();
+
+  try {
+    const liveWeather =
+      await fetchDeviceWeather({
+        force
+      });
+
+    renderWorldAtmosphere({
+      condition:
+        liveWeather.condition,
+      updatedAt:
+        liveWeather.updatedAt
+    });
+
+    return;
+  }
+
+  catch (deviceWeatherError) {
+    console.info(
+      "Live device weather unavailable; using shared weather fallback."
+    );
+  }
 
   if (!supabaseClient) {
     renderWorldAtmosphere();
