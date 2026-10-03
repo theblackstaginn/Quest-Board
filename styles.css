@@ -1577,7 +1577,7 @@ body[data-character-theme="amethyst"] .character-class-name {
   position: fixed;
   z-index: 50;
   left: 50%;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  bottom: 0;
   transform: translateX(-50%);
   width: min(calc(100% - 10px), 720px);
   display: grid;
