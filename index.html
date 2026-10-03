@@ -9,7 +9,7 @@
 
   <meta name="theme-color" content="#11100c">
   <meta name="description" content="Quest Board — a gamified fantasy fitness tracker.">
-  <meta name="quest-board-build" content="119">
+  <meta name="quest-board-build" content="120">
 
   <title>Quest Board</title>
 
@@ -21,7 +21,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css?v=119">
+  <link rel="stylesheet" href="styles.css?v=120">
   <link rel="stylesheet" href="quest-guild.css?v=1">
 </head>
 
@@ -846,12 +846,31 @@
               ></div>
             </div>
 
+            <div class="party-adventure-reward">
+              <span class="party-adventure-reward-glyph" aria-hidden="true">✦</span>
+              <div>
+                <strong>Adventure Spoils</strong>
+                <small id="partyAdventureRewardSummary">
+                  Each companion earns the Lanternbound Seal and one Fellowship consumable.
+                </small>
+              </div>
+            </div>
+
             <button
               class="fantasy-action-button party-adventure-start"
               id="beginPartyAdventureButton"
               type="button"
             >
               Begin Fellowship Adventure
+            </button>
+
+            <button
+              class="fantasy-action-button party-adventure-claim"
+              id="claimPartyAdventureRewardButton"
+              type="button"
+              hidden
+            >
+              Claim Adventure Rewards
             </button>
 
           </section>
@@ -2395,7 +2414,7 @@
   ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=119"></script>
+  <script src="app.js?v=120"></script>
   <script src="quest-guild.js?v=8"></script>
 
 </body>
