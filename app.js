@@ -12697,12 +12697,12 @@ async function fetchDeviceWeather({
 
       url.searchParams.set(
         "past_minutely_15",
-        "1"
+        "4"
       );
 
       url.searchParams.set(
         "forecast_minutely_15",
-        "2"
+        "4"
       );
 
       url.searchParams.set(
@@ -12767,7 +12767,9 @@ async function fetchDeviceWeather({
         fetchedAt:
           Date.now(),
         locationSource:
-          source || "unknown"
+          source || "unknown",
+        latitude,
+        longitude
       };
 
       return deviceWeatherCache;
@@ -12814,6 +12816,24 @@ async function refreshWorldAtmosphere({
         liveWeather.locationSource
         || "device"
     });
+
+    const weatherStatus =
+      document.getElementById(
+        "weatherStatus"
+      );
+
+    if (
+      weatherStatus
+      && Number.isFinite(
+        liveWeather.latitude
+      )
+      && Number.isFinite(
+        liveWeather.longitude
+      )
+    ) {
+      weatherStatus.title =
+        `${liveWeather.latitude.toFixed(4)}, ${liveWeather.longitude.toFixed(4)}`;
+    }
 
     return;
   }
