@@ -11096,6 +11096,19 @@ function getAtmosphereTestOverrides() {
       window.location.search
     );
 
+  const testMode =
+    params.get(
+      "atmosphereTest"
+    ) === "1";
+
+  if (!testMode) {
+    return {
+      season: null,
+      weather: null,
+      daypart: null
+    };
+  }
+
   const season =
     params.get("season");
 
