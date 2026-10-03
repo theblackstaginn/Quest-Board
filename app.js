@@ -12262,33 +12262,56 @@ function renderWorldAtmosphere({
     return;
   }
 
-  const plan =
+  const plans = [
     getWeatherParticlePlan(
       season,
       weather,
       daypart
-    );
+    )
+  ];
 
   if (
-    !plan.kind
-    || plan.count <= 0
+    season === "autumn"
+    && (
+      weather === "rain"
+      || weather === "storm"
+    )
   ) {
-    return;
+    plans.push({
+      kind: "leaf",
+      count:
+        weather === "storm"
+          ? 8
+          : 11
+    });
   }
 
   const fragment =
     document.createDocumentFragment();
 
-  for (
-    let index = 0;
-    index < plan.count;
-    index += 1
-  ) {
-    fragment.appendChild(
-      createWeatherParticle(
-        plan.kind
-      )
-    );
+  for (const plan of plans) {
+    if (
+      !plan?.kind
+      || plan.count <= 0
+    ) {
+      continue;
+    }
+
+    for (
+      let index = 0;
+      index < plan.count;
+      index += 1
+    ) {
+      fragment.appendChild(
+        createWeatherParticle(
+          plan.kind
+        )
+      );
+    }
+  }
+
+  if (!fragment.childNodes.length) {
+    return;
   }
 
   particleHost.appendChild(
@@ -12321,21 +12344,83 @@ function getDevicePosition() {
             latitude:
               position.coords.latitude,
             longitude:
-              position.coords.longitude
+              position.coords.longitude,
+            source:
+              "device"
           });
         },
         error => {
           reject(error);
         },
         {
-          enableHighAccuracy: false,
-          timeout: 10000,
-          maximumAge:
-            WORLD_DEVICE_WEATHER_CACHE_MS
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 0
         }
       );
     }
   );
+}
+
+async function getApproximateNetworkPosition() {
+  const response =
+    await fetch(
+      "https://ipwho.is/",
+      {
+        cache: "no-store"
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      `Approximate location request failed with status ${response.status}.`
+    );
+  }
+
+  const payload =
+    await response.json();
+
+  const latitude =
+    Number(
+      payload?.latitude
+    );
+
+  const longitude =
+    Number(
+      payload?.longitude
+    );
+
+  if (
+    payload?.success === false
+    || !Number.isFinite(latitude)
+    || !Number.isFinite(longitude)
+  ) {
+    throw new Error(
+      "Approximate location was unavailable."
+    );
+  }
+
+  return {
+    latitude,
+    longitude,
+    source:
+      "network"
+  };
+}
+
+async function getBestWeatherPosition() {
+  try {
+    return await getDevicePosition();
+  }
+
+  catch (deviceLocationError) {
+    console.info(
+      "Precise device location unavailable; trying approximate network location.",
+      deviceLocationError
+    );
+
+    return await getApproximateNetworkPosition();
+  }
 }
 
 function getOpenMeteoCondition(
@@ -12542,9 +12627,10 @@ async function fetchDeviceWeather({
     (async () => {
       const {
         latitude,
-        longitude
+        longitude,
+        source
       } =
-        await getDevicePosition();
+        await getBestWeatherPosition();
 
       const url =
         new URL(
@@ -12653,7 +12739,9 @@ async function fetchDeviceWeather({
         updatedAt:
           new Date().toISOString(),
         fetchedAt:
-          Date.now()
+          Date.now(),
+        locationSource:
+          source || "unknown"
       };
 
       return deviceWeatherCache;
