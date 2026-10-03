@@ -7322,16 +7322,16 @@ body.reduce-motion .map-fog-wisp {
 ========================================================= */
 
 .bottom-nav {
-  --nav-button-width: 158px;
-  width: min(calc(100% - 16px), 600px);
-  height: 178px;
+  --nav-button-width: 184px;
+  width: min(calc(100% - 16px), 610px);
+  height: 226px;
   display: block;
 }
 
 .bottom-nav::before {
   width: 100%;
   height: 100%;
-  border-radius: 26px;
+  border-radius: 28px;
   background:
     linear-gradient(
       180deg,
@@ -7367,39 +7367,39 @@ body.reduce-motion .map-fog-wisp {
 }
 
 .bottom-nav .nav-item[data-view="board"] {
-  --cluster-x: 19%;
+  --cluster-x: 29%;
   --cluster-y: 18px;
-  --cluster-rot: -4deg;
+  --cluster-rot: -3.6deg;
+  --cluster-z: 3;
+}
+
+.bottom-nav .nav-item[data-view="party"] {
+  --cluster-x: 71%;
+  --cluster-y: 18px;
+  --cluster-rot: 3.4deg;
   --cluster-z: 3;
 }
 
 .bottom-nav .nav-item[data-view="map"] {
   --cluster-x: 50%;
-  --cluster-y: 10px;
+  --cluster-y: 78px;
   --cluster-rot: .8deg;
-  --cluster-z: 2;
-  filter: brightness(.84) saturate(.94);
-}
-
-.bottom-nav .nav-item[data-view="party"] {
-  --cluster-x: 81%;
-  --cluster-y: 20px;
-  --cluster-rot: 4deg;
-  --cluster-z: 3;
+  --cluster-z: 5;
+  filter: brightness(.86) saturate(.96);
 }
 
 .bottom-nav .nav-item[data-view="character"] {
-  --cluster-x: 34%;
-  --cluster-y: 90px;
-  --cluster-rot: 2.2deg;
-  --cluster-z: 5;
+  --cluster-x: 29%;
+  --cluster-y: 142px;
+  --cluster-rot: 2.5deg;
+  --cluster-z: 4;
 }
 
 .bottom-nav .nav-item[data-view="settings"] {
-  --cluster-x: 66%;
-  --cluster-y: 88px;
-  --cluster-rot: -2.4deg;
-  --cluster-z: 5;
+  --cluster-x: 71%;
+  --cluster-y: 140px;
+  --cluster-rot: -2.7deg;
+  --cluster-z: 4;
 }
 
 .bottom-nav .nav-item:active {
@@ -7421,66 +7421,73 @@ body.reduce-motion .map-fog-wisp {
 
 @media (max-width: 560px) {
   .bottom-nav {
-    --nav-button-width: 142px;
+    --nav-button-width: 168px;
     width: calc(100% - 8px);
-    height: 172px;
+    height: 218px;
   }
 
   .bottom-nav::before {
     width: 100%;
     height: 100%;
-    border-radius: 23px;
+    border-radius: 24px;
   }
 
   .bottom-nav .nav-item[data-view="board"] {
-    --cluster-x: 20%;
-    --cluster-y: 18px;
+    --cluster-x: 29%;
+    --cluster-y: 16px;
+  }
+
+  .bottom-nav .nav-item[data-view="party"] {
+    --cluster-x: 71%;
+    --cluster-y: 16px;
   }
 
   .bottom-nav .nav-item[data-view="map"] {
     --cluster-x: 50%;
-    --cluster-y: 8px;
-  }
-
-  .bottom-nav .nav-item[data-view="party"] {
-    --cluster-x: 80%;
-    --cluster-y: 20px;
+    --cluster-y: 74px;
   }
 
   .bottom-nav .nav-item[data-view="character"] {
-    --cluster-x: 35%;
-    --cluster-y: 88px;
+    --cluster-x: 29%;
+    --cluster-y: 136px;
   }
 
   .bottom-nav .nav-item[data-view="settings"] {
-    --cluster-x: 65%;
-    --cluster-y: 86px;
+    --cluster-x: 71%;
+    --cluster-y: 134px;
   }
 }
 
 @media (max-width: 390px) {
   .bottom-nav {
-    --nav-button-width: 136px;
+    --nav-button-width: 158px;
     width: calc(100% - 6px);
-    height: 168px;
+    height: 210px;
   }
 
   .bottom-nav .nav-item[data-view="board"] {
-    --cluster-x: 20%;
+    --cluster-x: 29%;
+    --cluster-y: 14px;
   }
 
   .bottom-nav .nav-item[data-view="party"] {
-    --cluster-x: 80%;
+    --cluster-x: 71%;
+    --cluster-y: 14px;
+  }
+
+  .bottom-nav .nav-item[data-view="map"] {
+    --cluster-x: 50%;
+    --cluster-y: 70px;
   }
 
   .bottom-nav .nav-item[data-view="character"] {
-    --cluster-x: 35%;
-    --cluster-y: 86px;
+    --cluster-x: 29%;
+    --cluster-y: 130px;
   }
 
   .bottom-nav .nav-item[data-view="settings"] {
-    --cluster-x: 65%;
-    --cluster-y: 84px;
+    --cluster-x: 71%;
+    --cluster-y: 128px;
   }
 }
 
