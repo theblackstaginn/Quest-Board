@@ -8127,3 +8127,148 @@ body[data-active-view="party"] .party-section {
     0 2px 4px rgba(0, 0, 0, 0.95),
     0 0 10px rgba(230, 175, 83, 0.12);
 }
+
+/* =========================================================
+   HUD PROFILE — ORNATE FANTASY MEDALLION
+========================================================= */
+
+.profile-avatar {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid #6f3f16;
+  outline: 1px solid rgba(236, 190, 100, 0.42);
+  outline-offset: 1px;
+  color: #2b1608;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 1px 0 rgba(255, 235, 181, 0.72),
+    0 2px 2px rgba(70, 35, 8, 0.34);
+  background:
+    radial-gradient(
+      circle at 50% 10%,
+      #ffe09a 0 1.2px,
+      #7d4817 1.4px 2.2px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 90% 50%,
+      #ffd887 0 1.2px,
+      #744015 1.4px 2.2px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 50% 90%,
+      #e9b658 0 1.2px,
+      #6a3912 1.4px 2.2px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 10% 50%,
+      #f0bf62 0 1.2px,
+      #714015 1.4px 2.2px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 31% 25%,
+      rgba(255, 246, 205, 0.94) 0%,
+      rgba(244, 194, 96, 0.96) 19%,
+      rgba(202, 132, 42, 0.98) 49%,
+      rgba(143, 82, 24, 1) 76%,
+      rgba(91, 48, 13, 1) 100%
+    );
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 219, 139, 0.52),
+    inset 0 0 0 5px rgba(91, 47, 13, 0.48),
+    inset 0 2px 3px rgba(255, 245, 211, 0.62),
+    inset 0 -5px 7px rgba(74, 34, 8, 0.42),
+    0 3px 8px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(45, 24, 8, 0.70);
+  transition:
+    transform 140ms ease,
+    filter 140ms ease;
+}
+
+.profile-avatar::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border-radius: 50%;
+  border: 1px solid rgba(86, 46, 13, 0.56);
+  box-shadow:
+    0 0 0 1px rgba(255, 226, 158, 0.20),
+    inset 0 0 5px rgba(78, 37, 8, 0.24);
+  pointer-events: none;
+}
+
+.profile-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.20) 0%,
+      rgba(255, 255, 255, 0.04) 28%,
+      transparent 47%,
+      rgba(76, 34, 8, 0.09) 72%,
+      rgba(45, 20, 5, 0.16) 100%
+    );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.player-hud:active .profile-avatar {
+  transform: rotate(-2deg) scale(0.97);
+  filter: brightness(0.96);
+}
+
+body[data-character-theme="ember"] .profile-avatar {
+  background:
+    radial-gradient(circle at 50% 10%, #ffe19b 0 1.2px, #7c4315 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 90% 50%, #ffd27c 0 1.2px, #6f3812 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 50% 90%, #e9ae4d 0 1.2px, #67300e 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 10% 50%, #f3ba55 0 1.2px, #703811 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(
+      circle at 31% 25%,
+      #fff0bd 0%,
+      #f2bf63 19%,
+      #d28635 48%,
+      #a3511b 75%,
+      #642d0b 100%
+    );
+}
+
+body[data-character-theme="amethyst"] .profile-avatar {
+  border-color: #4d2d63;
+  outline-color: rgba(193, 146, 226, 0.42);
+  color: #1c0d25;
+  text-shadow:
+    0 1px 0 rgba(238, 211, 255, 0.66),
+    0 2px 2px rgba(38, 17, 48, 0.38);
+  background:
+    radial-gradient(circle at 50% 10%, #e2b9ff 0 1.2px, #5a3470 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 90% 50%, #d29be9 0 1.2px, #4a285f 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 50% 90%, #a96ed0 0 1.2px, #3d204f 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(circle at 10% 50%, #c486e7 0 1.2px, #4c2960 1.4px 2.2px, transparent 2.4px),
+    radial-gradient(
+      circle at 31% 25%,
+      #ead0ff 0%,
+      #bd8be8 20%,
+      #8d5eaf 49%,
+      #65417d 76%,
+      #3d244d 100%
+    );
+  box-shadow:
+    inset 0 0 0 2px rgba(226, 185, 252, 0.40),
+    inset 0 0 0 5px rgba(66, 34, 83, 0.48),
+    inset 0 2px 3px rgba(244, 226, 255, 0.54),
+    inset 0 -5px 7px rgba(45, 22, 57, 0.44),
+    0 3px 8px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(31, 16, 39, 0.74);
+}
