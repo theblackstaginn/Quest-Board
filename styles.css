@@ -7484,6 +7484,54 @@ body.reduce-motion .map-fog-wisp {
   pointer-events: none;
 }
 
+.weather-atmosphere[data-weather="rain"]::before,
+.weather-atmosphere[data-weather="storm"]::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -18vh -18vw;
+  pointer-events: none;
+  opacity: .62;
+  background-image:
+    repeating-linear-gradient(
+      104deg,
+      transparent 0 18px,
+      rgba(224, 239, 247, .10) 19px 20px,
+      rgba(220, 236, 245, .72) 21px 23px,
+      transparent 24px 46px
+    ),
+    repeating-linear-gradient(
+      104deg,
+      transparent 0 31px,
+      rgba(235, 245, 250, .28) 32px 34px,
+      transparent 35px 68px
+    );
+  background-size:
+    86px 154px,
+    122px 218px;
+  animation:
+    weatherRainSheet .62s linear infinite;
+  will-change:
+    background-position;
+}
+
+.weather-atmosphere[data-weather="storm"]::before {
+  opacity: .82;
+}
+
+@keyframes weatherRainSheet {
+  from {
+    background-position:
+      0 -154px,
+      24px -218px;
+  }
+  to {
+    background-position:
+      -42px 154px,
+      -36px 218px;
+  }
+}
+
 .weather-atmosphere__veil {
   background: transparent;
   transition: background 800ms ease, opacity 800ms ease;
@@ -9156,3 +9204,22 @@ body[data-character-theme="amethyst"] .profile-avatar {
   display: none;
 }
 
+
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-atmosphere[data-weather="rain"]::before,
+  .weather-atmosphere[data-weather="storm"]::before {
+    animation: none !important;
+    background-position:
+      0 0,
+      24px 18px;
+  }
+}
+
+body.reduce-motion .weather-atmosphere[data-weather="rain"]::before,
+body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
+  animation: none !important;
+  background-position:
+    0 0,
+    24px 18px;
+}
