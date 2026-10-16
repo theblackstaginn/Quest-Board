@@ -284,6 +284,218 @@ const QUESTS = [
   }
 ];
 
+
+const PROFILE_QUEST_OVERRIDES = {
+  farmer: {
+    "there-back": {
+      description:
+        "A recovery-focused road quest that keeps conditioning in the build without stealing from strength and muscle work.",
+      exercises: [
+        "Walk the full 1-mile route at a brisk but conversational pace",
+        "Keep shoulders relaxed and posture tall",
+        "On the final quarter mile, add 3 x 20-second faster efforts with easy walking between them"
+      ]
+    },
+
+    keep: {
+      description:
+        "Farmer's hypertrophy-focused dumbbell and kettlebell session, built around chest, back, shoulders, arms, and enough lower-body work to keep the frame balanced.",
+      exercises: [
+        "Dumbbell bench press - 3 sets of 8-12 reps",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Goblet squat - 3 sets of 8-12 reps",
+        "Dumbbell shoulder press - 2-3 sets of 8-12 reps",
+        "Dumbbell curl - 2 sets of 10-15 reps",
+        "Overhead dumbbell triceps extension - 2 sets of 10-15 reps"
+      ]
+    },
+
+    dragonstrength: {
+      description:
+        "Farmer's heavy barbell quest. Build the dense chest, back, legs, and shoulders that give the Half-Orc Wizard his broad, powerful silhouette.",
+      exercises: [
+        "Barbell squat - 3 sets of 5-8 reps",
+        "Bench press - 3 sets of 5-8 reps",
+        "Barbell Romanian deadlift - 3 sets of 6-10 reps",
+        "Cable row or lat pulldown - 3 sets of 8-12 reps",
+        "Dumbbell lateral raise - 2-3 sets of 12-20 reps"
+      ]
+    },
+
+    "iron-gate": {
+      description:
+        "Farmer's power-building cage session, emphasizing upper-chest, back width, shoulders, and strong legs while keeping two solid reps in reserve.",
+      exercises: [
+        "Power-cage squat - 3 sets of 6-10 reps",
+        "Incline dumbbell bench press - 3 sets of 8-12 reps",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell Romanian deadlift - 2-3 sets of 8-12 reps",
+        "Dumbbell lateral raise - 3 sets of 12-20 reps"
+      ]
+    },
+
+    "smiths-circuit": {
+      description:
+        "Farmer's compact upper-body pump quest for busy days, keeping chest, shoulders, back, and arms growing without a long session.",
+      exercises: [
+        "Dumbbell floor or bench press - 10-12 reps",
+        "One-arm dumbbell row - 10-12 reps each side",
+        "Dumbbell shoulder press - 8-10 reps",
+        "Dumbbell lateral raise - 12-15 reps",
+        "Dumbbell curl - 10-12 reps",
+        "Overhead dumbbell triceps extension - 10-12 reps",
+        "Complete 2-3 controlled rounds"
+      ]
+    },
+
+    "sentinels-stand": {
+      description:
+        "Farmer's full-body strength quest with extra back, shoulder, and carry work for a thicker, broader frame.",
+      exercises: [
+        "Power-cage squat or box squat - 3 sets of 6-10 reps",
+        "Bench press or dumbbell bench press - 3 sets of 8-12 reps",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell split squat - 2 sets of 8-10 reps each side",
+        "Farmer carry or heavy static dumbbell hold - 3 rounds of 30-45 seconds"
+      ]
+    },
+
+    rogue: {
+      description:
+        "Farmer's short conditioning quest. Keep the heart working and the waistline honest without turning a muscle-building week into an endurance marathon.",
+      exercises: [
+        "10 kettlebell deadlifts",
+        "8 goblet squats",
+        "8 dumbbell push presses",
+        "10 one-arm dumbbell rows each side",
+        "20-30 second plank",
+        "Repeat at a steady pace until 10 minutes is complete"
+      ]
+    },
+
+    restoration: {
+      description:
+        "Farmer's lifter recovery quest, opening the hips, chest, shoulders, and upper back so heavy pressing, rowing, squatting, and hinging stay comfortable.",
+      exercises: [
+        "Hip-flexor mobility - 45 seconds each side",
+        "Hamstring stretch - 45 seconds each side",
+        "Calf stretch - 30 seconds each side",
+        "Doorway chest stretch - 45 seconds each side",
+        "Cross-body shoulder stretch - 30 seconds each side",
+        "Thoracic rotation - 6 slow reps each side"
+      ]
+    },
+
+    "unbinding-ritual": {
+      description:
+        "Farmer's gentle deload ritual for keeping a heavily trained frame loose on low-energy days.",
+      exercises: [
+        "Standing calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "Doorway chest stretch - 30 seconds each side",
+        "Lat stretch - 30 seconds each side",
+        "Repeat any tight area once"
+      ]
+    },
+
+    "wayfarers-reset": {
+      description:
+        "Farmer's lower-body reset for squat, hinge, walking, and long workdays on the feet.",
+      exercises: [
+        "Ankle rocks - 10 each side",
+        "Calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Adductor rock-back - 8 slow reps each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "Easy spinal rotation - 5 slow reps each side"
+      ]
+    },
+
+    "moonlit-mobility": {
+      description:
+        "Farmer's upper-body recovery quest for shoulders, pecs, lats, and thoracic mobility after pressing and pulling.",
+      exercises: [
+        "Shoulder rolls - 10 each direction",
+        "Doorway chest stretch - 45 seconds each side",
+        "Cross-body shoulder stretch - 30 seconds each side",
+        "Thread-the-needle - 6 slow reps each side",
+        "Supported lat stretch - 45 seconds",
+        "Thoracic rotation - 6 reps each side",
+        "Cat-cow - 8 slow reps"
+      ]
+    },
+
+    ranger: {
+      description:
+        "Farmer's conditioning quest: enough pace work to support work capacity and body composition while protecting recovery for the heavy quests.",
+      exercises: [
+        "5-minute easy warm-up",
+        "1 minute fast walk",
+        "2 minutes normal pace",
+        "Repeat intervals",
+        "Complete the full 1-mile route"
+      ]
+    }
+  },
+
+  // Jess keeps the current quest workouts until her own training target is defined.
+  // The profile-aware loader is already in place, so her workouts can be tailored
+  // without changing quest IDs, names, rewards, completion rules, or party mechanics.
+  jess: {}
+};
+
+
+function getQuestForProfile(
+  quest,
+  profileId = activeProfileId
+) {
+  if (!quest) {
+    return quest;
+  }
+
+  const override =
+    PROFILE_QUEST_OVERRIDES[
+      profileId
+    ]?.[quest.id];
+
+  if (!override) {
+    return {
+      ...quest,
+      exercises: [
+        ...(quest.exercises || [])
+      ]
+    };
+  }
+
+  return {
+    ...quest,
+    ...override,
+    exercises: [
+      ...(
+        override.exercises
+        || quest.exercises
+        || []
+      )
+    ]
+  };
+}
+
+
+function getProfileQuests(
+  profileId = activeProfileId
+) {
+  return QUESTS.map(
+    quest =>
+      getQuestForProfile(
+        quest,
+        profileId
+      )
+  );
+}
+
 const QUEST_ICON_PATHS = {
   "there-back": "icons/there-and-back.webp",
   "keep": "icons/the-keep.webp",
@@ -2577,13 +2789,19 @@ function getLevelData(xp) {
 // =========================================================
 
 function findQuest(id) {
-  return (
+  const baseQuest =
     QUESTS.find(
       quest =>
         quest.id === id
-    )
-    || SPECIAL_QUESTS[id]
-  );
+    );
+
+  if (baseQuest) {
+    return getQuestForProfile(
+      baseQuest
+    );
+  }
+
+  return SPECIAL_QUESTS[id];
 }
 
 
@@ -3690,7 +3908,7 @@ function getWeeklyBossProfile(s){
 function getEquipmentBonuses(s){const o={flatGold:0,goldMultiplier:1,xpBonus:{strength:0,endurance:0,restoration:0}};Object.values(s.equippedRelics||{}).forEach(id=>{const b=EQUIPMENT_RELICS[id];if(!b)return;o.flatGold+=Number(b.flatGold||0);o.goldMultiplier*=Number(b.goldMultiplier||1);if(b.xpType)o.xpBonus[b.xpType]+=Number(b.xpBonus||0);});return o;}
 function evaluateAchievements(s){const e=new Set(s.achievements||[]),a=[];ACHIEVEMENTS.forEach(x=>{if(!e.has(x.id)&&x.test(s)){e.add(x.id);a.push(x.id);}});if(a.length){s.achievements=Array.from(e);saveState(s);}return a;}
 function renderCampaign(s){const p=Math.min(CAMPAIGN_GOAL,Math.max(Number(s.campaignProgress||0),Math.min(CAMPAIGN_GOAL,s.history.filter(x=>x.questId!=="boss").length)));s.campaignProgress=p;const c=getCampaignLocation(p);$("#campaignRank").textContent=getAdventurerTitle(s);$("#campaignLocation").textContent=c.name;$("#campaignProgressText").textContent=`${p} / ${CAMPAIGN_GOAL} quests`;$("#campaignNarrative").textContent=p>=CAMPAIGN_GOAL?"The heart of the Blackwood stands open. Campaign I is conquered.":`Current location: ${c.name}. Every completed quest pushes the expedition deeper into the wood.`;$("#campaignMap").innerHTML=CAMPAIGN_LOCATIONS.map((x,i)=>`<div class="campaign-map-stop ${p>=x.at?"is-unlocked":""} ${c.name===x.name?"is-current":""}"><span class="campaign-map-node">${x.glyph}</span><small>${escapeHtml(x.name)}</small></div>${i<CAMPAIGN_LOCATIONS.length-1?'<span class="campaign-map-path"></span>':""}`).join("");}
-function getDailyContracts(){const d=new Date().toISOString().slice(0,10);let seed=Array.from(d).reduce((s,c)=>s+c.charCodeAt(0),0);const p=[...QUESTS],o=[];while(p.length&&o.length<3){seed=(seed*9301+49297)%233280;o.push(p.splice(seed%p.length,1)[0]);}return o;}
+function getDailyContracts(){const d=new Date().toISOString().slice(0,10);let seed=Array.from(d).reduce((s,c)=>s+c.charCodeAt(0),0);const p=[...getProfileQuests()],o=[];while(p.length&&o.length<3){seed=(seed*9301+49297)%233280;o.push(p.splice(seed%p.length,1)[0]);}return o;}
 function renderDailyContracts(s){const g=$("#dailyContractGrid");if(!g)return;const d=new Date().toISOString().slice(0,10),done=new Set(s.history.filter(x=>x.completedAt?.startsWith(d)).map(x=>x.questId));g.innerHTML=getDailyContracts().map(q=>`<button class="daily-contract ${done.has(q.id)?"is-complete":""}" type="button" data-quest-id="${q.id}"><span>${done.has(q.id)?"✓":"◆"}</span><div><strong>${escapeHtml(q.title)}</strong><small>${escapeHtml(q.category)} · +${q.gold} Gold</small></div></button>`).join("");}
 function getQuestChainStage(s){let n=Math.max(0,Number(s.questChainStage||0));while(n<QUEST_CHAIN.length&&s.history.some(x=>x.questId===QUEST_CHAIN[n].questId))n++;s.questChainStage=n;return n;}
 function renderQuestChain(s){const n=getQuestChainStage(s);$("#questChainProgress").textContent=`${Math.min(n,QUEST_CHAIN.length)} / ${QUEST_CHAIN.length}`;$("#questChainSteps").innerHTML=QUEST_CHAIN.map((x,i)=>`<span class="quest-chain-step ${i<n?"is-complete":""} ${i===n?"is-active":""}">${i<n?"✓":i+1}</span>`).join("");const b=$("#questChainButton");if(n>=QUEST_CHAIN.length){$("#questChainCopy").textContent="The Briar Warden has fallen. The first Blackwood story is complete.";b.textContent="Story Complete";b.disabled=true;return;}const c=QUEST_CHAIN[n];$("#questChainCopy").textContent=`Next: ${c.title}`;b.textContent=n?"Continue Story":"Begin Story Quest";b.disabled=c.questId==="boss"&&Boolean($("#bossButton")?.disabled);}
@@ -4026,7 +4244,8 @@ function renderQuestCards() {
   const timerState = getSavedTimerState();
 
   $("#questGrid").innerHTML =
-    QUESTS.map(quest => {
+    getProfileQuests()
+      .map(quest => {
       const completed =
         completedIds.has(quest.id);
       const active =
