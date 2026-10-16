@@ -705,6 +705,95 @@ const SPECIAL_QUESTS = {
 };
 
 
+const PROFILE_SPECIAL_QUEST_OVERRIDES = {
+  farmer: {
+    emergency: {
+      description:
+        "Farmer's five-minute fallback: preserve momentum with a compact chest, back, legs, and shoulder circuit.",
+      exercises: [
+        "10 goblet squats",
+        "10 dumbbell rows each side",
+        "10 dumbbell chest presses",
+        "10 dumbbell Romanian deadlifts",
+        "8 dumbbell shoulder presses",
+        "Repeat until five minutes is complete"
+      ]
+    },
+
+    boss: {
+      description:
+        "Farmer's weekly challenge. Walk the mile, then complete twenty minutes from one of his strength-focused quests.",
+      exercises: [
+        "Walk the full 1-mile route",
+        "Choose The Keep, DragonStrength, or Rogue Mode",
+        "Complete 20 minutes of Farmer's profile-specific strength work"
+      ]
+    }
+  },
+
+  jess: {
+    emergency: {
+      description:
+        "Jess's five-minute fallback: keep the streak alive with glute, leg, and core work.",
+      exercises: [
+        "10 goblet squats",
+        "10 dumbbell Romanian deadlifts",
+        "8 reverse lunges each side",
+        "12 glute bridges",
+        "20-second plank",
+        "Repeat until five minutes is complete"
+      ]
+    },
+
+    boss: {
+      description:
+        "Jess's weekly challenge. Walk the mile, then complete twenty minutes from one of her glute, leg, and core-focused quests.",
+      exercises: [
+        "Walk the full 1-mile route",
+        "Choose The Keep, DragonStrength, or Rogue Mode",
+        "Complete 20 minutes of Jess's profile-specific strength work"
+      ]
+    }
+  }
+};
+
+
+function getSpecialQuestForProfile(
+  quest,
+  profileId = activeProfileId
+) {
+  if (!quest) {
+    return quest;
+  }
+
+  const override =
+    PROFILE_SPECIAL_QUEST_OVERRIDES[
+      profileId
+    ]?.[quest.id];
+
+  if (!override) {
+    return {
+      ...quest,
+      exercises: [
+        ...(quest.exercises || [])
+      ]
+    };
+  }
+
+  return {
+    ...quest,
+    ...override,
+    exercises: [
+      ...(
+        override.exercises
+        || quest.exercises
+        || []
+      )
+    ]
+  };
+}
+
+
 // =========================================================
 // 4. CHARACTER DATA
 // =========================================================
@@ -2950,7 +3039,9 @@ function findQuest(id) {
     );
   }
 
-  return SPECIAL_QUESTS[id];
+  return getSpecialQuestForProfile(
+    SPECIAL_QUESTS[id]
+  );
 }
 
 
