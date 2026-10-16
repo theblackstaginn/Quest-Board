@@ -301,12 +301,12 @@ const PROFILE_QUEST_OVERRIDES = {
       description:
         "Farmer's hypertrophy-focused dumbbell and kettlebell session, built around chest, back, shoulders, arms, and enough lower-body work to keep the frame balanced.",
       exercises: [
-        "Dumbbell bench press - 3 sets of 8-12 reps",
-        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
-        "Goblet squat - 3 sets of 8-12 reps",
-        "Dumbbell shoulder press - 2-3 sets of 8-12 reps",
-        "Dumbbell curl - 2 sets of 10-15 reps",
-        "Overhead dumbbell triceps extension - 2 sets of 10-15 reps"
+        "Dumbbell bench press - 8-12 reps",
+        "One-arm dumbbell row - 8-12 reps each side",
+        "Goblet squat - 8-12 reps",
+        "Dumbbell lateral raise - 12-15 reps",
+        "Dumbbell curl + overhead triceps extension - 10-12 reps each",
+        "Complete 2-3 controlled rounds"
       ]
     },
 
@@ -314,11 +314,11 @@ const PROFILE_QUEST_OVERRIDES = {
       description:
         "Farmer's heavy barbell quest. Build the dense chest, back, legs, and shoulders that give the Half-Orc Wizard his broad, powerful silhouette.",
       exercises: [
-        "Barbell squat - 3 sets of 5-8 reps",
-        "Bench press - 3 sets of 5-8 reps",
-        "Barbell Romanian deadlift - 3 sets of 6-10 reps",
-        "Cable row or lat pulldown - 3 sets of 8-12 reps",
-        "Dumbbell lateral raise - 2-3 sets of 12-20 reps"
+        "Barbell squat - 2 working sets of 5-8 reps",
+        "Bench press - 2 working sets of 5-8 reps",
+        "Barbell Romanian deadlift - 2 working sets of 6-10 reps",
+        "Cable row or lat pulldown - 2 sets of 8-12 reps",
+        "Dumbbell lateral raise - 1-2 sets of 12-20 reps"
       ]
     },
 
