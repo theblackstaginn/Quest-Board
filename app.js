@@ -649,6 +649,235 @@ function getProfileQuests(
   );
 }
 
+
+const PROFILE_NUTRITION_TIPS = {
+  farmer: {
+    strength: [
+      {
+        food: "Ready-to-drink protein shake + banana",
+        why: "Fast protein and carbs make this an easy post-lift option for muscle recovery and training energy."
+      },
+      {
+        food: "Greek yogurt + granola + berries",
+        why: "A quick mix of protein, carbs, and fruit that supports muscle gain without needing a full meal."
+      },
+      {
+        food: "Rotisserie chicken wrap + piece of fruit",
+        why: "Portable protein with enough carbohydrate to refill the tank after a harder strength quest."
+      },
+      {
+        food: "Cottage cheese + pineapple + handful of nuts",
+        why: "Protein plus easy calories for days when the goal is building and recovering, not accidentally under-eating."
+      },
+      {
+        food: "Two hard-boiled eggs + cheese stick + apple",
+        why: "A no-cooking protein snack that is easy to grab when a full meal is not happening."
+      },
+      {
+        food: "Peanut butter sandwich + milk or protein shake",
+        why: "Simple carbs, protein, and calories for supporting a bigger, stronger frame."
+      }
+    ],
+
+    endurance: [
+      {
+        food: "Banana + Greek yogurt",
+        why: "Easy carbohydrate before or after the walk, with protein to keep the day muscle-friendly."
+      },
+      {
+        food: "Apple + peanut butter packet",
+        why: "Quick energy with enough staying power for a walking or conditioning day."
+      },
+      {
+        food: "Chocolate milk + banana",
+        why: "A fast recovery option with carbs, fluid, and protein after conditioning."
+      },
+      {
+        food: "Turkey and cheese roll-ups + crackers",
+        why: "Portable protein and carbs without needing to cook anything."
+      }
+    ],
+
+    restoration: [
+      {
+        food: "Greek yogurt + berries",
+        why: "Protein for recovery plus fruit for an easy, lighter rest-day snack."
+      },
+      {
+        food: "Cottage cheese + apple",
+        why: "Simple protein and fiber when the day is about recovery rather than a hard training session."
+      },
+      {
+        food: "Tuna packet + whole-grain crackers",
+        why: "Shelf-stable protein that takes about a minute to turn into food."
+      },
+      {
+        food: "Protein shake + handful of nuts",
+        why: "A fast way to keep protein intake steady even on a low-effort recovery day."
+      }
+    ]
+  },
+
+  jess: {
+    strength: [
+      {
+        food: "Greek yogurt + banana + a little granola",
+        why: "Protein supports glute, leg, back, shoulder, and arm training while the carbs help fuel the next session."
+      },
+      {
+        food: "Ready-to-drink protein shake + piece of fruit",
+        why: "Fast, portable protein and carbs without turning the goal into a crash-diet project."
+      },
+      {
+        food: "Rotisserie chicken + microwave rice cup",
+        why: "A two-minute high-protein meal with useful training carbs for building stronger legs and glutes."
+      },
+      {
+        food: "Cottage cheese + berries + a few nuts",
+        why: "Protein for muscle recovery with fruit and a little fat for a satisfying quick meal."
+      },
+      {
+        food: "Turkey roll-ups + cheese + crackers",
+        why: "Grab-and-go protein with enough carbohydrate to support training rather than draining it."
+      },
+      {
+        food: "Two hard-boiled eggs + fruit + string cheese",
+        why: "Simple protein and produce for days when there is no time to cook."
+      }
+    ],
+
+    endurance: [
+      {
+        food: "Banana + string cheese",
+        why: "Quick carbohydrate for the walk plus a little protein to keep recovery covered."
+      },
+      {
+        food: "Greek yogurt + berries",
+        why: "Light, fast, and protein-forward for conditioning days."
+      },
+      {
+        food: "Apple + peanut butter packet",
+        why: "Portable energy with fiber and fat so the snack actually sticks with you."
+      },
+      {
+        food: "Protein shake + small granola bar",
+        why: "Easy fuel when conditioning has to fit between everything else in the day."
+      }
+    ],
+
+    restoration: [
+      {
+        food: "Cottage cheese + berries",
+        why: "A light protein option that supports recovery without needing a full cooked meal."
+      },
+      {
+        food: "Tuna packet + crackers + cucumber slices",
+        why: "Fast protein with a crunchy, easy side for a lower-intensity day."
+      },
+      {
+        food: "Greek yogurt + fruit",
+        why: "Simple protein and fiber that fits a recovery day without aggressive restriction."
+      },
+      {
+        food: "Protein shake + handful of almonds",
+        why: "Low-effort protein and fats when the priority is simply staying consistent."
+      }
+    ]
+  }
+};
+
+
+function getNutritionTipForQuest(
+  quest,
+  profileId = activeProfileId,
+  date = new Date()
+) {
+  const bucket =
+    quest?.xpType === "endurance"
+      ? "endurance"
+      : quest?.xpType === "restoration"
+        ? "restoration"
+        : "strength";
+
+  const tips =
+    PROFILE_NUTRITION_TIPS[
+      profileId
+    ]?.[bucket]
+    || PROFILE_NUTRITION_TIPS
+      .farmer[bucket]
+    || [];
+
+  if (!tips.length) {
+    return null;
+  }
+
+  const dayKey =
+    date.toISOString()
+      .slice(0, 10);
+
+  const seedText =
+    `${profileId}:${quest?.id || "quest"}:${dayKey}`;
+
+  let hash = 0;
+
+  for (
+    const character
+    of seedText
+  ) {
+    hash =
+      (
+        hash * 31
+        + character.charCodeAt(0)
+      )
+      >>> 0;
+  }
+
+  return tips[
+    hash % tips.length
+  ];
+}
+
+
+function renderQuestNutrition(
+  quest
+) {
+  const panel =
+    $("#questNutritionPanel");
+
+  const food =
+    $("#questNutritionFood");
+
+  const why =
+    $("#questNutritionWhy");
+
+  if (
+    !panel
+    || !food
+    || !why
+  ) {
+    return;
+  }
+
+  const tip =
+    getNutritionTipForQuest(
+      quest
+    );
+
+  panel.hidden =
+    !tip;
+
+  if (!tip) {
+    return;
+  }
+
+  food.textContent =
+    tip.food;
+
+  why.textContent =
+    tip.why;
+}
+
+
 const QUEST_ICON_PATHS = {
   "there-back": "icons/there-and-back.webp",
   "keep": "icons/the-keep.webp",
@@ -4867,6 +5096,10 @@ function openQuest(id) {
   }
 
   renderExerciseList(
+    quest
+  );
+
+  renderQuestNutrition(
     quest
   );
 
