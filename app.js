@@ -454,11 +454,12 @@ const PROFILE_QUEST_OVERRIDES = {
 
     keep: {
       description:
-        "Jess's lower-body and core quest, emphasizing glutes, thighs, and trunk strength while keeping the session compact.",
+        "Jess's balanced full-body quest with a glute-and-leg bias, plus back, shoulders, arms, and core so strength develops everywhere.",
       exercises: [
         "Goblet squat - 10-12 reps",
         "Dumbbell Romanian deadlift - 10-12 reps",
-        "Reverse lunge - 8-10 reps each side",
+        "One-arm dumbbell row - 10-12 reps each side",
+        "Dumbbell shoulder press - 8-12 reps",
         "Glute bridge or hip thrust - 12-15 reps",
         "Dead bug - 8-10 reps each side",
         "Complete 2-3 controlled rounds"
@@ -467,48 +468,50 @@ const PROFILE_QUEST_OVERRIDES = {
 
     dragonstrength: {
       description:
-        "Jess's heavy lower-body quest, built around glute and leg strength with focused core work.",
+        "Jess's heavy full-body quest with a lower-body emphasis, pairing glute and leg strength with strong back, shoulders, and core.",
       exercises: [
         "Barbell squat - 2 working sets of 6-10 reps",
         "Barbell hip thrust - 2 working sets of 8-12 reps",
-        "Barbell Romanian deadlift - 2 working sets of 8-10 reps",
-        "Reverse lunge or split squat - 2 sets of 8-10 reps each side",
+        "Cable row or lat pulldown - 2 sets of 8-12 reps",
+        "Dumbbell shoulder press - 2 sets of 8-12 reps",
         "Plank - 2 rounds of 30-45 seconds"
       ]
     },
 
     "iron-gate": {
       description:
-        "Jess's power-cage lower-body session for glute growth, thicker legs, and strong midline control.",
+        "Jess's power-cage full-body session, keeping glute and leg growth front and center while building a strong back and shoulders.",
       exercises: [
         "Power-cage squat - 3 sets of 8-10 reps",
         "Barbell or dumbbell hip thrust - 3 sets of 8-12 reps",
-        "Bulgarian split squat - 2-3 sets of 8-12 reps each side",
-        "Dumbbell Romanian deadlift - 2 sets of 10-12 reps",
-        "Side plank - 2 rounds of 20-40 seconds each side"
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell shoulder press - 2-3 sets of 8-12 reps",
+        "Bulgarian split squat - 2 sets of 8-10 reps each side"
       ]
     },
 
     "smiths-circuit": {
       description:
-        "Jess's compact glute, leg, and core circuit for busy days.",
+        "Jess's compact full-body circuit for busy days, with extra attention to glutes and legs plus back, shoulders, and arms.",
       exercises: [
         "Goblet squat - 12 reps",
         "Dumbbell Romanian deadlift - 12 reps",
-        "Step-up or reverse lunge - 10 reps each side",
+        "One-arm dumbbell row - 10 reps each side",
+        "Dumbbell lateral raise - 12-15 reps",
         "Glute bridge or hip thrust - 15 reps",
-        "Dead bug - 10 reps each side",
+        "Dumbbell curl + triceps extension - 10-12 reps each",
         "Complete 2-3 controlled rounds"
       ]
     },
 
     "sentinels-stand": {
       description:
-        "Jess's full lower-body strength quest with extra unilateral work for glutes, quads, hamstrings, and core stability.",
+        "Jess's full-body strength quest with a lower-body bias, combining glutes and legs with back, shoulders, arms, and core stability.",
       exercises: [
         "Power-cage squat or box squat - 3 sets of 8-10 reps",
-        "Dumbbell Bulgarian split squat - 3 sets of 8-10 reps each side",
-        "Dumbbell Romanian deadlift - 3 sets of 8-12 reps",
+        "Dumbbell Bulgarian split squat - 2 sets of 8-10 reps each side",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell shoulder press - 2 sets of 8-12 reps",
         "Glute bridge or hip thrust - 2 sets of 12-15 reps",
         "Suitcase carry or side plank - 2 rounds each side"
       ]
@@ -516,11 +519,12 @@ const PROFILE_QUEST_OVERRIDES = {
 
     rogue: {
       description:
-        "Jess's short conditioning circuit, keeping the legs working and the core engaged without turning the session into endless cardio.",
+        "Jess's short conditioning circuit, keeping glutes, legs, back, shoulders, and core working without turning the session into endless cardio.",
       exercises: [
         "10 kettlebell deadlifts or swings",
         "10 goblet squats",
-        "8 reverse lunges each side",
+        "8 one-arm dumbbell rows each side",
+        "8 dumbbell push presses",
         "12 glute bridges",
         "20-30 second plank",
         "Repeat at a steady pace until 10 minutes is complete"
@@ -570,15 +574,15 @@ const PROFILE_QUEST_OVERRIDES = {
 
     "moonlit-mobility": {
       description:
-        "Jess's posture and core-recovery quest, opening the upper body while keeping the trunk moving comfortably after lower-body work.",
+        "Jess's upper-body and core recovery quest for shoulders, lats, upper back, chest, and trunk mobility between strength sessions.",
       exercises: [
         "Shoulder rolls - 10 each direction",
         "Wall or doorway chest stretch - 30 seconds each side",
+        "Cross-body shoulder stretch - 30 seconds each side",
         "Thread-the-needle - 6 slow reps each side",
-        "Cat-cow - 8 slow reps",
+        "Supported lat stretch - 45 seconds",
         "Dead bug - 8 controlled reps each side",
-        "Gentle thoracic rotation - 6 reps each side",
-        "Child's pose - 45 seconds"
+        "Gentle thoracic rotation - 6 reps each side"
       ]
     },
 
@@ -734,11 +738,12 @@ const PROFILE_SPECIAL_QUEST_OVERRIDES = {
   jess: {
     emergency: {
       description:
-        "Jess's five-minute fallback: keep the streak alive with glute, leg, and core work.",
+        "Jess's five-minute fallback: keep the streak alive with a quick full-body hit that still favors glutes and legs.",
       exercises: [
         "10 goblet squats",
         "10 dumbbell Romanian deadlifts",
-        "8 reverse lunges each side",
+        "8 one-arm dumbbell rows each side",
+        "8 dumbbell shoulder presses",
         "12 glute bridges",
         "20-second plank",
         "Repeat until five minutes is complete"
