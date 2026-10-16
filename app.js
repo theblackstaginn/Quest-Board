@@ -4383,9 +4383,9 @@ function getEquipmentBonuses(s){const o={flatGold:0,goldMultiplier:1,xpBonus:{st
 function evaluateAchievements(s){const e=new Set(s.achievements||[]),a=[];ACHIEVEMENTS.forEach(x=>{if(!e.has(x.id)&&x.test(s)){e.add(x.id);a.push(x.id);}});if(a.length){s.achievements=Array.from(e);saveState(s);}return a;}
 function renderCampaign(s){const p=Math.min(CAMPAIGN_GOAL,Math.max(Number(s.campaignProgress||0),Math.min(CAMPAIGN_GOAL,s.history.filter(x=>x.questId!=="boss").length)));s.campaignProgress=p;const c=getCampaignLocation(p);$("#campaignRank").textContent=getAdventurerTitle(s);$("#campaignLocation").textContent=c.name;$("#campaignProgressText").textContent=`${p} / ${CAMPAIGN_GOAL} quests`;$("#campaignNarrative").textContent=p>=CAMPAIGN_GOAL?"The heart of the Blackwood stands open. Campaign I is conquered.":`Current location: ${c.name}. Every completed quest pushes the expedition deeper into the wood.`;$("#campaignMap").innerHTML=CAMPAIGN_LOCATIONS.map((x,i)=>`<div class="campaign-map-stop ${p>=x.at?"is-unlocked":""} ${c.name===x.name?"is-current":""}"><span class="campaign-map-node">${x.glyph}</span><small>${escapeHtml(x.name)}</small></div>${i<CAMPAIGN_LOCATIONS.length-1?'<span class="campaign-map-path"></span>':""}`).join("");}
 function getDailyContracts(){const d=new Date().toISOString().slice(0,10);let seed=Array.from(d).reduce((s,c)=>s+c.charCodeAt(0),0);const p=[...getProfileQuests()],o=[];while(p.length&&o.length<3){seed=(seed*9301+49297)%233280;o.push(p.splice(seed%p.length,1)[0]);}return o;}
-function renderDailyContracts(s){const g=$("#dailyContractGrid");if(!g)return;const d=new Date().toISOString().slice(0,10),done=new Set(s.history.filter(x=>x.completedAt?.startsWith(d)).map(x=>x.questId));g.innerHTML=getDailyContracts().map(q=>`<button class="daily-contract ${done.has(q.id)?"is-complete":""}" type="button" data-quest-id="${q.id}"><span>${done.has(q.id)?"✓":"◆"}</span><div><strong>${escapeHtml(q.title)}</strong><small>${escapeHtml(q.category)} · +${q.gold} Gold</small></div></button>`).join("");}
+function renderDailyContracts(s){const g=$("#dailyContractGrid");if(!g)return;const d=new Date().toISOString().slice(0,10),done=new Set(s.history.filter(x=>x.completedAt?.startsWith(d)).map(x=>x.questId)),bossGateActive=isBossGateActive(s,getSettings());g.innerHTML=getDailyContracts().map(q=>{const locked=bossGateActive&&!done.has(q.id);return `<button class="daily-contract ${done.has(q.id)?"is-complete":""} ${locked?"is-boss-locked":""}" type="button" data-quest-id="${q.id}" ${locked?"disabled":""}><span>${done.has(q.id)?"✓":locked?"⚔":"◆"}</span><div><strong>${escapeHtml(q.title)}</strong><small>${locked?"Defeat the Boss Battle first":escapeHtml(q.category)+" · +"+q.gold+" Gold"}</small></div></button>`;}).join("");}
 function getQuestChainStage(s){let n=Math.max(0,Number(s.questChainStage||0));while(n<QUEST_CHAIN.length&&s.history.some(x=>x.questId===QUEST_CHAIN[n].questId))n++;s.questChainStage=n;return n;}
-function renderQuestChain(s){const n=getQuestChainStage(s);$("#questChainProgress").textContent=`${Math.min(n,QUEST_CHAIN.length)} / ${QUEST_CHAIN.length}`;$("#questChainSteps").innerHTML=QUEST_CHAIN.map((x,i)=>`<span class="quest-chain-step ${i<n?"is-complete":""} ${i===n?"is-active":""}">${i<n?"✓":i+1}</span>`).join("");const b=$("#questChainButton");if(n>=QUEST_CHAIN.length){$("#questChainCopy").textContent="The Briar Warden has fallen. The first Blackwood story is complete.";b.textContent="Story Complete";b.disabled=true;return;}const c=QUEST_CHAIN[n];$("#questChainCopy").textContent=`Next: ${c.title}`;b.textContent=n?"Continue Story":"Begin Story Quest";b.disabled=c.questId==="boss"&&Boolean($("#bossButton")?.disabled);}
+function renderQuestChain(s){const n=getQuestChainStage(s);$("#questChainProgress").textContent=`${Math.min(n,QUEST_CHAIN.length)} / ${QUEST_CHAIN.length}`;$("#questChainSteps").innerHTML=QUEST_CHAIN.map((x,i)=>`<span class="quest-chain-step ${i<n?"is-complete":""} ${i===n?"is-active":""}">${i<n?"✓":i+1}</span>`).join("");const b=$("#questChainButton");if(n>=QUEST_CHAIN.length){$("#questChainCopy").textContent="The Briar Warden has fallen. The first Blackwood story is complete.";b.textContent="Story Complete";b.disabled=true;return;}const c=QUEST_CHAIN[n],bossGateActive=isBossGateActive(s,getSettings());if(bossGateActive&&c.questId!=="boss"){$("#questChainCopy").textContent="The road is sealed until the weekly Boss is defeated.";b.textContent="Boss Battle First";b.disabled=true;return;}$("#questChainCopy").textContent=`Next: ${c.title}`;b.textContent=n?"Continue Story":"Begin Story Quest";b.disabled=c.questId==="boss"&&Boolean($("#bossButton")?.disabled);}
 function renderNpcs(){const g=$("#npcGrid");if(g)g.innerHTML=NPCS.map(n=>`<button class="npc-card" type="button" data-npc-id="${n.id}"><span class="npc-glyph">${n.glyph}</span><strong>${escapeHtml(n.name)}</strong><small>${escapeHtml(n.role)}</small></button>`).join("");}
 function renderAchievements(s){const e=new Set(s.achievements||[]);$("#achievementCount").textContent=`${e.size} / ${ACHIEVEMENTS.length}`;$("#achievementGrid").innerHTML=ACHIEVEMENTS.map(a=>{const on=e.has(a.id);return `<article class="achievement-card ${on?"is-unlocked":"is-locked"}"><img src="${on?"badges/quest-completed.webp":"badges/secret-acheivment.webp"}" alt=""><div><strong>${on?escapeHtml(a.name):"Hidden Feat"}</strong><small>${on?escapeHtml(a.copy):"Continue your campaign to reveal this achievement."}</small></div></article>`;}).join("");}
 function renderEquipment(s){const e=s.equippedRelics||{};$("#equipmentSlots").innerHTML=EQUIPMENT_SLOTS.map(x=>{const r=getRelicById(e[x.id]);return `<button class="equipment-slot ${r?"is-equipped":""}" type="button" data-equipment-slot="${x.id}"><span>${x.label}</span><strong>${r?escapeHtml(r.name):"Empty"}</strong><small>${r?escapeHtml(EQUIPMENT_RELICS[r.id]?.bonus||"Relic equipped"):"Equip a discovered relic"}</small></button>`;}).join("");const a=(s.discoveredRelics||[]).map(getRelicById).filter(r=>r&&EQUIPMENT_RELICS[r.id]);$("#equipmentInventory").innerHTML=a.length?a.map(r=>{const c=EQUIPMENT_RELICS[r.id],on=e[c.slot]===r.id;return `<button class="inventory-relic ${on?"is-equipped":""}" type="button" data-equip-relic="${r.id}"><img src="${r.image}" alt=""><span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(c.bonus)}</small></span></button>`;}).join(""):'<p class="muted">Discover equippable relics to build your loadout.</p>';$("#equipmentBonusSummary").textContent=Object.values(e).filter(Boolean).map(id=>EQUIPMENT_RELICS[id]?.bonus).filter(Boolean).join(" · ")||"No bonuses equipped";}
@@ -4555,6 +4555,26 @@ function renderProfile(settings, state) {
 }
 
 
+function isBossGateActive(
+  state = normalizeWeek(),
+  settings = getSettings()
+) {
+  const goal =
+    Number(
+      settings.weeklyGoal
+    )
+    || DEFAULT_WEEKLY_GOAL;
+
+  return (
+    state.weeklyCompleted
+      .length
+    >= goal
+    && state.bossDefeatedWeek
+      !== getWeekKey()
+  );
+}
+
+
 // =========================================================
 // 21. WEEKLY PROGRESS
 // =========================================================
@@ -4598,9 +4618,16 @@ function renderWeeklyProgress(
   if (
     completed >= goal
   ) {
+    const boss =
+      getWeeklyBossProfile(
+        state
+      );
+
     $("#weekStatus")
       .textContent =
-        "Week conquered.";
+        state.bossDefeatedWeek === getWeekKey()
+          ? "Week conquered. The board is open."
+          : `${boss.name} blocks the road. Defeat the Boss Battle to continue.`;
   }
 
   else if (
@@ -4685,7 +4712,7 @@ function renderBossBattle(
   ) {
     $("#bossLockText")
       .textContent =
-        `Unlocked. Face ${boss.name}.`;
+        `Unlocked. Defeat ${boss.name} to reopen the Quest Board.`;
   }
 
   else {
@@ -4709,6 +4736,12 @@ function getQuestDifficulty(quest) {
 
 function renderQuestCards() {
   const state = normalizeWeek();
+  const settings = getSettings();
+  const bossGateActive =
+    isBossGateActive(
+      state,
+      settings
+    );
   const completedIds =
     new Set(
       state.weeklyCompleted
@@ -4722,27 +4755,37 @@ function renderQuestCards() {
       .map(quest => {
       const completed =
         completedIds.has(quest.id);
+      const lockedByBoss =
+        bossGateActive
+        && !completed;
       const active =
         !completed
+        && !lockedByBoss
         && timerState?.questId === quest.id;
       const status =
         completed
           ? "Complete"
-          : active
-            ? (timerState.paused ? "Paused" : "Active")
-            : "Available";
+          : lockedByBoss
+            ? "Boss Locked"
+            : active
+              ? (timerState.paused ? "Paused" : "Active")
+              : "Available";
       const action =
         completed
           ? "Review Quest"
-          : active
-            ? "Resume Quest"
-            : "Begin Quest";
+          : lockedByBoss
+            ? "Defeat Boss First"
+            : active
+              ? "Resume Quest"
+              : "Begin Quest";
       const stateClass =
         completed
           ? "is-complete"
-          : active
-            ? "is-active"
-            : "is-available";
+          : lockedByBoss
+            ? "is-boss-locked"
+            : active
+              ? "is-active"
+              : "is-available";
 
       return `
         <article
@@ -4750,6 +4793,7 @@ function renderQuestCards() {
           data-quest-id="${quest.id}"
           tabindex="0"
           role="button"
+          aria-disabled="${lockedByBoss ? "true" : "false"}"
           aria-label="${escapeHtml(`${quest.title}. ${status}. ${action}.`)}"
         >
           <div class="quest-card-status-row">
@@ -4959,15 +5003,34 @@ function openQuest(id) {
     return;
   }
 
+  const state =
+    normalizeWeek();
+
+  const settings =
+    getSettings();
+
+  if (
+    id !== "boss"
+    && isBossGateActive(
+      state,
+      settings
+    )
+  ) {
+    const boss =
+      getWeeklyBossProfile(
+        state
+      );
+
+    showToast(
+      `${boss.name} blocks the Quest Board. Defeat the Boss Battle first.`
+    );
+
+    return;
+  }
+
   if (
     id === "boss"
   ) {
-    const state =
-      normalizeWeek();
-
-    const settings =
-      getSettings();
-
     const goal =
       Number(
         settings.weeklyGoal
@@ -5163,6 +5226,35 @@ async function completeQuest() {
 
   const settings =
     getSettings();
+
+  if (
+    isBossGateActive(
+      state,
+      settings
+    )
+  ) {
+    const boss =
+      getWeeklyBossProfile(
+        state
+      );
+
+    clearTimerForQuest(
+      completedQuest.id
+    );
+
+    activeQuest =
+      null;
+
+    closeQuest();
+
+    render();
+
+    showToast(
+      `${boss.name} blocks the Quest Board. Defeat the Boss Battle first.`
+    );
+
+    return;
+  }
 
   const goal =
     Number(settings.weeklyGoal)
@@ -5396,7 +5488,7 @@ function closeWeekConquered() {
   render();
 
   showToast(
-    `Week Conquered | +${WEEK_CONQUERED_GOLD} Gold | Boss Battle Unlocked`
+    `Week Conquered | +${WEEK_CONQUERED_GOLD} Gold | Boss Battle Unlocked | Quest Board Sealed Until Victory`
   );
 
   showNextRelicReveal();
