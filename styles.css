@@ -2017,6 +2017,53 @@ body[data-character-theme="amethyst"] .character-class-name {
 }
 
 /* =========================================================
+   32A. DAILY NUTRITION RATION
+========================================================= */
+
+.quest-nutrition-panel {
+  margin: 0 0 18px;
+  padding: 15px 16px;
+  border: 1px solid rgba(88, 65, 31, 0.34);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(155, 124, 67, 0.12),
+      rgba(86, 65, 37, 0.07)
+    );
+  box-shadow:
+    inset 0 0 18px rgba(255, 238, 190, 0.08);
+}
+
+.quest-nutrition-panel .eyebrow {
+  margin-bottom: 6px;
+  color: #7c5629;
+}
+
+.quest-nutrition-panel strong {
+  display: block;
+  color: #342414;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.quest-nutrition-panel p {
+  margin: 6px 0 8px;
+  color: #54422f;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.quest-nutrition-panel small {
+  display: block;
+  color: #725f49;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+
+/* =========================================================
    33. CHECKLIST
 ========================================================= */
 
