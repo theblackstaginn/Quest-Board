@@ -441,10 +441,163 @@ const PROFILE_QUEST_OVERRIDES = {
     }
   },
 
-  // Jess keeps the current quest workouts until her own training target is defined.
-  // The profile-aware loader is already in place, so her workouts can be tailored
-  // without changing quest IDs, names, rewards, completion rules, or party mechanics.
-  jess: {}
+  jess: {
+    "there-back": {
+      description:
+        "Jess's steady conditioning quest for supporting overall fitness and body composition without draining the legs for strength work.",
+      exercises: [
+        "Walk the full 1-mile route at a brisk but sustainable pace",
+        "Keep posture tall and core gently braced",
+        "Add 4 x 30-second faster efforts with easy walking between them"
+      ]
+    },
+
+    keep: {
+      description:
+        "Jess's balanced full-body quest with a glute-and-leg bias, plus back, shoulders, arms, and core so strength develops everywhere.",
+      exercises: [
+        "Goblet squat - 10-12 reps",
+        "Dumbbell Romanian deadlift - 10-12 reps",
+        "One-arm dumbbell row - 10-12 reps each side",
+        "Dumbbell shoulder press - 8-12 reps",
+        "Glute bridge or hip thrust - 12-15 reps",
+        "Dead bug - 8-10 reps each side",
+        "Complete 2-3 controlled rounds"
+      ]
+    },
+
+    dragonstrength: {
+      description:
+        "Jess's heavy full-body quest with a lower-body emphasis, pairing glute and leg strength with strong back, shoulders, and core.",
+      exercises: [
+        "Barbell squat - 2 working sets of 6-10 reps",
+        "Barbell hip thrust - 2 working sets of 8-12 reps",
+        "Cable row or lat pulldown - 2 sets of 8-12 reps",
+        "Dumbbell shoulder press - 2 sets of 8-12 reps",
+        "Plank - 2 rounds of 30-45 seconds"
+      ]
+    },
+
+    "iron-gate": {
+      description:
+        "Jess's power-cage full-body session, keeping glute and leg growth front and center while building a strong back and shoulders.",
+      exercises: [
+        "Power-cage squat - 3 sets of 8-10 reps",
+        "Barbell or dumbbell hip thrust - 3 sets of 8-12 reps",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell shoulder press - 2-3 sets of 8-12 reps",
+        "Bulgarian split squat - 2 sets of 8-10 reps each side"
+      ]
+    },
+
+    "smiths-circuit": {
+      description:
+        "Jess's compact full-body circuit for busy days, with extra attention to glutes and legs plus back, shoulders, and arms.",
+      exercises: [
+        "Goblet squat - 12 reps",
+        "Dumbbell Romanian deadlift - 12 reps",
+        "One-arm dumbbell row - 10 reps each side",
+        "Dumbbell lateral raise - 12-15 reps",
+        "Glute bridge or hip thrust - 15 reps",
+        "Dumbbell curl + triceps extension - 10-12 reps each",
+        "Complete 2-3 controlled rounds"
+      ]
+    },
+
+    "sentinels-stand": {
+      description:
+        "Jess's full-body strength quest with a lower-body bias, combining glutes and legs with back, shoulders, arms, and core stability.",
+      exercises: [
+        "Power-cage squat or box squat - 3 sets of 8-10 reps",
+        "Dumbbell Bulgarian split squat - 2 sets of 8-10 reps each side",
+        "One-arm dumbbell row - 3 sets of 8-12 reps each side",
+        "Dumbbell shoulder press - 2 sets of 8-12 reps",
+        "Glute bridge or hip thrust - 2 sets of 12-15 reps",
+        "Suitcase carry or side plank - 2 rounds each side"
+      ]
+    },
+
+    rogue: {
+      description:
+        "Jess's short conditioning circuit, keeping glutes, legs, back, shoulders, and core working without turning the session into endless cardio.",
+      exercises: [
+        "10 kettlebell deadlifts or swings",
+        "10 goblet squats",
+        "8 one-arm dumbbell rows each side",
+        "8 dumbbell push presses",
+        "12 glute bridges",
+        "20-30 second plank",
+        "Repeat at a steady pace until 10 minutes is complete"
+      ]
+    },
+
+    restoration: {
+      description:
+        "Jess's lower-body recovery quest for hips, glutes, hamstrings, calves, and trunk mobility after leg-focused training.",
+      exercises: [
+        "Hip-flexor stretch - 45 seconds each side",
+        "Hamstring stretch - 45 seconds each side",
+        "Figure-four glute stretch - 45 seconds each side",
+        "Calf stretch - 30 seconds each side",
+        "Adductor rock-back - 8 slow reps each side",
+        "Gentle spinal rotation - 6 reps each side"
+      ]
+    },
+
+    "unbinding-ritual": {
+      description:
+        "Jess's gentle deload ritual for keeping hips, glutes, legs, and low back loose on low-energy days.",
+      exercises: [
+        "Standing calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "Adductor stretch - 30 seconds each side",
+        "Child's pose - 45 seconds",
+        "Repeat any tight area once"
+      ]
+    },
+
+    "wayfarers-reset": {
+      description:
+        "Jess's lower-body mobility reset for squat depth, hip comfort, and recovery between glute and leg sessions.",
+      exercises: [
+        "Ankle rocks - 10 each side",
+        "Calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Adductor rock-back - 10 slow reps each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "90/90 hip switches - 8 slow reps"
+      ]
+    },
+
+    "moonlit-mobility": {
+      description:
+        "Jess's upper-body and core recovery quest for shoulders, lats, upper back, chest, and trunk mobility between strength sessions.",
+      exercises: [
+        "Shoulder rolls - 10 each direction",
+        "Wall or doorway chest stretch - 30 seconds each side",
+        "Cross-body shoulder stretch - 30 seconds each side",
+        "Thread-the-needle - 6 slow reps each side",
+        "Supported lat stretch - 45 seconds",
+        "Dead bug - 8 controlled reps each side",
+        "Gentle thoracic rotation - 6 reps each side"
+      ]
+    },
+
+    ranger: {
+      description:
+        "Jess's conditioning quest for work capacity and overall body composition while preserving strength for glute and leg training.",
+      exercises: [
+        "5-minute easy warm-up",
+        "1 minute fast walk",
+        "2 minutes normal pace",
+        "Repeat intervals",
+        "Complete the full 1-mile route"
+      ]
+    }
+  }
 };
 
 
@@ -554,6 +707,96 @@ const SPECIAL_QUESTS = {
     ]
   }
 };
+
+
+const PROFILE_SPECIAL_QUEST_OVERRIDES = {
+  farmer: {
+    emergency: {
+      description:
+        "Farmer's five-minute fallback: preserve momentum with a compact chest, back, legs, and shoulder circuit.",
+      exercises: [
+        "10 goblet squats",
+        "10 dumbbell rows each side",
+        "10 dumbbell chest presses",
+        "10 dumbbell Romanian deadlifts",
+        "8 dumbbell shoulder presses",
+        "Repeat until five minutes is complete"
+      ]
+    },
+
+    boss: {
+      description:
+        "Farmer's weekly challenge. Walk the mile, then complete twenty minutes from one of his strength-focused quests.",
+      exercises: [
+        "Walk the full 1-mile route",
+        "Choose The Keep, DragonStrength, or Rogue Mode",
+        "Complete 20 minutes of Farmer's profile-specific strength work"
+      ]
+    }
+  },
+
+  jess: {
+    emergency: {
+      description:
+        "Jess's five-minute fallback: keep the streak alive with a quick full-body hit that still favors glutes and legs.",
+      exercises: [
+        "10 goblet squats",
+        "10 dumbbell Romanian deadlifts",
+        "8 one-arm dumbbell rows each side",
+        "8 dumbbell shoulder presses",
+        "12 glute bridges",
+        "20-second plank",
+        "Repeat until five minutes is complete"
+      ]
+    },
+
+    boss: {
+      description:
+        "Jess's weekly challenge. Walk the mile, then complete twenty minutes from one of her glute, leg, and core-focused quests.",
+      exercises: [
+        "Walk the full 1-mile route",
+        "Choose The Keep, DragonStrength, or Rogue Mode",
+        "Complete 20 minutes of Jess's profile-specific strength work"
+      ]
+    }
+  }
+};
+
+
+function getSpecialQuestForProfile(
+  quest,
+  profileId = activeProfileId
+) {
+  if (!quest) {
+    return quest;
+  }
+
+  const override =
+    PROFILE_SPECIAL_QUEST_OVERRIDES[
+      profileId
+    ]?.[quest.id];
+
+  if (!override) {
+    return {
+      ...quest,
+      exercises: [
+        ...(quest.exercises || [])
+      ]
+    };
+  }
+
+  return {
+    ...quest,
+    ...override,
+    exercises: [
+      ...(
+        override.exercises
+        || quest.exercises
+        || []
+      )
+    ]
+  };
+}
 
 
 // =========================================================
@@ -2801,7 +3044,9 @@ function findQuest(id) {
     );
   }
 
-  return SPECIAL_QUESTS[id];
+  return getSpecialQuestForProfile(
+    SPECIAL_QUESTS[id]
+  );
 }
 
 
