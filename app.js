@@ -441,10 +441,159 @@ const PROFILE_QUEST_OVERRIDES = {
     }
   },
 
-  // Jess keeps the current quest workouts until her own training target is defined.
-  // The profile-aware loader is already in place, so her workouts can be tailored
-  // without changing quest IDs, names, rewards, completion rules, or party mechanics.
-  jess: {}
+  jess: {
+    "there-back": {
+      description:
+        "Jess's steady conditioning quest for supporting overall fitness and body composition without draining the legs for strength work.",
+      exercises: [
+        "Walk the full 1-mile route at a brisk but sustainable pace",
+        "Keep posture tall and core gently braced",
+        "Add 4 x 30-second faster efforts with easy walking between them"
+      ]
+    },
+
+    keep: {
+      description:
+        "Jess's lower-body and core quest, emphasizing glutes, thighs, and trunk strength while keeping the session compact.",
+      exercises: [
+        "Goblet squat - 10-12 reps",
+        "Dumbbell Romanian deadlift - 10-12 reps",
+        "Reverse lunge - 8-10 reps each side",
+        "Glute bridge or hip thrust - 12-15 reps",
+        "Dead bug - 8-10 reps each side",
+        "Complete 2-3 controlled rounds"
+      ]
+    },
+
+    dragonstrength: {
+      description:
+        "Jess's heavy lower-body quest, built around glute and leg strength with focused core work.",
+      exercises: [
+        "Barbell squat - 2 working sets of 6-10 reps",
+        "Barbell hip thrust - 2 working sets of 8-12 reps",
+        "Barbell Romanian deadlift - 2 working sets of 8-10 reps",
+        "Reverse lunge or split squat - 2 sets of 8-10 reps each side",
+        "Plank - 2 rounds of 30-45 seconds"
+      ]
+    },
+
+    "iron-gate": {
+      description:
+        "Jess's power-cage lower-body session for glute growth, thicker legs, and strong midline control.",
+      exercises: [
+        "Power-cage squat - 3 sets of 8-10 reps",
+        "Barbell or dumbbell hip thrust - 3 sets of 8-12 reps",
+        "Bulgarian split squat - 2-3 sets of 8-12 reps each side",
+        "Dumbbell Romanian deadlift - 2 sets of 10-12 reps",
+        "Side plank - 2 rounds of 20-40 seconds each side"
+      ]
+    },
+
+    "smiths-circuit": {
+      description:
+        "Jess's compact glute, leg, and core circuit for busy days.",
+      exercises: [
+        "Goblet squat - 12 reps",
+        "Dumbbell Romanian deadlift - 12 reps",
+        "Step-up or reverse lunge - 10 reps each side",
+        "Glute bridge or hip thrust - 15 reps",
+        "Dead bug - 10 reps each side",
+        "Complete 2-3 controlled rounds"
+      ]
+    },
+
+    "sentinels-stand": {
+      description:
+        "Jess's full lower-body strength quest with extra unilateral work for glutes, quads, hamstrings, and core stability.",
+      exercises: [
+        "Power-cage squat or box squat - 3 sets of 8-10 reps",
+        "Dumbbell Bulgarian split squat - 3 sets of 8-10 reps each side",
+        "Dumbbell Romanian deadlift - 3 sets of 8-12 reps",
+        "Glute bridge or hip thrust - 2 sets of 12-15 reps",
+        "Suitcase carry or side plank - 2 rounds each side"
+      ]
+    },
+
+    rogue: {
+      description:
+        "Jess's short conditioning circuit, keeping the legs working and the core engaged without turning the session into endless cardio.",
+      exercises: [
+        "10 kettlebell deadlifts or swings",
+        "10 goblet squats",
+        "8 reverse lunges each side",
+        "12 glute bridges",
+        "20-30 second plank",
+        "Repeat at a steady pace until 10 minutes is complete"
+      ]
+    },
+
+    restoration: {
+      description:
+        "Jess's lower-body recovery quest for hips, glutes, hamstrings, calves, and trunk mobility after leg-focused training.",
+      exercises: [
+        "Hip-flexor stretch - 45 seconds each side",
+        "Hamstring stretch - 45 seconds each side",
+        "Figure-four glute stretch - 45 seconds each side",
+        "Calf stretch - 30 seconds each side",
+        "Adductor rock-back - 8 slow reps each side",
+        "Gentle spinal rotation - 6 reps each side"
+      ]
+    },
+
+    "unbinding-ritual": {
+      description:
+        "Jess's gentle deload ritual for keeping hips, glutes, legs, and low back loose on low-energy days.",
+      exercises: [
+        "Standing calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "Adductor stretch - 30 seconds each side",
+        "Child's pose - 45 seconds",
+        "Repeat any tight area once"
+      ]
+    },
+
+    "wayfarers-reset": {
+      description:
+        "Jess's lower-body mobility reset for squat depth, hip comfort, and recovery between glute and leg sessions.",
+      exercises: [
+        "Ankle rocks - 10 each side",
+        "Calf stretch - 30 seconds each side",
+        "Hamstring stretch - 30 seconds each side",
+        "Half-kneeling hip-flexor stretch - 30 seconds each side",
+        "Adductor rock-back - 10 slow reps each side",
+        "Figure-four glute stretch - 30 seconds each side",
+        "90/90 hip switches - 8 slow reps"
+      ]
+    },
+
+    "moonlit-mobility": {
+      description:
+        "Jess's posture and core-recovery quest, opening the upper body while keeping the trunk moving comfortably after lower-body work.",
+      exercises: [
+        "Shoulder rolls - 10 each direction",
+        "Wall or doorway chest stretch - 30 seconds each side",
+        "Thread-the-needle - 6 slow reps each side",
+        "Cat-cow - 8 slow reps",
+        "Dead bug - 8 controlled reps each side",
+        "Gentle thoracic rotation - 6 reps each side",
+        "Child's pose - 45 seconds"
+      ]
+    },
+
+    ranger: {
+      description:
+        "Jess's conditioning quest for work capacity and overall body composition while preserving strength for glute and leg training.",
+      exercises: [
+        "5-minute easy warm-up",
+        "1 minute fast walk",
+        "2 minutes normal pace",
+        "Repeat intervals",
+        "Complete the full 1-mile route"
+      ]
+    }
+  }
 };
 
 
