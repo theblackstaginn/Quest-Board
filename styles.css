@@ -459,6 +459,34 @@ p {
   font-size: 1.45rem;
 }
 
+.quest-card.is-boss-locked {
+  filter: grayscale(.72) brightness(.58);
+  cursor: not-allowed;
+}
+
+.quest-card.is-boss-locked .quest-card-content,
+.quest-card.is-boss-locked .quest-card-meta {
+  opacity: .54;
+}
+
+.quest-card.is-boss-locked .quest-state-badge {
+  border-color: rgba(151, 60, 49, .58);
+  background: rgba(91, 27, 23, .82);
+  color: #f0c5b9;
+}
+
+.quest-card.is-boss-locked .quest-card-action {
+  color: #8f3f34;
+}
+
+.daily-contract.is-boss-locked,
+.daily-contract:disabled.is-boss-locked {
+  opacity: .5;
+  filter: grayscale(.7) brightness(.62);
+  cursor: not-allowed;
+}
+
+
 .boss-quest:disabled {
   opacity: 0.58;
   cursor: not-allowed;
