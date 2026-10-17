@@ -1,0 +1,75 @@
+name: RogueWitchWatch
+
+options:
+  minimumXcodeGenVersion: 2.46.0
+  bundleIdPrefix: com.blackstag.questboard
+  deploymentTarget:
+    watchOS: "10.0"
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift.git
+    exactVersion: 2.55.3
+
+targets:
+  RogueWitchWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: App
+      - path: Shared
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - target: RogueWitchWidget
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.blackstag.questboard.roguewitch
+        PRODUCT_NAME: "Rogue Witch"
+        SWIFT_VERSION: "5.0"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: 4
+    info:
+      path: Generated/RogueWitchWatch-Info.plist
+      properties:
+        CFBundleDisplayName: "Rogue Witch"
+        WKApplication: true
+        WKWatchOnly: true
+    entitlements:
+      path: Generated/RogueWitchWatch.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.blackstag.questboard.roguewitch
+    scheme:
+      gatherCoverageData: false
+
+  RogueWitchWidget:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: Widget
+      - path: Shared/QuestBoardModels.swift
+      - path: Shared/RogueWitchSharedState.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.blackstag.questboard.roguewitch.widget
+        PRODUCT_NAME: "Rogue Witch Widget"
+        SWIFT_VERSION: "5.0"
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Generated/RogueWitchWidget-Info.plist
+      properties:
+        CFBundleDisplayName: "Rogue Witch"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Generated/RogueWitchWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.blackstag.questboard.roguewitch
