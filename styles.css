@@ -9298,3 +9298,24 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
     0 0,
     24px 18px;
 }
+
+
+/* =========================================================
+   QUEST BOARD SURFACE ASSETS — NON-TILED / NON-STRETCHED
+   Fresh full-panel art replaces the stretched parchment and
+   repeating relic stone tile without touching app behavior.
+========================================================= */
+
+.quest-dialog {
+  background-image: url("quest-dialog-parchment.avif");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+.relic-collection-panel {
+  background-image: url("relic-collection-stone.avif");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
