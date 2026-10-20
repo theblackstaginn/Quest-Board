@@ -3014,10 +3014,10 @@ body.reduce-motion *::after {
   margin-top: 20px;
   padding: 24px;
 
-  background-image: url("mossy-stone.webp");
-  background-size: 380px auto;
-  background-position: center center;
-  background-repeat: repeat;
+  background-image: url("relic-collection-stone.avif");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 
   box-shadow: var(--shadow);
 }
@@ -9313,9 +9313,3 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
   background-repeat: no-repeat;
 }
 
-.relic-collection-panel {
-  background-image: url("relic-collection-stone.avif");
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-}
