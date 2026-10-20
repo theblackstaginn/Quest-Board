@@ -9307,7 +9307,7 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
 ========================================================= */
 
 .quest-dialog {
-  background-image: url("quest-dialog-parchment.avif");
+  background-image: url("quest-dialog-parchment.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
