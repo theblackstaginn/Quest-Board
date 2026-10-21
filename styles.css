@@ -3012,11 +3012,17 @@ body.reduce-motion *::after {
 
 .relic-collection-panel {
   margin-top: 20px;
-  padding: 24px;
+  padding: clamp(38px, 9vw, 62px) clamp(34px, 9vw, 68px) clamp(50px, 10vw, 72px);
 
-  background-image: url("relic-collection-stone.avif");
-  background-size: cover;
-  background-position: center top;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(7, 4, 2, 0.12),
+      rgba(5, 3, 2, 0.24)
+    ),
+    url("relic-vault-panel.webp");
+  background-size: 100% 100%;
+  background-position: center;
   background-repeat: no-repeat;
 
   box-shadow: var(--shadow);
@@ -3357,7 +3363,7 @@ body.reduce-motion *::after {
 
 @media (max-width: 390px) {
   .relic-collection-panel {
-    padding: 18px;
+    padding: 36px 32px 46px;
   }
 
   .relic-filters {
@@ -8981,22 +8987,21 @@ body[data-character-theme="amethyst"] .profile-avatar {
 .party-adventure {
   position: relative;
   margin-bottom: 22px;
-  padding: 22px;
+  padding: 48px 54px 58px 48px;
   overflow: hidden;
-  border: 1px solid rgba(213, 165, 87, 0.24);
-  border-radius: 14px;
+  border: 0;
+  border-radius: 0;
   background:
     linear-gradient(
-      145deg,
-      rgba(10, 11, 9, 0.28),
-      rgba(5, 7, 6, 0.18)
+      180deg,
+      rgba(4, 6, 5, 0.14),
+      rgba(3, 4, 3, 0.28)
     ),
-    url("mossy-stone.webp");
-  background-size: cover;
+    url("lantern-road-panel.webp");
+  background-size: 100% 100%;
   background-position: center;
-  box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 229, 175, 0.04);
+  background-repeat: no-repeat;
+  box-shadow: none;
 }
 
 .party-adventure-heading {
