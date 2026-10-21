@@ -8781,17 +8781,8 @@ body[data-active-view="party"] .party-section {
 }
 
 /* =========================================================
-   JESS PARTY CHARACTER — UNIFIED STAT PANELS + RECORD LEGIBILITY
+   JESS PARTY CHARACTER — RECORD LEGIBILITY
 ========================================================= */
-
-.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(1),
-.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(2),
-.party-character-dialog[data-profile-id="jess"] .party-profile-stat:nth-child(3) {
-  background-image: url("restoration-pnl.webp");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-}
 
 .party-character-dialog[data-profile-id="jess"] .party-profile-record {
   background:
