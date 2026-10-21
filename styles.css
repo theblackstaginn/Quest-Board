@@ -9307,3 +9307,25 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
   background-repeat: no-repeat;
 }
 
+
+
+/* =========================================================
+   JESS CHARACTER STATS — PRESERVE PANEL ART PROPORTIONS
+========================================================= */
+
+@media (max-width: 699px) {
+  body[data-profile-id="jess"] #characterView .stat-card {
+    min-height: 0;
+    aspect-ratio: 2.5 / 1;
+    padding: 22px 28px 20px 36px;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+@media (max-width: 390px) {
+  body[data-profile-id="jess"] #characterView .stat-card {
+    padding: 20px 24px 18px 32px;
+  }
+}
