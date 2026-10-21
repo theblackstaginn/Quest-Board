@@ -22,7 +22,7 @@
   >
 
   <link rel="stylesheet" href="styles.css?v=140">
-  <link rel="stylesheet" href="quest-guild.css?v=125">
+  <link rel="stylesheet" href="quest-guild.css?v=126">
 </head>
 
 <body>
@@ -201,16 +201,28 @@
 
 
         <section class="guild-hall-panel" aria-labelledby="guildHallTitle">
-          <div class="section-heading">
+          <div class="section-heading guild-collapsible-heading">
             <div>
               <p class="eyebrow">Guild Hall</p>
               <h2 id="guildHallTitle">Talk to the Guild</h2>
             </div>
+            <button
+              class="guild-collapse-toggle"
+              id="guildHallCollapseToggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="guildHallCollapseBody"
+              aria-label="Collapse Talk to the Guild"
+            >
+              <span aria-hidden="true">⌄</span>
+            </button>
           </div>
-          <div class="npc-grid" id="npcGrid"></div>
-          <div class="npc-dialogue" id="npcDialogue" aria-live="polite">
-            <strong>Guildmaster Rowan</strong>
-            <p>The road is open. Choose a quest and make your mark.</p>
+          <div class="guild-collapse-body" id="guildHallCollapseBody">
+            <div class="npc-grid" id="npcGrid"></div>
+            <div class="npc-dialogue" id="npcDialogue" aria-live="polite">
+              <strong>Guildmaster Rowan</strong>
+              <p>The road is open. Choose a quest and make your mark.</p>
+            </div>
           </div>
         </section>
 
@@ -2451,7 +2463,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js?v=135"></script>
-  <script src="quest-guild.js?v=9"></script>
+  <script src="quest-guild.js?v=10"></script>
 
 </body>
 </html>

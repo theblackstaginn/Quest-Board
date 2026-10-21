@@ -134,6 +134,36 @@
     );
   }
 
+  function setGuildCollapsibleState(
+    section,
+    button,
+    body,
+    collapsed,
+    label
+  ) {
+    if (!section || !button || !body) {
+      return;
+    }
+
+    section.classList.toggle(
+      "is-collapsed",
+      collapsed
+    );
+
+    body.hidden =
+      collapsed;
+
+    button.setAttribute(
+      "aria-expanded",
+      String(!collapsed)
+    );
+
+    button.setAttribute(
+      "aria-label",
+      `${collapsed ? "Expand" : "Collapse"} ${label}`
+    );
+  }
+
   function currentGuildMode() {
     return GUILD_MODES[selectedGuildMode] || GUILD_MODES.counsel;
   }
@@ -1607,56 +1637,80 @@
         )
         .join("");
 
+    const ravenCollapsed =
+      Boolean(
+        readGuildStorage()
+          .ravenPostCollapsed
+      );
+
     return (
-      "<section class='guild-raven-post'>" +
-        "<div class='section-heading compact'>" +
+      "<section class='guild-raven-post" +
+        (ravenCollapsed ? " is-collapsed" : "") +
+      "'>" +
+        "<div class='section-heading compact guild-collapsible-heading'>" +
           "<div>" +
             "<span class='eyebrow'>Raven Post</span>" +
             "<h3>Fellowship Ravens</h3>" +
           "</div>" +
+          "<button type='button' " +
+            "class='guild-collapse-toggle' " +
+            "data-guild-raven-toggle " +
+            "aria-expanded='" +
+              String(!ravenCollapsed) +
+            "' " +
+            "aria-controls='guildRavenBody' " +
+            "aria-label='" +
+              (ravenCollapsed ? "Expand" : "Collapse") +
+              " Raven Post'>" +
+            "<span aria-hidden='true'>⌄</span>" +
+          "</button>" +
         "</div>" +
-        (
-          activeGuildPartyId()
-            ? (
-              "<div class='guild-raven-compose'>" +
-                "<label class='guild-raven-recipient'>" +
-                  "<span>Send to</span>" +
-                  "<select id='guildRavenRecipient' " +
-                    (recipientOptions ? "" : "disabled") +
-                  ">" +
-                    (
-                      recipientOptions ||
-                      "<option>No companion available</option>"
-                    ) +
-                  "</select>" +
-                "</label>" +
-                "<label class='guild-chat-field'>" +
-                  "<span>Message</span>" +
-                  "<textarea id='guildRavenMessage' rows='3' maxlength='8000' placeholder='Tie a note beneath the raven&#39;s wing…'></textarea>" +
-                "</label>" +
-                "<label class='guild-raven-file-input'>" +
-                  "<span>Attachments</span>" +
-                  "<input id='guildRavenFiles' type='file' multiple accept='image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx'>" +
-                  "<small>Up to 4 files, 10 MB each.</small>" +
-                "</label>" +
-                "<div class='guild-raven-compose-actions'>" +
-                  "<button type='button' class='guild-mini-action primary' id='guildRavenSend' " +
-                    (recipientOptions ? "" : "disabled") +
-                  ">Send Raven</button>" +
-                  "<span class='muted' id='guildRavenStatus'>Private to your fellowship.</span>" +
-                "</div>" +
-              "</div>"
-            )
-            : "<p class='muted guild-empty-copy'>Join a fellowship before sending ravens.</p>"
-        ) +
-        "<div class='guild-raven-list'>" +
+        "<div class='guild-raven-body' id='guildRavenBody'" +
+          (ravenCollapsed ? " hidden" : "") +
+        ">" +
           (
-            guildRavens.length
-              ? guildRavens
-                  .map(guildRavenCard)
-                  .join("")
-              : "<p class='muted guild-empty-copy'>No fellowship ravens yet.</p>"
+            activeGuildPartyId()
+              ? (
+                "<div class='guild-raven-compose'>" +
+                  "<label class='guild-raven-recipient'>" +
+                    "<span>Send to</span>" +
+                    "<select id='guildRavenRecipient' " +
+                      (recipientOptions ? "" : "disabled") +
+                    ">" +
+                      (
+                        recipientOptions ||
+                        "<option>No companion available</option>"
+                      ) +
+                    "</select>" +
+                  "</label>" +
+                  "<label class='guild-chat-field'>" +
+                    "<span>Message</span>" +
+                    "<textarea id='guildRavenMessage' rows='3' maxlength='8000' placeholder='Tie a note beneath the raven&#39;s wing…'></textarea>" +
+                  "</label>" +
+                  "<label class='guild-raven-file-input'>" +
+                    "<span>Attachments</span>" +
+                    "<input id='guildRavenFiles' type='file' multiple accept='image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx'>" +
+                    "<small>Up to 4 files, 10 MB each.</small>" +
+                  "</label>" +
+                  "<div class='guild-raven-compose-actions'>" +
+                    "<button type='button' class='guild-mini-action primary' id='guildRavenSend' " +
+                      (recipientOptions ? "" : "disabled") +
+                    ">Send Raven</button>" +
+                    "<span class='muted' id='guildRavenStatus'>Private to your fellowship.</span>" +
+                  "</div>" +
+                "</div>"
+              )
+              : "<p class='muted guild-empty-copy'>Join a fellowship before sending ravens.</p>"
           ) +
+          "<div class='guild-raven-list'>" +
+            (
+              guildRavens.length
+                ? guildRavens
+                    .map(guildRavenCard)
+                    .join("")
+                : "<p class='muted guild-empty-copy'>No fellowship ravens yet.</p>"
+            ) +
+          "</div>" +
         "</div>" +
       "</section>"
     );
@@ -2416,6 +2470,45 @@
     host.querySelector("#guildRefreshButton")
       ?.addEventListener("click", refreshGuildLoop);
 
+    const ravenPost =
+      host.querySelector(
+        ".guild-raven-post"
+      );
+
+    const ravenToggle =
+      host.querySelector(
+        "[data-guild-raven-toggle]"
+      );
+
+    const ravenBody =
+      host.querySelector(
+        "#guildRavenBody"
+      );
+
+    ravenToggle
+      ?.addEventListener(
+        "click",
+        () => {
+          const collapsed =
+            !Boolean(
+              ravenBody?.hidden
+            );
+
+          setGuildCollapsibleState(
+            ravenPost,
+            ravenToggle,
+            ravenBody,
+            collapsed,
+            "Raven Post"
+          );
+
+          writeGuildStorage({
+            ravenPostCollapsed:
+              collapsed
+          });
+        }
+      );
+
     host.querySelector("#guildRavenSend")
       ?.addEventListener("click", sendDirectGuildRaven);
 
@@ -2787,11 +2880,60 @@
       return;
     }
 
+    const guildHallBody =
+      document.querySelector(
+        "#guildHallCollapseBody"
+      );
+
+    const guildHallToggle =
+      document.querySelector(
+        "#guildHallCollapseToggle"
+      );
+
+    const storedCollapse =
+      Boolean(
+        readGuildStorage()
+          .guildHallCollapsed
+      );
+
+    setGuildCollapsibleState(
+      guildHall,
+      guildHallToggle,
+      guildHallBody,
+      storedCollapse,
+      "Talk to the Guild"
+    );
+
+    guildHallToggle
+      ?.addEventListener(
+        "click",
+        () => {
+          const collapsed =
+            !Boolean(
+              guildHallBody?.hidden
+            );
+
+          setGuildCollapsibleState(
+            guildHall,
+            guildHallToggle,
+            guildHallBody,
+            collapsed,
+            "Talk to the Guild"
+          );
+
+          writeGuildStorage({
+            guildHallCollapsed:
+              collapsed
+          });
+        }
+      );
+
     const panel = document.createElement("section");
     panel.id = "guildLoopPanel";
     panel.className = "guild-loop-panel";
     panel.setAttribute("aria-label", "Quest Board Guild link");
-    guildHall.appendChild(panel);
+    (guildHallBody || guildHall)
+      .appendChild(panel);
 
     document.querySelector("#npcGrid")
       ?.addEventListener("click", event => {

@@ -502,3 +502,72 @@
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   GUILD COLLAPSIBLE SECTIONS
+========================================================= */
+
+.guild-collapsible-heading {
+  align-items: center;
+}
+
+.guild-collapse-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(201, 154, 80, 0.34);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(210, 164, 83, 0.17),
+      rgba(0, 0, 0, 0.34)
+    );
+  color: var(--gold-light);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 185, 0.06),
+    0 4px 10px rgba(0, 0, 0, 0.22);
+}
+
+.guild-collapse-toggle > span {
+  display: block;
+  transform: translateY(-2px) rotate(0deg);
+  transition: transform 160ms ease;
+}
+
+.guild-collapse-toggle[aria-expanded="false"] > span {
+  transform: translateY(0) rotate(-90deg);
+}
+
+.guild-collapse-toggle:focus-visible {
+  outline: 2px solid rgba(230, 189, 115, 0.72);
+  outline-offset: 2px;
+}
+
+.guild-collapse-body,
+.guild-raven-body {
+  min-width: 0;
+}
+
+.guild-collapse-body[hidden],
+.guild-raven-body[hidden] {
+  display: none !important;
+}
+
+.guild-raven-body {
+  display: grid;
+  gap: 12px;
+}
+
+.guild-hall-panel.is-collapsed,
+.guild-raven-post.is-collapsed {
+  padding-bottom: 14px;
+}
