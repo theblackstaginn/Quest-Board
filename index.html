@@ -22,7 +22,7 @@
   >
 
   <link rel="stylesheet" href="styles.css?v=140">
-  <link rel="stylesheet" href="quest-guild.css?v=126">
+  <link rel="stylesheet" href="quest-guild.css?v=127">
 </head>
 
 <body>
@@ -200,30 +200,65 @@
         </section>
 
 
-        <section class="guild-hall-panel" aria-labelledby="guildHallTitle">
-          <div class="section-heading guild-collapsible-heading">
-            <div>
-              <p class="eyebrow">Guild Hall</p>
-              <h2 id="guildHallTitle">Talk to the Guild</h2>
-            </div>
+        <section class="guild-tabs" id="guildTabs" aria-label="Guild Hall and Raven Post">
+          <div class="guild-tab-bar" role="tablist" aria-label="Guild sections">
             <button
-              class="guild-collapse-toggle"
+              class="guild-symbol-tab"
               id="guildHallCollapseToggle"
               type="button"
-              aria-expanded="true"
-              aria-controls="guildHallCollapseBody"
-              aria-label="Collapse Talk to the Guild"
+              role="tab"
+              data-guild-tab="guild"
+              aria-selected="false"
+              aria-expanded="false"
+              aria-controls="guildHallPanel"
+              aria-label="Talk to the Guild"
             >
-              <span aria-hidden="true">⌄</span>
+              <img src="guild-tab-symbol.png" width="520" height="288" alt="" aria-hidden="true">
+            </button>
+            <button
+              class="guild-symbol-tab"
+              id="guildRavenTab"
+              type="button"
+              role="tab"
+              data-guild-tab="raven"
+              aria-selected="false"
+              aria-expanded="false"
+              aria-controls="guildRavenPanel"
+              aria-label="Raven Post"
+              tabindex="-1"
+            >
+              <img src="raven-post-tab-symbol.png" width="520" height="281" alt="" aria-hidden="true">
             </button>
           </div>
-          <div class="guild-collapse-body" id="guildHallCollapseBody">
-            <div class="npc-grid" id="npcGrid"></div>
-            <div class="npc-dialogue" id="npcDialogue" aria-live="polite">
-              <strong>Guildmaster Rowan</strong>
-              <p>The road is open. Choose a quest and make your mark.</p>
+
+          <section
+            class="guild-hall-panel guild-framed-panel"
+            id="guildHallPanel"
+            role="tabpanel"
+            aria-labelledby="guildHallCollapseToggle"
+            hidden
+          >
+            <img class="guild-panel-art" src="guild-panel-frame-web.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async">
+            <div class="guild-frame-scroll" id="guildHallCollapseBody" role="region" aria-label="Guild conversation" tabindex="0">
+              <h2 class="guild-visually-hidden" id="guildHallTitle">Talk to the Guild</h2>
+              <div class="npc-grid" id="npcGrid"></div>
+              <div class="npc-dialogue" id="npcDialogue" aria-live="polite">
+                <strong>Guildmaster Rowan</strong>
+                <p>The road is open. Choose a quest and make your mark.</p>
+              </div>
             </div>
-          </div>
+          </section>
+
+          <section
+            class="guild-framed-panel guild-raven-panel"
+            id="guildRavenPanel"
+            role="tabpanel"
+            aria-labelledby="guildRavenTab"
+            hidden
+          >
+            <img class="guild-panel-art" src="raven-post-panel-frame-web.webp" width="1122" height="1402" alt="" aria-hidden="true" decoding="async">
+            <div class="guild-frame-scroll" id="guildRavenPanelContent" role="region" aria-label="Raven Post messages" tabindex="0"></div>
+          </section>
         </section>
 
 
@@ -2463,7 +2498,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js?v=135"></script>
-  <script src="quest-guild.js?v=10"></script>
+  <script src="quest-guild-portraits.js?v=1"></script>
+  <script src="quest-guild.js?v=11"></script>
 
 </body>
 </html>

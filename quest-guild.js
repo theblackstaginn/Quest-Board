@@ -21,6 +21,8 @@
   let guildFellowshipPartyId = null;
   let guildQuestCache = new Map();
   let guildUiReady = false;
+  let activeGuildTab = null;
+  let guildTabRevealTimer = null;
   let guildRavenPickerActive = false;
   let guildRavenPendingFiles = [];
 
@@ -134,34 +136,72 @@
     );
   }
 
-  function setGuildCollapsibleState(
-    section,
-    button,
-    body,
-    collapsed,
-    label
-  ) {
-    if (!section || !button || !body) {
+  function setActiveGuildTab(nextTab) {
+    activeGuildTab = nextTab;
+    window.clearTimeout(guildTabRevealTimer);
+
+    const tabs = document.querySelectorAll("[data-guild-tab]");
+    const panels = document.querySelectorAll(".guild-framed-panel");
+
+    panels.forEach(panel => {
+      panel.hidden = true;
+      panel.classList.remove("is-revealing");
+    });
+
+    tabs.forEach(button => {
+      const selected = button.dataset.guildTab === activeGuildTab;
+      button.setAttribute("aria-selected", String(selected));
+      button.setAttribute("aria-expanded", String(selected));
+      button.tabIndex = selected || (!activeGuildTab && button.dataset.guildTab === "guild") ? 0 : -1;
+      button.classList.remove("is-enchanted");
+    });
+
+    if (!activeGuildTab) {
       return;
     }
 
-    section.classList.toggle(
-      "is-collapsed",
-      collapsed
-    );
+    const button = Array.from(tabs).find(tab => tab.dataset.guildTab === activeGuildTab);
+    const panel = document.getElementById(button?.getAttribute("aria-controls"));
 
-    body.hidden =
-      collapsed;
+    if (!button || !panel) {
+      return;
+    }
 
-    button.setAttribute(
-      "aria-expanded",
-      String(!collapsed)
-    );
+    // Restart the glint even when the same tab is reopened quickly.
+    void button.offsetWidth;
+    button.classList.add("is-enchanted");
+    guildTabRevealTimer = window.setTimeout(() => {
+      panel.hidden = false;
+      panel.classList.add("is-revealing");
+      button.classList.remove("is-enchanted");
+    }, 380);
+  }
 
-    button.setAttribute(
-      "aria-label",
-      `${collapsed ? "Expand" : "Collapse"} ${label}`
-    );
+  function bindGuildTabs() {
+    const tabs = Array.from(document.querySelectorAll("[data-guild-tab]"));
+
+    tabs.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        const nextTab = button.dataset.guildTab;
+        setActiveGuildTab(activeGuildTab === nextTab ? null : nextTab);
+      });
+
+      button.addEventListener("keydown", event => {
+        let nextIndex;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        else if (event.key === "ArrowLeft") nextIndex = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+
+        event.preventDefault();
+        tabs.forEach((tab, tabIndex) => { tab.tabIndex = tabIndex === nextIndex ? 0 : -1; });
+        tabs[nextIndex].focus();
+      });
+    });
+
+    // Closed on every page load, independent of the old collapse preferences.
+    setActiveGuildTab(null);
   }
 
   function currentGuildMode() {
@@ -1637,37 +1677,10 @@
         )
         .join("");
 
-    const ravenCollapsed =
-      Boolean(
-        readGuildStorage()
-          .ravenPostCollapsed
-      );
-
     return (
-      "<section class='guild-raven-post" +
-        (ravenCollapsed ? " is-collapsed" : "") +
-      "'>" +
-        "<div class='section-heading compact guild-collapsible-heading'>" +
-          "<div>" +
-            "<span class='eyebrow'>Raven Post</span>" +
-            "<h3>Fellowship Ravens</h3>" +
-          "</div>" +
-          "<button type='button' " +
-            "class='guild-collapse-toggle' " +
-            "data-guild-raven-toggle " +
-            "aria-expanded='" +
-              String(!ravenCollapsed) +
-            "' " +
-            "aria-controls='guildRavenBody' " +
-            "aria-label='" +
-              (ravenCollapsed ? "Expand" : "Collapse") +
-              " Raven Post'>" +
-            "<span aria-hidden='true'>⌄</span>" +
-          "</button>" +
-        "</div>" +
-        "<div class='guild-raven-body' id='guildRavenBody'" +
-          (ravenCollapsed ? " hidden" : "") +
-        ">" +
+      "<section class='guild-raven-post' aria-label='Fellowship Ravens'>" +
+        "<h3 class='guild-visually-hidden'>Fellowship Ravens</h3>" +
+        "<div class='guild-raven-body' id='guildRavenBody'>" +
           (
             activeGuildPartyId()
               ? (
@@ -2403,111 +2416,24 @@
     }
   }
 
-  function renderGuildLoop() {
-    const host = document.querySelector("#guildLoopPanel");
-
-    if (!host) {
+  function renderGuildRavenPost() {
+    const host = document.querySelector("#guildRavenPanelContent");
+    if (!host || ravenFileSelectionPending()) {
       return;
     }
 
-    const mode = currentGuildMode();
-    const npc = currentNpc();
+    const draft = host.querySelector("#guildRavenMessage")?.value || "";
+    const recipient = host.querySelector("#guildRavenRecipient")?.value;
+    const scrollTop = host.scrollTop;
+    host.innerHTML = ravenInboxMarkup();
 
-    const visibleArtifacts = guildArtifacts
-      .filter(item => !["dismissed", "completed"].includes(item.status))
-      .slice(0, 8);
-
-    host.innerHTML =
-      "<div class='guild-loop-heading'>" +
-        "<div>" +
-          "<span class='eyebrow'>Questmaster Link</span>" +
-          "<h3>Ask Ember</h3>" +
-          "<p class='muted'>" +
-            qbEscape(
-              npc
-                ? `${npc.name} is listening. Quest Board sends only this request's scoped game context.`
-                : "Quest Board sends only this request's scoped game context."
-            ) +
-          "</p>" +
-        "</div>" +
-        "<button type='button' class='guild-refresh-button' id='guildRefreshButton'>Refresh</button>" +
-      "</div>" +
-
-      "<div class='guild-mode-grid'>" +
-        Object.entries(GUILD_MODES).map(([key, value]) =>
-          `<button type="button" class="guild-mode-button ${key === selectedGuildMode ? "active" : ""}" data-guild-mode="${key}">${qbEscape(value.label)}</button>`
-        ).join("") +
-      "</div>" +
-
-      "<label class='guild-chat-field'>" +
-        `<span>${qbEscape(mode.label)}</span>` +
-        `<textarea id="guildChatInput" rows="4" maxlength="8000" placeholder="${qbEscape(mode.placeholder)}"></textarea>` +
-      "</label>" +
-
-      "<div class='guild-chat-actions'>" +
-        "<button type='button' class='fantasy-action-button' id='guildChatSend'>Ask Ember</button>" +
-        "<span id='guildChatStatus' class='muted'>Ember's raven returns here through the Guild link.</span>" +
-      "</div>" +
-
-      latestResponseMarkup() +
-
-      ravenInboxMarkup() +
-
-      "<div class='guild-dispatches'>" +
-        "<div class='section-heading compact'>" +
-          "<div><span class='eyebrow'>Dispatches</span><h3>Guild-Forged Content</h3></div>" +
-        "</div>" +
-        (
-          visibleArtifacts.length
-            ? visibleArtifacts.map(artifactCard).join("")
-            : "<p class='muted guild-empty-copy'>No generated quests, challenges, or story beats yet.</p>"
-        ) +
-      "</div>";
-
-    host.querySelector("#guildChatSend")
-      ?.addEventListener("click", sendGuildRequest);
-
-    host.querySelector("#guildRefreshButton")
-      ?.addEventListener("click", refreshGuildLoop);
-
-    const ravenPost =
-      host.querySelector(
-        ".guild-raven-post"
-      );
-
-    const ravenToggle =
-      host.querySelector(
-        "[data-guild-raven-toggle]"
-      );
-
-    const ravenBody =
-      host.querySelector(
-        "#guildRavenBody"
-      );
-
-    ravenToggle
-      ?.addEventListener(
-        "click",
-        () => {
-          const collapsed =
-            !Boolean(
-              ravenBody?.hidden
-            );
-
-          setGuildCollapsibleState(
-            ravenPost,
-            ravenToggle,
-            ravenBody,
-            collapsed,
-            "Raven Post"
-          );
-
-          writeGuildStorage({
-            ravenPostCollapsed:
-              collapsed
-          });
-        }
-      );
+    const messageInput = host.querySelector("#guildRavenMessage");
+    if (messageInput) messageInput.value = draft;
+    const recipientInput = host.querySelector("#guildRavenRecipient");
+    if (recipientInput && Array.from(recipientInput.options).some(option => option.value === recipient)) {
+      recipientInput.value = recipient;
+    }
+    host.scrollTop = scrollTop;
 
     host.querySelector("#guildRavenSend")
       ?.addEventListener("click", sendDirectGuildRaven);
@@ -2649,11 +2575,82 @@
             : guildRavenPendingFiles.length + " attachments ready to fly.";
       });
 
+  }
+
+  function renderGuildLoop({ refreshRavens = true } = {}) {
+    const host = document.querySelector("#guildLoopPanel");
+
+    if (!host) {
+      return;
+    }
+
+    const mode = currentGuildMode();
+    const npc = currentNpc();
+
+    const visibleArtifacts = guildArtifacts
+      .filter(item => !["dismissed", "completed"].includes(item.status))
+      .slice(0, 8);
+
+    host.innerHTML =
+      "<div class='guild-loop-heading'>" +
+        "<div>" +
+          "<span class='eyebrow'>Questmaster Link</span>" +
+          "<h3>Ask Ember</h3>" +
+          "<p class='muted'>" +
+            qbEscape(
+              npc
+                ? `${npc.name} is listening. Quest Board sends only this request's scoped game context.`
+                : "Quest Board sends only this request's scoped game context."
+            ) +
+          "</p>" +
+        "</div>" +
+        "<button type='button' class='guild-refresh-button' id='guildRefreshButton'>Refresh</button>" +
+      "</div>" +
+
+      "<div class='guild-mode-grid'>" +
+        Object.entries(GUILD_MODES).map(([key, value]) =>
+          `<button type="button" class="guild-mode-button ${key === selectedGuildMode ? "active" : ""}" data-guild-mode="${key}">${qbEscape(value.label)}</button>`
+        ).join("") +
+      "</div>" +
+
+      "<label class='guild-chat-field'>" +
+        `<span>${qbEscape(mode.label)}</span>` +
+        `<textarea id="guildChatInput" rows="4" maxlength="8000" placeholder="${qbEscape(mode.placeholder)}"></textarea>` +
+      "</label>" +
+
+      "<div class='guild-chat-actions'>" +
+        "<button type='button' class='fantasy-action-button' id='guildChatSend'>Ask Ember</button>" +
+        "<span id='guildChatStatus' class='muted'>Ember's raven returns here through the Guild link.</span>" +
+      "</div>" +
+
+      latestResponseMarkup() +
+
+      "<div class='guild-dispatches'>" +
+        "<div class='section-heading compact'>" +
+          "<div><span class='eyebrow'>Dispatches</span><h3>Guild-Forged Content</h3></div>" +
+        "</div>" +
+        (
+          visibleArtifacts.length
+            ? visibleArtifacts.map(artifactCard).join("")
+            : "<p class='muted guild-empty-copy'>No generated quests, challenges, or story beats yet.</p>"
+        ) +
+      "</div>";
+
+    host.querySelector("#guildChatSend")
+      ?.addEventListener("click", sendGuildRequest);
+
+    host.querySelector("#guildRefreshButton")
+      ?.addEventListener("click", refreshGuildLoop);
+
+    if (refreshRavens) {
+      renderGuildRavenPost();
+    }
+
     host.querySelectorAll("[data-guild-mode]")
       .forEach(button => {
         button.addEventListener("click", () => {
           selectedGuildMode = button.dataset.guildMode || "counsel";
-          renderGuildLoop();
+          renderGuildLoop({ refreshRavens: false });
           document.querySelector("#guildChatInput")?.focus();
         });
       });
@@ -2874,66 +2871,18 @@
       return;
     }
 
-    const guildHall = document.querySelector(".guild-hall-panel");
-
-    if (!guildHall) {
+    const guildHallBody = document.querySelector("#guildHallCollapseBody");
+    if (!guildHallBody) {
       return;
     }
 
-    const guildHallBody =
-      document.querySelector(
-        "#guildHallCollapseBody"
-      );
-
-    const guildHallToggle =
-      document.querySelector(
-        "#guildHallCollapseToggle"
-      );
-
-    const storedCollapse =
-      Boolean(
-        readGuildStorage()
-          .guildHallCollapsed
-      );
-
-    setGuildCollapsibleState(
-      guildHall,
-      guildHallToggle,
-      guildHallBody,
-      storedCollapse,
-      "Talk to the Guild"
-    );
-
-    guildHallToggle
-      ?.addEventListener(
-        "click",
-        () => {
-          const collapsed =
-            !Boolean(
-              guildHallBody?.hidden
-            );
-
-          setGuildCollapsibleState(
-            guildHall,
-            guildHallToggle,
-            guildHallBody,
-            collapsed,
-            "Talk to the Guild"
-          );
-
-          writeGuildStorage({
-            guildHallCollapsed:
-              collapsed
-          });
-        }
-      );
+    bindGuildTabs();
 
     const panel = document.createElement("section");
     panel.id = "guildLoopPanel";
     panel.className = "guild-loop-panel";
     panel.setAttribute("aria-label", "Quest Board Guild link");
-    (guildHallBody || guildHall)
-      .appendChild(panel);
+    guildHallBody.appendChild(panel);
 
     document.querySelector("#npcGrid")
       ?.addEventListener("click", event => {
@@ -2945,7 +2894,7 @@
 
         selectedGuildNpc = button.dataset.npcId || "guildmaster";
         selectedGuildMode = NPC_MODE[selectedGuildNpc] || selectedGuildMode;
-        renderGuildLoop();
+        renderGuildLoop({ refreshRavens: false });
 
         window.setTimeout(
           () => {
