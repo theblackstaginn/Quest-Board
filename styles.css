@@ -9334,3 +9334,77 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
     padding: 20px 24px 18px 32px;
   }
 }
+
+
+/* =========================================================
+   FRAMED PANEL SCROLL AREAS
+   Keep long Quest/Relic collections inside their artwork
+   instead of stretching the background assets vertically.
+========================================================= */
+
+.relic-grid,
+.party-adventure-route {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(218, 173, 92, 0.62)
+    rgba(3, 3, 3, 0.26);
+}
+
+.relic-grid {
+  max-height: clamp(320px, 42svh, 520px);
+  align-content: start;
+  padding-right: 8px;
+}
+
+.party-adventure-route {
+  max-height: clamp(240px, 30svh, 340px);
+  padding-right: 8px;
+}
+
+.relic-grid::-webkit-scrollbar,
+.party-adventure-route::-webkit-scrollbar {
+  width: 5px;
+}
+
+.relic-grid::-webkit-scrollbar-track,
+.party-adventure-route::-webkit-scrollbar-track {
+  background: rgba(3, 3, 3, 0.24);
+  border-radius: 999px;
+}
+
+.relic-grid::-webkit-scrollbar-thumb,
+.party-adventure-route::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(231, 187, 105, 0.72),
+      rgba(127, 83, 34, 0.72)
+    );
+  border-radius: 999px;
+}
+
+@media (max-width: 520px) {
+  .relic-collection-panel {
+    padding: 44px 44px 54px;
+  }
+
+  .relic-grid {
+    max-height: 42svh;
+    gap: 10px;
+    padding-right: 6px;
+  }
+
+  .party-adventure {
+    padding: 50px 34px 56px;
+  }
+
+  .party-adventure-route {
+    max-height: 30svh;
+    padding-right: 6px;
+  }
+}
