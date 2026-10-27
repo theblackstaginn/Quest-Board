@@ -9409,3 +9409,91 @@ body.reduce-motion .weather-atmosphere[data-weather="storm"]::before {
     padding-right: 6px;
   }
 }
+
+/* =========================================================
+   THE FIRST SCROLL - FOUNDERS' LEGENDARY RELIC
+   Original handwriting is faithfully preserved.
+========================================================= */
+.relic-card.is-discovered[data-relic-id="the-first-scroll"] {
+  border-color: rgba(239, 197, 104, .65);
+  box-shadow: 0 0 24px rgba(194, 130, 58, .25), 0 8px 25px rgba(0,0,0,.48);
+}
+.relic-card.is-discovered[data-relic-id="the-first-scroll"] .relic-art-shell {
+  background: radial-gradient(ellipse, rgba(224,171,82,.21), rgba(22,12,9,.83));
+}
+.relic-dialog.is-first-scroll .relic-dialog-panel {
+  border-color: rgba(236, 187, 100, .66);
+  box-shadow: 0 0 55px rgba(198,128,47,.24), var(--shadow-heavy);
+}
+.relic-dialog.is-first-scroll .relic-dialog-art-shell {
+  min-height: 0;
+  max-height: none;
+  padding: 6px;
+  background: radial-gradient(ellipse at center, rgba(172,107,46,.14), rgba(6,6,6,.92));
+}
+.relic-dialog.is-first-scroll .relic-dialog-image {
+  height: auto !important;
+  max-height: 55vh;
+  width: 100%;
+  object-fit: contain;
+}
+.founding-scroll-lore[hidden] { display: none; }
+.founding-scroll-lore {
+  margin-top: 15px;
+  padding: 15px 14px;
+  text-align: center;
+  border: 1px solid rgba(206,161,88,.34);
+  border-radius: 10px;
+  background: linear-gradient(155deg,rgba(68,40,24,.72),rgba(10,12,11,.81));
+}
+.founding-scroll-kicker {
+  margin: 0 0 9px;
+  color: #f6d8a0;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: .84rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.founding-scroll-story {
+  margin: 0;
+  color: var(--cream-soft);
+  font-size: .88rem;
+  line-height: 1.55;
+}
+.founding-scroll-creators {
+  margin: 10px 0 0;
+  color: #e7be7d;
+  font-family: var(--font-heading);
+  font-size: .7rem;
+  letter-spacing: .03em;
+}
+.founding-scroll-links {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+  margin-top: 15px;
+}
+.founding-scroll-links a {
+  display: grid;
+  place-items: center;
+  min-height: 46px;
+  padding: 8px 10px;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid rgba(219,171,92,.55);
+  border-radius: 8px;
+  background: linear-gradient(#82532e,#4b301e);
+  color: #fff1d4;
+  font-family: var(--font-heading);
+  font-size: .65rem;
+  font-weight: 800;
+}
+.founding-scroll-links a:focus-visible {
+  outline: 2px solid #f3d9a1;
+  outline-offset: 3px;
+}
+@media (max-width: 420px) {
+  .founding-scroll-links { grid-template-columns: 1fr; }
+  .founding-scroll-lore { padding: 12px 10px; }
+}
