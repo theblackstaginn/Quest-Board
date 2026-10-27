@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { createDeadlineFetch } from "./upstream-fetch.js";
+const upstreamFetch = createDeadlineFetch();
 import express from "express";
 import { createClient } from "@supabase/supabase-js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -17,6 +19,8 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY,
   {
+    db: { retry: false },
+    global: { fetch: upstreamFetch },
     auth: {
       persistSession: false,
       autoRefreshToken: false
