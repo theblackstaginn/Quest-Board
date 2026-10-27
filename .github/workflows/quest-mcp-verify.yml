@@ -1,0 +1,29 @@
+name: Quest MCP dependency verification
+on:
+  push:
+    branches:
+      - fix/plugin-reliability-20261027
+    paths:
+      - "mcp-server/**"
+      - ".github/workflows/quest-mcp-verify.yml"
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Generate lockfile and install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run integration and unit tests
+        run: npm test
+      - name: Upload generated dependency lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: quest-mcp-lockfile
+          path: mcp-server/package-lock.json
+          if-no-files-found: error
