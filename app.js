@@ -1288,6 +1288,18 @@ const RELICS = [
   },
 
   {
+    id: "the-first-scroll",
+    name: "The First Scroll",
+    image: "relics/first-scroll-thumb.webp",
+    detailImage: "relics/first-scroll-legendary.webp",
+    originalImage: "relics/first-scroll-original.webp",
+    flavor: "Before the maps, legends, and Guild Hall, Jess and Caelum wrote the first Quest Board by hand. Its founding rule still guides every adventurer: complete three quests per week.",
+    rarity: "legendary",
+    source: "secret",
+    condition: stats => stats.hasCompletedFoundingWeek
+  },
+
+  {
     id: "compass-of-true-north",
     name: "Compass of True North",
     image: "relics/compass-of-true-north.webp",
@@ -3726,6 +3738,23 @@ function getRelicById(id) {
 }
 
 
+function hasCompletedFoundingWeek(state) {
+  // Count completed quests within the same week, including historical progress.
+  const completedByWeek = new Map();
+  for (const entry of state.history || []) {
+    if (!entry || entry.questId === "boss" || !entry.completedAt) continue;
+    const completedAt = new Date(entry.completedAt);
+    if (!Number.isFinite(completedAt.getTime())) continue;
+    const weekKey = getWeekKey(completedAt);
+    const total = (completedByWeek.get(weekKey) || 0) + 1;
+    if (total >= 3) return true;
+    completedByWeek.set(weekKey, total);
+  }
+  // Fallback for older saves that have weekly completions without dated history.
+  return Array.isArray(state.weeklyCompleted)
+    && state.weeklyCompleted.filter(entry => entry && entry.questId !== "boss").length >= 3;
+}
+
 function getRelicStats(state) {
   const normalHistory =
     state.history.filter(
@@ -3830,7 +3859,10 @@ function getRelicStats(state) {
     hasConqueredWeek:
       Boolean(
         state.weekConqueredRewardWeek
-      )
+      ),
+
+    hasCompletedFoundingWeek:
+      hasCompletedFoundingWeek(state)
   };
 }
 
@@ -4160,11 +4192,16 @@ function openRelicDialog(
   currentRelicRevealMode =
     reveal;
 
+  const isFirstScroll = relic.id === "the-first-scroll";
+  $("#relicDialog")?.classList.toggle("is-first-scroll", isFirstScroll);
+  const foundingScrollLore = $("#foundingScrollLore");
+  if (foundingScrollLore) foundingScrollLore.hidden = !isFirstScroll;
+
   $("#relicDialogEyebrow")
     .textContent =
       reveal
-        ? "Relic Discovered"
-        : "Relic";
+        ? (isFirstScroll ? "Legendary Relic Discovered" : "Relic Discovered")
+        : (isFirstScroll ? "Founders' Relic" : "Relic");
 
   $("#relicDialogTitle")
     .textContent =
@@ -4172,7 +4209,7 @@ function openRelicDialog(
 
   $("#relicDialogImage")
     .src =
-      relic.image;
+      relic.detailImage || relic.image;
 
   $("#relicDialogImage")
     .alt =
@@ -4257,7 +4294,7 @@ function openRelicDialog(
   $("#relicContinueButton")
     .textContent =
       reveal
-        ? "Claim Relic"
+        ? (isFirstScroll ? "Claim the First Scroll" : "Claim Relic")
         : "Close";
 
   const dialog =
@@ -4326,7 +4363,8 @@ function queueRelicReveals(
 
 function showNextRelicReveal() {
   if (
-    $("#relicDialog")?.open
+    document.querySelector("dialog[open]")
+    || $("#relicDialog")?.open
     || $("#weekConqueredDialog")
       ?.open
     || $("#bossDefeatedDialog")
@@ -4466,9 +4504,11 @@ function render({ skipParty = false } = {}) {
     were already earned before the relic system was added or
     while an older app.js was active.
   */
-  discoverEligibleRelics(
-    state
-  );
+  const newlyDiscoveredOnRender = discoverEligibleRelics(state);
+  if (newlyDiscoveredOnRender.includes("the-first-scroll")) {
+    queueRelicReveals(["the-first-scroll"], { defer: true });
+    if (appInitialized) window.setTimeout(showNextRelicReveal, 500);
+  }
 
   const settings =
     getSettings();
@@ -11263,7 +11303,7 @@ $("#savePlayerNameButton")
 
 $("#questChainButton")?.addEventListener("click", openCurrentStoryQuest);
 $("#claimEncounterButton")?.addEventListener("click", claimEncounter);
-$("#beginAdventureButton")?.addEventListener("click",()=>{const s=getState();s.onboardingComplete=true;saveState(s);$("#onboardingDialog")?.close();showToast("Campaign I: The Blackwood begins.");});
+$("#beginAdventureButton")?.addEventListener("click",()=>{const s=getState();s.onboardingComplete=true;saveState(s);$("#onboardingDialog")?.close();showToast("Campaign I: The Blackwood begins.");window.setTimeout(showNextRelicReveal,450);});
 $("#npcGrid")?.addEventListener("click",e=>{const b=e.target.closest("[data-npc-id]");if(!b)return;const n=NPCS.find(x=>x.id===b.dataset.npcId);if(!n)return;$("#npcDialogue").innerHTML=`<strong>${escapeHtml(n.name)}</strong><p>${escapeHtml(n.dialogue)}</p>`;playUiSound("open");});
 $("#equipmentInventory")?.addEventListener("click",e=>{const b=e.target.closest("[data-equip-relic]");if(b)equipRelic(b.dataset.equipRelic);});
 $("#equipmentSlots")?.addEventListener("click",e=>{const b=e.target.closest("[data-equipment-slot]");if(!b)return;const id=getState().equippedRelics[b.dataset.equipmentSlot];if(id)equipRelic(id);});
@@ -13930,9 +13970,10 @@ async function initializeApp() {
   const initialState =
     normalizeWeek();
 
-  discoverEligibleRelics(
-    initialState
-  );
+  const previouslyEarnedRelics = discoverEligibleRelics(initialState);
+  if (previouslyEarnedRelics.includes("the-first-scroll")) {
+    queueRelicReveals(["the-first-scroll"], { defer: true });
+  }
 
   try {
     render();
@@ -14000,6 +14041,9 @@ async function initializeApp() {
 
   appInitialized =
     true;
+
+  // Announce retroactive discoveries only after account restoration.
+  window.setTimeout(showNextRelicReveal, 650);
 }
 
 
