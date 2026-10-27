@@ -29,7 +29,7 @@ jobs:
         run: npm test
       - name: Commit verified generated lockfile to PR branch
         run: |
-          git add mcp-server/package-lock.json
+          git add package-lock.json
           if ! git diff --cached --quiet; then
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Lock verified Quest MCP dependencies'
             git push origin HEAD:fix/plugin-reliability-20261027
